@@ -383,46 +383,46 @@ tests/FactoryRuntimeLoaderTest.php	FactoryRuntimeLoaderTest::testLoadReturnsNull
 tests/FileExtensionEscapingStrategyTest.php	FileExtensionEscapingStrategyTest::testGuess	pending	
 tests/IntegrationTest.php	IntegrationTest::testIntegration	pending	
 tests/IntegrationTest.php	IntegrationTest::testLegacyIntegration	pending	
-tests/LexerTest.php	LexerTest::testBigNumbers	pending	
-tests/LexerTest.php	LexerTest::testBlockTagDelimitersPointAtTheMarkers	pending	
-tests/LexerTest.php	LexerTest::testBracketsNesting	pending	
+tests/LexerTest.php	LexerTest::testBigNumbers	ported	crates/twig/tests/lexer_test.rs::testBigNumbers
+tests/LexerTest.php	LexerTest::testBlockTagDelimitersPointAtTheMarkers	ported	crates/twig/tests/lexer_test.rs::testBlockTagDelimitersPointAtTheMarkers
+tests/LexerTest.php	LexerTest::testBracketsNesting	ported	crates/twig/tests/lexer_test.rs::testBracketsNesting
 tests/LexerTest.php	LexerTest::testClosingDelimiterLineMatchesTheMarkerLine	pending	
-tests/LexerTest.php	LexerTest::testErrorsAtTheEndOfTheStream	pending	
-tests/LexerTest.php	LexerTest::testFilterAndAttributeNamedAfterOperator	pending	
-tests/LexerTest.php	LexerTest::testInlineCommentForBlock	pending	
-tests/LexerTest.php	LexerTest::testInlineCommentForComment	pending	
-tests/LexerTest.php	LexerTest::testInlineCommentForVariable	pending	
-tests/LexerTest.php	LexerTest::testInlineCommentWithHashInString	pending	
-tests/LexerTest.php	LexerTest::testLineDirective	pending	
-tests/LexerTest.php	LexerTest::testLineDirectiveInline	pending	
-tests/LexerTest.php	LexerTest::testLiteralIsNotAnOperator	pending	
-tests/LexerTest.php	LexerTest::testLongBlock	pending	
-tests/LexerTest.php	LexerTest::testLongComments	pending	
-tests/LexerTest.php	LexerTest::testLongVar	pending	
-tests/LexerTest.php	LexerTest::testLongVerbatim	pending	
-tests/LexerTest.php	LexerTest::testNameLabelForFunction	pending	
-tests/LexerTest.php	LexerTest::testNameLabelForTag	pending	
-tests/LexerTest.php	LexerTest::testOffsetsAllowRecoveringTheRawExpressionSource	pending	
-tests/LexerTest.php	LexerTest::testOffsetsReferToTheOriginalSourceWhenLineEndingsAreNormalized	pending	
-tests/LexerTest.php	LexerTest::testOperatorEndingWithALetterAtTheEndOfALine	pending	
-tests/LexerTest.php	LexerTest::testOverridingSyntax	pending	
-tests/LexerTest.php	LexerTest::testStringWithEscapedDelimiter	pending	
-tests/LexerTest.php	LexerTest::testStringWithEscapedDelimiterProducingDeprecation	pending	
-tests/LexerTest.php	LexerTest::testStringWithEscapedInterpolation	pending	
-tests/LexerTest.php	LexerTest::testStringWithHash	pending	
-tests/LexerTest.php	LexerTest::testStringWithInterpolation	pending	
-tests/LexerTest.php	LexerTest::testStringWithNestedInterpolations	pending	
-tests/LexerTest.php	LexerTest::testStringWithNestedInterpolationsInBlock	pending	
-tests/LexerTest.php	LexerTest::testStringWithUnterminatedInterpolation	pending	
-tests/LexerTest.php	LexerTest::testStrings	pending	
+tests/LexerTest.php	LexerTest::testErrorsAtTheEndOfTheStream	ported	crates/twig/tests/lexer_test.rs::testErrorsAtTheEndOfTheStream
+tests/LexerTest.php	LexerTest::testFilterAndAttributeNamedAfterOperator	ported	crates/twig/tests/lexer_test.rs::testFilterAndAttributeNamedAfterOperator
+tests/LexerTest.php	LexerTest::testInlineCommentForBlock	ported	crates/twig/tests/lexer_test.rs::testInlineCommentForBlock
+tests/LexerTest.php	LexerTest::testInlineCommentForComment	ported	crates/twig/tests/lexer_test.rs::testInlineCommentForComment
+tests/LexerTest.php	LexerTest::testInlineCommentForVariable	ported	crates/twig/tests/lexer_test.rs::testInlineCommentForVariable
+tests/LexerTest.php	LexerTest::testInlineCommentWithHashInString	ported	crates/twig/tests/lexer_test.rs::testInlineCommentWithHashInString
+tests/LexerTest.php	LexerTest::testLineDirective	ported	crates/twig/tests/lexer_test.rs::testLineDirective
+tests/LexerTest.php	LexerTest::testLineDirectiveInline	ported	crates/twig/tests/lexer_test.rs::testLineDirectiveInline
+tests/LexerTest.php	LexerTest::testLiteralIsNotAnOperator	ported	crates/twig/tests/lexer_test.rs::testLiteralIsNotAnOperator
+tests/LexerTest.php	LexerTest::testLongBlock	ported	crates/twig/tests/lexer_test.rs::testLongBlock
+tests/LexerTest.php	LexerTest::testLongComments	ported	crates/twig/tests/lexer_test.rs::testLongComments
+tests/LexerTest.php	LexerTest::testLongVar	ported	crates/twig/tests/lexer_test.rs::testLongVar
+tests/LexerTest.php	LexerTest::testLongVerbatim	ported	crates/twig/tests/lexer_test.rs::testLongVerbatim
+tests/LexerTest.php	LexerTest::testNameLabelForFunction	ported	crates/twig/tests/lexer_test.rs::testNameLabelForFunction
+tests/LexerTest.php	LexerTest::testNameLabelForTag	ported	crates/twig/tests/lexer_test.rs::testNameLabelForTag
+tests/LexerTest.php	LexerTest::testOffsetsAllowRecoveringTheRawExpressionSource	ported	crates/twig/tests/lexer_test.rs::testOffsetsAllowRecoveringTheRawExpressionSource
+tests/LexerTest.php	LexerTest::testOffsetsReferToTheOriginalSourceWhenLineEndingsAreNormalized	ported	crates/twig/tests/lexer_test.rs::testOffsetsReferToTheOriginalSourceWhenLineEndingsAreNormalized
+tests/LexerTest.php	LexerTest::testOperatorEndingWithALetterAtTheEndOfALine	ported	crates/twig/tests/lexer_test.rs::testOperatorEndingWithALetterAtTheEndOfALine
+tests/LexerTest.php	LexerTest::testOverridingSyntax	ported	crates/twig/tests/lexer_test.rs::testOverridingSyntax
+tests/LexerTest.php	LexerTest::testStringWithEscapedDelimiter	ported	crates/twig/tests/lexer_test.rs::testStringWithEscapedDelimiter
+tests/LexerTest.php	LexerTest::testStringWithEscapedDelimiterProducingDeprecation	ported	crates/twig/tests/lexer_test.rs::testStringWithEscapedDelimiterProducingDeprecation
+tests/LexerTest.php	LexerTest::testStringWithEscapedInterpolation	ported	crates/twig/tests/lexer_test.rs::testStringWithEscapedInterpolation
+tests/LexerTest.php	LexerTest::testStringWithHash	ported	crates/twig/tests/lexer_test.rs::testStringWithHash
+tests/LexerTest.php	LexerTest::testStringWithInterpolation	ported	crates/twig/tests/lexer_test.rs::testStringWithInterpolation
+tests/LexerTest.php	LexerTest::testStringWithNestedInterpolations	ported	crates/twig/tests/lexer_test.rs::testStringWithNestedInterpolations
+tests/LexerTest.php	LexerTest::testStringWithNestedInterpolationsInBlock	ported	crates/twig/tests/lexer_test.rs::testStringWithNestedInterpolationsInBlock
+tests/LexerTest.php	LexerTest::testStringWithUnterminatedInterpolation	ported	crates/twig/tests/lexer_test.rs::testStringWithUnterminatedInterpolation
+tests/LexerTest.php	LexerTest::testStrings	ported	crates/twig/tests/lexer_test.rs::testStrings
 tests/LexerTest.php	LexerTest::testSyntaxErrorColumnUsesOriginalSourceOffsets	pending	
-tests/LexerTest.php	LexerTest::testSyntaxErrorReportsTheColumn	pending	
-tests/LexerTest.php	LexerTest::testSyntheticTokensHaveNoOffset	pending	
-tests/LexerTest.php	LexerTest::testTokensCarryTheirSourceOffset	pending	
-tests/LexerTest.php	LexerTest::testUnclosedBracketInExpression	pending	
-tests/LexerTest.php	LexerTest::testUnexpectedBracketInExpression	pending	
-tests/LexerTest.php	LexerTest::testUnterminatedBlock	pending	
-tests/LexerTest.php	LexerTest::testUnterminatedVariable	pending	
+tests/LexerTest.php	LexerTest::testSyntaxErrorReportsTheColumn	ported	crates/twig/tests/lexer_test.rs::testSyntaxErrorReportsTheColumn
+tests/LexerTest.php	LexerTest::testSyntheticTokensHaveNoOffset	ported	crates/twig/tests/lexer_test.rs::testSyntheticTokensHaveNoOffset
+tests/LexerTest.php	LexerTest::testTokensCarryTheirSourceOffset	ported	crates/twig/tests/lexer_test.rs::testTokensCarryTheirSourceOffset
+tests/LexerTest.php	LexerTest::testUnclosedBracketInExpression	ported	crates/twig/tests/lexer_test.rs::testUnclosedBracketInExpression
+tests/LexerTest.php	LexerTest::testUnexpectedBracketInExpression	ported	crates/twig/tests/lexer_test.rs::testUnexpectedBracketInExpression
+tests/LexerTest.php	LexerTest::testUnterminatedBlock	ported	crates/twig/tests/lexer_test.rs::testUnterminatedBlock
+tests/LexerTest.php	LexerTest::testUnterminatedVariable	ported	crates/twig/tests/lexer_test.rs::testUnterminatedVariable
 tests/Loader/ArrayTest.php	ArrayTest::testGetCacheKey	pending	
 tests/Loader/ArrayTest.php	ArrayTest::testGetCacheKeyIsProtectedFromEdgeCollisions	pending	
 tests/Loader/ArrayTest.php	ArrayTest::testGetCacheKeyWhenTemplateDoesNotExist	pending	

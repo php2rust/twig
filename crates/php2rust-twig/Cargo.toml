@@ -1,0 +1,17 @@
+[package]
+name = "twig"
+version = "0.1.0"
+edition = "2024"
+license = "BSD-3-Clause"
+publish = false
+description = "Port of twig/twig: lexer, parser and runtime for a build-time Twig compiler"
+
+[dependencies]
+php-value = { path = "../php-value" }
+symfony-deprecation-contracts = { path = "../deprecation-contracts" }
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+serde_json = "1.0.154"
