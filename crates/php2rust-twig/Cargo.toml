@@ -7,6 +7,7 @@ publish = false
 description = "Port of twig/twig: lexer, parser and runtime for a build-time Twig compiler"
 
 [dependencies]
+php-pcre = { path = "../php-pcre" }
 php-value = { path = "../php-value" }
 symfony-deprecation-contracts = { path = "../deprecation-contracts" }
 

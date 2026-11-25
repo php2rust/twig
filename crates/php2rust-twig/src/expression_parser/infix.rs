@@ -453,9 +453,10 @@ pub(crate) fn parse_named_arguments(
             Some(name) => {
                 let key = Key::from_bytes(&name.to_php_string().unwrap_or_default());
                 if let Key::Int(i) = key
-                    && i >= next_index {
-                        next_index = i.saturating_add(1);
-                    }
+                    && i >= next_index
+                {
+                    next_index = i.saturating_add(1);
+                }
                 if let Some(slot) = args.iter_mut().find(|(k, _)| *k == key) {
                     slot.1 = value;
                 } else {

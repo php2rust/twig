@@ -74,9 +74,10 @@ fn change_ignore_strict_check(node: &Node) {
     node.set_attr("optimizable", false);
     node.set_attr("ignore_strict_check", true);
     if let Some(inner) = node.node("node")
-        && inner.is(NodeClass::GetAttrExpression) {
-            change_ignore_strict_check(&inner);
-        }
+        && inner.is(NodeClass::GetAttrExpression)
+    {
+        change_ignore_strict_check(&inner);
+    }
 }
 
 // ---- constants and names ----
@@ -134,12 +135,13 @@ pub fn assign_context_variable(name: &[u8], lineno: i64) -> Result<Node, Error> 
 pub fn temp_name(class: NodeClass, name: Attr, lineno: i64) -> Result<Node, Error> {
     if name.is_truthy()
         && let Some(text) = name.to_php_string()
-            && is_reserved_literal(&text) {
-                let mut message = b"You cannot assign a value to \"".to_vec();
-                message.extend_from_slice(&text);
-                message.extend_from_slice(b"\".");
-                return Err(Error::syntax(message, lineno, None));
-            }
+        && is_reserved_literal(&text)
+    {
+        let mut message = b"You cannot assign a value to \"".to_vec();
+        message.extend_from_slice(&text);
+        message.extend_from_slice(b"\".");
+        return Err(Error::syntax(message, lineno, None));
+    }
     let name = match name {
         Attr::Str(s) if !s.is_empty() && s.iter().all(u8::is_ascii_digit) => {
             Attr::Int(saturating_int(&s))
@@ -206,9 +208,10 @@ pub fn array_of_class(class: NodeClass, elements: Vec<Node>, lineno: i64) -> Nod
     for (key, _) in node.key_value_pairs() {
         if key.is(NodeClass::ConstantExpression)
             && let Some(value) = key.attr("value").and_then(|v| array_index_of(&v))
-                && value > index {
-                    index = value;
-                }
+            && value > index
+        {
+            index = value;
+        }
     }
     node.set_index(index);
     node
@@ -642,12 +645,12 @@ pub fn binary(class: NodeClass, left: Node, right: Node, lineno: i64) -> Result<
                     Some(Node::empty(0)),
                     line,
                 );
-                test = abstract_binary(
+                test = binary(
                     NodeClass::AndBinary,
                     test,
                     unary(NodeClass::NotUnary, null, line),
                     line,
-                );
+                )?;
             }
             left.set_attr("always_defined", true);
             node.set_node("test", test)?;
@@ -691,6 +694,29 @@ pub fn binary(class: NodeClass, left: Node, right: Node, lineno: i64) -> Result<
             }
             Ok(abstract_binary(class, left, right, lineno))
         }
+        NodeClass::AndBinary | NodeClass::OrBinary | NodeClass::XorBinary => Ok(abstract_binary(
+            class,
+            true_test_wrap(left),
+            true_test_wrap(right),
+            lineno,
+        )),
+        NodeClass::MatchesBinary => {
+            if right.is(NodeClass::ConstantExpression) {
+                let regexp = right
+                    .attr("value")
+                    .and_then(|v| v.to_php_string())
+                    .unwrap_or_default();
+                if let Err(php_pcre::PcreError::Compile(message)) = php_pcre::Pcre::new(&regexp) {
+                    let mut text = b"Regexp \"".to_vec();
+                    text.extend_from_slice(&regexp);
+                    text.extend_from_slice(b"\" passed to \"matches\" is not valid: ");
+                    text.extend_from_slice(message.as_bytes());
+                    text.push(b'.');
+                    return Err(Error::syntax(text, lineno, None));
+                }
+            }
+            Ok(abstract_binary(class, left, right, lineno))
+        }
         _ => Ok(abstract_binary(class, left, right, lineno)),
     }
 }
@@ -707,6 +733,11 @@ fn abstract_binary(class: NodeClass, left: Node, right: Node, lineno: i64) -> No
 
 /// `new $class($node, $lineno)` for a unary node class.
 pub fn unary(class: NodeClass, node: Node, lineno: i64) -> Node {
+    let node = if class == NodeClass::NotUnary {
+        true_test_wrap(node)
+    } else {
+        node
+    };
     Node::new(
         class,
         named(vec![("node", node)]),

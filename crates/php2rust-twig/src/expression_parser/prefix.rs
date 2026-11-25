@@ -166,12 +166,11 @@ fn parse_string_expression(parser: &mut Parser<'_>) -> Result<Node, Error> {
     let mut nodes: Vec<Node> = Vec::new();
     let mut next_can_be_string = true;
     loop {
-        if next_can_be_string
-            && let Some(token) = parser.stream_mut().next_if(TokenType::String)? {
-                nodes.push(constant_of(&token));
-                next_can_be_string = false;
-                continue;
-            }
+        if next_can_be_string && let Some(token) = parser.stream_mut().next_if(TokenType::String)? {
+            nodes.push(constant_of(&token));
+            next_can_be_string = false;
+            continue;
+        }
         if parser
             .stream_mut()
             .next_if(TokenType::InterpolationStart)?

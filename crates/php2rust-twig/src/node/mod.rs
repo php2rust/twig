@@ -54,9 +54,9 @@ impl Key {
             && let Some(i) = std::str::from_utf8(s)
                 .ok()
                 .and_then(|t| t.parse::<i64>().ok())
-            {
-                return Self::Int(i);
-            }
+        {
+            return Self::Int(i);
+        }
         Self::Str(s.to_vec())
     }
 }

@@ -250,12 +250,13 @@ impl<'env> Parser<'env> {
                         ));
                     }
                     if let Some(test) = &test
-                        && (test.test)(&token) {
-                            if drop_needle {
-                                self.stream_mut().next()?;
-                            }
-                            return Ok(finish(rv));
+                        && (test.test)(&token)
+                    {
+                        if drop_needle {
+                            self.stream_mut().next()?;
                         }
+                        return Ok(finish(rv));
+                    }
                     let tag = token.value_bytes();
                     let Some(subparser) = self.env.token_parser(&tag) else {
                         let source = Some(self.stream().source_context().clone());
@@ -298,9 +299,10 @@ impl<'env> Parser<'env> {
                     node.set_tag(subparser.tag())?;
                     node.add_documentation(&[&start_token]);
                     if let Some(target) = target
-                        && !node.ptr_eq(&target) {
-                            node.move_documentation(&target);
-                        }
+                        && !node.ptr_eq(&target)
+                    {
+                        node.move_documentation(&target);
+                    }
                     rv.push(node);
                 }
                 _ => {
@@ -622,16 +624,17 @@ impl<'env> Parser<'env> {
             }
         };
         if parsers.get(parser).kind().parser_type() == ExpressionParserType::Prefix
-            && let Some(node) = expr.node("node") {
-                for (ep, list) in changes {
-                    if !list.contains(&parser) {
-                        continue;
-                    }
-                    if node.parsed_by() == Some(*ep) {
-                        trigger(parser, &node);
-                    }
+            && let Some(node) = expr.node("node")
+        {
+            for (ep, list) in changes {
+                if !list.contains(&parser) {
+                    continue;
+                }
+                if node.parsed_by() == Some(*ep) {
+                    trigger(parser, &node);
                 }
             }
+        }
         for &ep in affecting {
             for node in expr.child_nodes() {
                 if node.parsed_by() == Some(ep) && !node.has_explicit_parentheses() {

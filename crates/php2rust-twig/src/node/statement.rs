@@ -301,16 +301,17 @@ pub fn macro_node(
             ));
         }
         if let Some(variadic) = variadic_name
-            && variadic == strip_reserved_prefix(&arg_name) {
-                return Err(Error::syntax(
-                    format!(
-                        "The variadic argument \"{}\" in macro \"{display}\" cannot have the same name as another argument.",
-                        String::from_utf8_lossy(variadic)
-                    ),
-                    value.line(),
-                    value.source_context(),
-                ));
-            }
+            && variadic == strip_reserved_prefix(&arg_name)
+        {
+            return Err(Error::syntax(
+                format!(
+                    "The variadic argument \"{}\" in macro \"{display}\" cannot have the same name as another argument.",
+                    String::from_utf8_lossy(variadic)
+                ),
+                value.line(),
+                value.source_context(),
+            ));
+        }
         if seen.contains(&arg_name) {
             return Err(Error::syntax(
                 format!(
