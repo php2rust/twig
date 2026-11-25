@@ -67,7 +67,7 @@ pub struct Parser<'env> {
     state: State,
     stream: TokenStream,
     last_embed_index: i64,
-    /// `$visitors`: taken from the environment at the first parse.
+    /// `$visitors` when set in place of the environment's.
     visitors: Option<Vec<Box<dyn NodeVisitor>>>,
 }
 
@@ -196,13 +196,10 @@ impl<'env> Parser<'env> {
             self.stream().source_context(),
         );
 
-        let mut visitors = self
-            .visitors
-            .take()
-            .unwrap_or_else(|| self.env.node_visitors());
-        let traversed = node_visitor::traverse(self.env, &mut visitors, node);
-        self.visitors = Some(visitors);
-        let node = traversed?;
+        let node = match self.visitors.as_mut() {
+            Some(visitors) => node_visitor::traverse(self.env, visitors, node)?,
+            None => self.env.traverse(node)?,
+        };
 
         if let Some(previous) = self.stack.pop() {
             self.state = previous;

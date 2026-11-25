@@ -2,15 +2,20 @@
 // Twig parser vectors (crates/twig/tests/parser_vectors.rs): every template
 // of twig/twig's tests/Fixtures/**/*.test (split as IntegrationTestCase
 // does), plus the cases in crates/twig/tests/data/parser_extra.json, each
-// parsed by the real Twig\Parser with the node visitors turned off. The
+// parsed by the real Twig\Parser with the node visitors turned off. With
+// the argument "visitors" (crates/twig/tests/data/parser_visitors.json):
+// the same templates with the environment's node visitors except
+// SandboxNodeVisitor (the sandbox is not ported yet), plus the cases in
+// crates/twig/tests/data/parser_visitors_extra.json, each with its own
+// "autoescape" and "optimizations" options. The
 // environment has the extensions of Twig\Tests\IntegrationTest (debug,
 // sandbox, string loader and the test extension, rebuilt below without its
 // runtime code; no undefined-callable callbacks). For each template: the
 // ModuleNode as a compact dump (dump_node() below), or the error (class,
 // message, line), and the deprecations parsing triggered. Templates,
 // messages and deprecations are base64; a tree is text, or base64 when it
-// is not UTF-8. Output: crates/twig/tests/data/parser.json
-// (scripts/record.sh twig-parser).
+// is not UTF-8. Output: crates/twig/tests/data/parser.json or
+// parser_visitors.json (scripts/record.sh twig-parser).
 
 if (is_file('/demo/vendor/autoload.php')) {
     require '/demo/vendor/autoload.php';
@@ -34,6 +39,7 @@ use Twig\Extension\DebugExtension;
 use Twig\Extension\SandboxExtension;
 use Twig\Extension\StringLoaderExtension;
 use Twig\Loader\ArrayLoader;
+use Twig\NodeVisitor\SandboxNodeVisitor;
 use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Node;
 use Twig\Node\PrintNode;
@@ -215,16 +221,34 @@ foreach ($files as $path) {
         $cases[] = ['name' => $relative.' '.$name, 'source' => $name, 'template' => $code];
     }
 }
+$visitors = 'visitors' === ($argv[1] ?? '');
 foreach (json_decode(file_get_contents('/work/crates/twig/tests/data/parser_extra.json'), true) as $name => $code) {
     $cases[] = ['name' => 'extra '.$name, 'source' => 'index.twig', 'template' => $code];
 }
+if ($visitors) {
+    foreach (json_decode(file_get_contents('/work/crates/twig/tests/data/parser_visitors_extra.json'), true) as $name => $case) {
+        $cases[] = [
+            'name' => 'visitors '.$name,
+            'source' => $case['source'] ?? 'index.twig',
+            'template' => $case['template'],
+            'autoescape' => $case['autoescape'] ?? 'html',
+            'optimizations' => $case['optimizations'] ?? -1,
+        ];
+    }
+}
 
-$env = new Environment(new ArrayLoader());
-$env->addExtension(new DebugExtension());
-$env->addExtension(new SandboxExtension(new SecurityPolicy([], [], [], [], ['dump']), false));
-$env->addExtension(new StringLoaderExtension());
-$env->addExtension(new FixtureExtension());
+function make_env($autoescape, int $optimizations): Environment
+{
+    $env = new Environment(new ArrayLoader(), ['autoescape' => $autoescape, 'optimizations' => $optimizations]);
+    $env->addExtension(new DebugExtension());
+    $env->addExtension(new SandboxExtension(new SecurityPolicy([], [], [], [], ['dump']), false));
+    $env->addExtension(new StringLoaderExtension());
+    $env->addExtension(new FixtureExtension());
 
+    return $env;
+}
+
+$envs = [];
 $out = [];
 foreach ($cases as $case) {
     $deprecations = [];
@@ -234,10 +258,19 @@ foreach ($cases as $case) {
         return true;
     });
     $record = ['name' => $case['name'], 'source' => $case['source'], 'template' => base64_encode($case['template'])];
+    if (isset($case['autoescape'])) {
+        $record['autoescape'] = $case['autoescape'];
+        $record['optimizations'] = $case['optimizations'];
+    }
     try {
+        $key = json_encode([$case['autoescape'] ?? 'html', $case['optimizations'] ?? -1]);
+        $env = $envs[$key] ??= make_env($case['autoescape'] ?? 'html', $case['optimizations'] ?? -1);
         $stream = $env->tokenize(new Source($case['template'], $case['source']));
         $parser = new Parser($env);
-        (new ReflectionProperty($parser, 'visitors'))->setValue($parser, []);
+        $list = $visitors
+            ? array_values(array_filter($env->getNodeVisitors(), fn ($v) => !$v instanceof SandboxNodeVisitor))
+            : [];
+        (new ReflectionProperty($parser, 'visitors'))->setValue($parser, $list);
         $module = $parser->parse($stream);
         $lines = [];
         dump_node($module, '', 0, null, $lines);

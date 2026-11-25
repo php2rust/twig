@@ -7,7 +7,7 @@
 //!
 //! Upstream: twig/twig src/Environment.php
 
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     callable::TwigCallable,
@@ -20,7 +20,7 @@ use crate::{
     file_extension_escaping_strategy,
     lexer::{Lexer, LexerOptions},
     node::Node,
-    node_visitor::{NodeVisitor, optimizer::OptimizerNodeVisitor},
+    node_visitor::{self, NodeVisitor, optimizer::OptimizerNodeVisitor},
     parser::Parser,
     source::Source,
     token_parser::TokenParser,
@@ -69,6 +69,11 @@ pub struct Environment {
     extension_set: ExtensionSet,
     lexer: Lexer,
     autoescape: Autoescape,
+    /// `ExtensionSet::$visitors`: one set for the environment, made at the
+    /// first parse. Their state lasts from one parse to the next, as in
+    /// PHP (a parse that fails in the middle of a traversal can leave the
+    /// optimizer inside a loop).
+    visitors: RefCell<Option<Vec<Box<dyn NodeVisitor>>>>,
 }
 
 impl Default for Environment {
@@ -120,6 +125,7 @@ impl Environment {
             extension_set,
             lexer,
             autoescape: options.autoescape,
+            visitors: RefCell::new(None),
         }
     }
 
@@ -136,9 +142,19 @@ impl Environment {
         }
     }
 
-    /// `getNodeVisitors()`: a new set of visitors.
-    pub fn node_visitors(&self) -> Vec<Box<dyn NodeVisitor>> {
-        self.extension_set.node_visitors()
+    /// Runs the environment's node visitors (`getNodeVisitors()`) on a
+    /// parsed module, as `Parser::parse()` does.
+    pub fn traverse(&self, node: Node) -> Result<Node, Error> {
+        // A parse started by a visitor would find the set in use: it gets
+        // a set of its own.
+        let mut visitors = self
+            .visitors
+            .borrow_mut()
+            .take()
+            .unwrap_or_else(|| self.extension_set.node_visitors());
+        let result = node_visitor::traverse(self, &mut visitors, node);
+        *self.visitors.borrow_mut() = Some(visitors);
+        result
     }
 
     /// `getExtensionSet()`.

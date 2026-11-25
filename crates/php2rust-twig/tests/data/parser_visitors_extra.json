@@ -1,0 +1,363 @@
+{
+ "print var": {
+  "template": "{{ foo }}"
+ },
+ "print var autoescape off": {
+  "template": "{{ foo }}",
+  "autoescape": false
+ },
+ "print var js": {
+  "template": "{{ foo }}",
+  "autoescape": "js"
+ },
+ "print constant": {
+  "template": "{{ \"<b>\" }}"
+ },
+ "print constant no optimizations": {
+  "template": "{{ \"<b>\" }}",
+  "optimizations": 0
+ },
+ "print int constant": {
+  "template": "{{ 3 }}"
+ },
+ "print raw": {
+  "template": "{{ foo|raw }}"
+ },
+ "print escape filter": {
+  "template": "{{ foo|escape }}"
+ },
+ "print escape js": {
+  "template": "{{ foo|e(\"js\") }}"
+ },
+ "print escape html_attr": {
+  "template": "{{ foo|e(\"html_attr\") }}"
+ },
+ "print escape twice": {
+  "template": "{{ foo|e|e(\"js\") }}"
+ },
+ "print upper": {
+  "template": "{{ foo|upper }}"
+ },
+ "print safe function": {
+  "template": "{{ safe_br() }}"
+ },
+ "print unsafe function": {
+  "template": "{{ unsafe_br() }}"
+ },
+ "print escape_something": {
+  "template": "{{ foo|escape_something }}"
+ },
+ "print preserves_safety on raw": {
+  "template": "{{ foo|raw|preserves_safety }}"
+ },
+ "print preserves_safety on var": {
+  "template": "{{ foo|preserves_safety }}"
+ },
+ "pre_escape nl2br": {
+  "template": "{{ foo|nl2br }}"
+ },
+ "pre_escape nl2br on safe": {
+  "template": "{{ foo|raw|nl2br }}"
+ },
+ "pre_escape nl2br off": {
+  "template": "{{ foo|nl2br }}",
+  "autoescape": false
+ },
+ "ternary": {
+  "template": "{{ a ? b : c }}"
+ },
+ "ternary safe branch": {
+  "template": "{{ a ? \"x\" : c }}"
+ },
+ "nested ternary": {
+  "template": "{{ a ? (b ? c : \"d\") : e|raw }}"
+ },
+ "elvis": {
+  "template": "{{ a ?: b }}"
+ },
+ "null coalesce": {
+  "template": "{{ a ?? b }}"
+ },
+ "null coalesce raw": {
+  "template": "{{ a|raw ?? \"x\" }}"
+ },
+ "concat": {
+  "template": "{{ a ~ b }}"
+ },
+ "block function": {
+  "template": "{{ block(\"x\") }}{% block x %}y{% endblock %}"
+ },
+ "parent function": {
+  "template": "{% extends \"b\" %}{% block x %}{{ parent() }}{% endblock %}"
+ },
+ "macro call": {
+  "template": "{% macro m() %}x{% endmacro %}{{ _self.m() }}"
+ },
+ "imported macro": {
+  "template": "{% import \"forms\" as forms %}{{ forms.input() }}{{ forms.label }}"
+ },
+ "from import": {
+  "template": "{% from \"forms\" import input %}{{ input() }}"
+ },
+ "getattr on imported var": {
+  "template": "{% import \"forms\" as forms %}{{ forms.foo.bar }}"
+ },
+ "include function": {
+  "template": "{{ include(\"x\") }}"
+ },
+ "dump function": {
+  "template": "{{ dump(a) }}"
+ },
+ "template_from_string": {
+  "template": "{{ template_from_string(\"x\") }}"
+ },
+ "autoescape tag default": {
+  "template": "{% autoescape %}{{ a }}{% endautoescape %}"
+ },
+ "autoescape tag js": {
+  "template": "{% autoescape \"js\" %}{{ a }}{% endautoescape %}"
+ },
+ "autoescape tag false": {
+  "template": "{% autoescape false %}{{ a }}{% endautoescape %}"
+ },
+ "autoescape tag true": {
+  "template": "{% autoescape true %}{{ a }}{% endautoescape %}"
+ },
+ "autoescape tag int": {
+  "template": "{% autoescape 3 %}{{ a }}{% endautoescape %}"
+ },
+ "autoescape tag nested": {
+  "template": "{% autoescape \"js\" %}{% autoescape false %}{{ a }}{% endautoescape %}{{ b }}{% endautoescape %}"
+ },
+ "autoescape tag under off": {
+  "template": "{% autoescape \"css\" %}{{ a }}{% endautoescape %}",
+  "autoescape": false
+ },
+ "block in autoescape": {
+  "template": "{% autoescape \"js\" %}{% block a %}{{ x }}{% endblock %}{% endautoescape %}{% block b %}{{ y }}{% endblock %}"
+ },
+ "block defined twice context": {
+  "template": "{% autoescape false %}{% block a %}{{ x }}{% endblock %}{% endautoescape %}"
+ },
+ "block in child": {
+  "template": "{% extends \"base\" %}{% block a %}{{ x }}{% endblock %}"
+ },
+ "name strategy html": {
+  "template": "{{ a }}",
+  "autoescape": "name",
+  "source": "page.html.twig"
+ },
+ "name strategy js": {
+  "template": "{{ a }}",
+  "autoescape": "name",
+  "source": "app.js.twig"
+ },
+ "name strategy css": {
+  "template": "{{ a }}",
+  "autoescape": "name",
+  "source": "a.css"
+ },
+ "name strategy txt": {
+  "template": "{{ a }}",
+  "autoescape": "name",
+  "source": "mail.txt.twig"
+ },
+ "name strategy json": {
+  "template": "{{ a }}",
+  "autoescape": "name",
+  "source": "data.json.twig"
+ },
+ "name strategy dir": {
+  "template": "{{ a }}",
+  "autoescape": "name",
+  "source": "dir/"
+ },
+ "name strategy no ext": {
+  "template": "{{ a }}",
+  "autoescape": "name",
+  "source": "foo"
+ },
+ "for without loop": {
+  "template": "{% for i in items %}{{ i }}{% endfor %}"
+ },
+ "for with loop": {
+  "template": "{% for i in items %}{{ loop.index }}{% endfor %}"
+ },
+ "for key value": {
+  "template": "{% for k, v in items %}{{ k }}{{ v }}{{ other }}{% endfor %}"
+ },
+ "for loop.parent": {
+  "template": "{% for i in a %}{% for j in b %}{{ loop.parent.loop.index }}{% endfor %}{% endfor %}"
+ },
+ "for nested inner loop": {
+  "template": "{% for i in a %}{% for j in b %}{{ loop.index }}{% endfor %}{% endfor %}"
+ },
+ "for dynamic attribute": {
+  "template": "{% for i in a %}{{ loop[x] }}{% endfor %}"
+ },
+ "for dynamic attribute other var": {
+  "template": "{% for i in a %}{{ foo[x] }}{% endfor %}"
+ },
+ "for include tag": {
+  "template": "{% for i in a %}{% include \"x\" %}{% endfor %}"
+ },
+ "for include only": {
+  "template": "{% for i in a %}{% include \"x\" only %}{% endfor %}"
+ },
+ "for include function": {
+  "template": "{% for i in a %}{{ include(\"x\") }}{% endfor %}"
+ },
+ "for include function no context": {
+  "template": "{% for i in a %}{{ include(\"x\", with_context = false) }}{% endfor %}"
+ },
+ "for include function context true": {
+  "template": "{% for i in a %}{{ include(\"x\", with_context = true) }}{% endfor %}"
+ },
+ "for include function dynamic context": {
+  "template": "{% for i in a %}{{ include(\"x\", with_context = c) }}{% endfor %}"
+ },
+ "for block function": {
+  "template": "{% for i in a %}{{ block(\"b\") }}{% endfor %}{% block b %}{% endblock %}"
+ },
+ "for block tag": {
+  "template": "{% for i in a %}{% block b %}{{ i }}{% endblock %}{% endfor %}"
+ },
+ "for else": {
+  "template": "{% for i in a %}{{ i }}{% else %}{{ loop }}{% endfor %}"
+ },
+ "for optimizations 0": {
+  "template": "{% for i in items %}{{ loop.index }}{% endfor %}",
+  "optimizations": 0
+ },
+ "for optimizations 2": {
+  "template": "{% for i in items %}{{ i }}{% endfor %}",
+  "optimizations": 2
+ },
+ "for embed": {
+  "template": "{% for i in a %}{% embed \"x\" %}{% endembed %}{% endfor %}"
+ },
+ "loop outside for": {
+  "template": "{{ loop.index }}"
+ },
+ "optimizations 4": {
+  "template": "{{ a }}",
+  "optimizations": 4
+ },
+ "optimizations 8": {
+  "template": "{{ a }}",
+  "optimizations": 8
+ },
+ "optimizations 14": {
+  "template": "{{ a }}",
+  "optimizations": 14
+ },
+ "optimizations 16": {
+  "template": "{{ a }}",
+  "optimizations": 16
+ },
+ "child content outside blocks": {
+  "template": "{% extends \"base\" %}Hello{% block a %}{% endblock %}"
+ },
+ "child blank text": {
+  "template": "{% extends \"base\" %}\n  \n{% block a %}{% endblock %}"
+ },
+ "child set outside blocks": {
+  "template": "{% extends \"base\" %}{% set a = 1 %}{% block a %}{% endblock %}"
+ },
+ "child print outside blocks": {
+  "template": "{% extends \"base\" %}{{ a }}"
+ },
+ "child block under if": {
+  "template": "{% extends \"base\" %}{% if a %}{% block a %}{% endblock %}{% endif %}"
+ },
+ "child block under for": {
+  "template": "{% extends \"base\" %}{% for a in b %}{% block a %}{% endblock %}{% endfor %}"
+ },
+ "child block under with": {
+  "template": "{% extends \"base\" %}{% with {} %}{% block a %}{% endblock %}{% endwith %}"
+ },
+ "child block under set capture": {
+  "template": "{% extends \"base\" %}{% set x %}{% block a %}{% endblock %}{% endset %}"
+ },
+ "child block in block under if": {
+  "template": "{% extends \"base\" %}{% block o %}{% if a %}{% block a %}{% endblock %}{% endif %}{% endblock %}"
+ },
+ "standalone block under if": {
+  "template": "{% if a %}{% block a %}{% endblock %}{% endif %}"
+ },
+ "extends in block": {
+  "template": "{% block a %}{% extends \"b\" %}{% endblock %}"
+ },
+ "extends in macro": {
+  "template": "{% macro m() %}{% extends \"b\" %}{% endmacro %}"
+ },
+ "extends in if": {
+  "template": "{% if a %}{% extends \"b\" %}{% endif %}"
+ },
+ "use in if": {
+  "template": "{% if a %}{% use \"b\" %}{% endif %}"
+ },
+ "use at root": {
+  "template": "{% use \"b\" %}"
+ },
+ "macro without parentheses": {
+  "template": "{% import _self as m %}{{ m.foo }}"
+ },
+ "macro without parentheses twice": {
+  "template": "{% import _self as m %}{{ m.foo }}{{ m.foo }}"
+ },
+ "macro without parentheses in default": {
+  "template": "{% import _self as m %}{{ x|default(m.foo) }}"
+ },
+ "child single node": {
+  "template": "{% extends \"base\" %}"
+ },
+ "child apply": {
+  "template": "{% extends \"base\" %}{% apply upper %}{% block a %}{% endblock %}{% endapply %}"
+ },
+ "child only comment": {
+  "template": "{% extends \"base\" %}{# c #}"
+ },
+ "extends embedded": {
+  "template": "{% embed \"x\" %}{% block a %}{% endblock %}{% endembed %}"
+ },
+ "embed content outside blocks": {
+  "template": "{% embed \"x\" %}Hi{% endembed %}"
+ },
+ "sandbox": {
+  "template": "{% sandbox %}{% include \"x\" %}{% endsandbox %}"
+ },
+ "apply escape": {
+  "template": "{% apply escape %}{{ a }}{% endapply %}"
+ },
+ "set capture": {
+  "template": "{% set x %}{{ a }}{% endset %}{{ x }}"
+ },
+ "deprecated tag": {
+  "template": "{% deprecated \"x\" %}{{ a }}"
+ },
+ "with tag": {
+  "template": "{% with {a: 1} %}{{ a }}{% endwith %}"
+ },
+ "if print": {
+  "template": "{% if a %}{{ b }}{% else %}{{ c|raw }}{% endif %}"
+ },
+ "do": {
+  "template": "{% do a|upper %}"
+ },
+ "guard": {
+  "template": "{% guard function x %}{{ x() }}{% endguard %}"
+ },
+ "arrow filter": {
+  "template": "{{ items|map(i => i ~ \"<\")|join }}"
+ },
+ "spread": {
+  "template": "{{ [...a]|join }}"
+ },
+ "text only": {
+  "template": "Hello"
+ },
+ "empty": {
+  "template": ""
+ }
+}
