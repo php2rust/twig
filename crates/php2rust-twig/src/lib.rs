@@ -9,14 +9,26 @@
 
 #![forbid(unsafe_code)]
 
+pub mod callable;
+pub mod environment;
 pub mod error;
+pub mod expression_parser;
+pub mod extension;
 pub mod lexer;
+pub mod node;
+pub mod parser;
 pub mod source;
 pub mod token;
+pub mod token_parser;
 pub mod token_stream;
+pub mod util;
 
+pub use callable::TwigCallable;
+pub use environment::Environment;
 pub use error::{Error, ErrorKind};
 pub use lexer::{Lexer, LexerOptions};
+pub use node::{Attr, Key, Node, NodeClass};
+pub use parser::Parser;
 pub use source::Source;
 pub use token::{Token, TokenType, TokenValue};
 pub use token_stream::TokenStream;

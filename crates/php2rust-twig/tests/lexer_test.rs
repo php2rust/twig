@@ -5,9 +5,6 @@
 //! testErrorsAtTheEndOfTheStream has no Rust equivalent: the lexer cannot
 //! raise PHP warnings, so the test checks that it returns.
 //!
-//! Not here (pending, they need the parser): testClosingDelimiterLineMatchesTheMarkerLine,
-//! testSyntaxErrorColumnUsesOriginalSourceOffsets.
-//!
 //! Upstream: twig/twig tests/LexerTest.php
 #![allow(non_snake_case, clippy::unwrap_used, clippy::expect_used)]
 
@@ -26,6 +23,17 @@ fn tokenize(template: impl Into<Vec<u8>>) -> TokenStream {
 fn tokenize_error(template: impl Into<Vec<u8>>) -> Error {
     match lexer().tokenize(Source::new(template, "index")) {
         Ok(stream) => panic!("expected a SyntaxError, got {stream}"),
+        Err(e) => {
+            assert_eq!(e.kind(), ErrorKind::Syntax);
+            e
+        }
+    }
+}
+
+/// `$env->parse($env->tokenize($source))`, which must fail.
+fn parse_error(template: &str) -> Error {
+    match twig::Environment::new(Vec::new()).parse_source(Source::new(template, "index")) {
+        Ok(module) => panic!("A SyntaxError should have been thrown, got {module}"),
         Err(e) => {
             assert_eq!(e.kind(), ErrorKind::Syntax);
             e
@@ -539,6 +547,14 @@ fn testBlockTagDelimitersPointAtTheMarkers() {
 }
 
 #[test]
+fn testClosingDelimiterLineMatchesTheMarkerLine() {
+    let e = parse_error("{% from 'forms.twig'\n  %}");
+    assert_eq!(e.template_line(), 2);
+    assert_eq!(e.template_column(), Some(3));
+    assert!(e.message().ends_with(b"at line 2 column 3."));
+}
+
+#[test]
 fn testSyntheticTokensHaveNoOffset() {
     assert_eq!(Token::new(TokenType::Name, "foo", 1).offset(), None);
 }
@@ -549,4 +565,12 @@ fn testSyntaxErrorReportsTheColumn() {
     assert_eq!(e.template_line(), 1);
     assert_eq!(e.template_column(), Some(9));
     assert!(e.message().ends_with(b"at line 1 column 9."));
+}
+
+#[test]
+fn testSyntaxErrorColumnUsesOriginalSourceOffsets() {
+    let e = parse_error("x\r\n{{ 1__2 }}");
+    assert_eq!(e.template_line(), 2);
+    assert_eq!(e.template_column(), Some(5));
+    assert!(e.message().ends_with(b"at line 2 column 5."));
 }

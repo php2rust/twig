@@ -134,44 +134,44 @@ tests/ErrorTest.php	ErrorTest::testTwigExceptionGuessWithMissingVarAndArrayLoade
 tests/ErrorTest.php	ErrorTest::testTwigExceptionGuessWithMissingVarAndFilesystemLoader	pending	
 tests/ErrorTest.php	ErrorTest::testTwigExceptionUpdateFileAndLineTogether	pending	
 tests/ExpressionParserTest.php	ExpressionParserTest::testBindingPower	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testCanOnlyAssignToNames	pending	
+tests/ExpressionParserTest.php	ExpressionParserTest::testCanOnlyAssignToNames	ported	crates/twig/tests/expression_parser_test.rs::testCanOnlyAssignToNames
 tests/ExpressionParserTest.php	ExpressionParserTest::testCompiledCodeForDynamicFilter	pending	
 tests/ExpressionParserTest.php	ExpressionParserTest::testCompiledCodeForDynamicFunction	pending	
 tests/ExpressionParserTest.php	ExpressionParserTest::testCompiledCodeForDynamicTest	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testEmptyDestructuringThrows	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testExpressionParserGetOperatorTokensDefaultBehavior	pending	
+tests/ExpressionParserTest.php	ExpressionParserTest::testEmptyDestructuringThrows	ported	crates/twig/tests/expression_parser_test.rs::testEmptyDestructuringThrows
+tests/ExpressionParserTest.php	ExpressionParserTest::testExpressionParserGetOperatorTokensDefaultBehavior	ported	crates/twig/tests/expression_parser_test.rs::testExpressionParserGetOperatorTokensDefaultBehavior
 tests/ExpressionParserTest.php	ExpressionParserTest::testInvalidNullSafeOperatorShortCircuiting	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testLiteralExpressionParserGetOperatorTokensReturnsEmptyArray	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testLiteralIsNotRegisteredAsOperator	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testMacroDefinitionDoesNotSupportNonConstantDefaultValues	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testMacroDefinitionDoesNotSupportNonNameVariableName	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testMacroDefinitionSupportsConstantDefaultValues	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testNotReadyFilter	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testNotReadyFilterWithNoConstructor	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testNotReadyFunction	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testNotReadyFunctionWithNoConstructor	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testNotReadyTest	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testNotReadyTestWithNoConstructor	pending	
+tests/ExpressionParserTest.php	ExpressionParserTest::testLiteralExpressionParserGetOperatorTokensReturnsEmptyArray	ported	crates/twig/tests/expression_parser_test.rs::testLiteralExpressionParserGetOperatorTokensReturnsEmptyArray
+tests/ExpressionParserTest.php	ExpressionParserTest::testLiteralIsNotRegisteredAsOperator	ported	crates/twig/tests/expression_parser_test.rs::testLiteralIsNotRegisteredAsOperator
+tests/ExpressionParserTest.php	ExpressionParserTest::testMacroDefinitionDoesNotSupportNonConstantDefaultValues	ported	crates/twig/tests/expression_parser_test.rs::testMacroDefinitionDoesNotSupportNonConstantDefaultValues
+tests/ExpressionParserTest.php	ExpressionParserTest::testMacroDefinitionDoesNotSupportNonNameVariableName	ported	crates/twig/tests/expression_parser_test.rs::testMacroDefinitionDoesNotSupportNonNameVariableName
+tests/ExpressionParserTest.php	ExpressionParserTest::testMacroDefinitionSupportsConstantDefaultValues	ported	crates/twig/tests/expression_parser_test.rs::testMacroDefinitionSupportsConstantDefaultValues
+tests/ExpressionParserTest.php	ExpressionParserTest::testNotReadyFilter	n/a: checks a PHP subclass of the expression node (node_class) and the #[FirstClassTwigCallableReady] attribute on its constructor; the port has no user node classes	
+tests/ExpressionParserTest.php	ExpressionParserTest::testNotReadyFilterWithNoConstructor	n/a: checks a PHP subclass of the expression node (node_class) and the #[FirstClassTwigCallableReady] attribute on its constructor; the port has no user node classes	
+tests/ExpressionParserTest.php	ExpressionParserTest::testNotReadyFunction	n/a: checks a PHP subclass of the expression node (node_class) and the #[FirstClassTwigCallableReady] attribute on its constructor; the port has no user node classes	
+tests/ExpressionParserTest.php	ExpressionParserTest::testNotReadyFunctionWithNoConstructor	n/a: checks a PHP subclass of the expression node (node_class) and the #[FirstClassTwigCallableReady] attribute on its constructor; the port has no user node classes	
+tests/ExpressionParserTest.php	ExpressionParserTest::testNotReadyTest	n/a: checks a PHP subclass of the expression node (node_class) and the #[FirstClassTwigCallableReady] attribute on its constructor; the port has no user node classes	
+tests/ExpressionParserTest.php	ExpressionParserTest::testNotReadyTestWithNoConstructor	n/a: checks a PHP subclass of the expression node (node_class) and the #[FirstClassTwigCallableReady] attribute on its constructor; the port has no user node classes	
 tests/ExpressionParserTest.php	ExpressionParserTest::testNullSafeOperator	pending	
 tests/ExpressionParserTest.php	ExpressionParserTest::testObjectDestructuringEvaluatesRightHandExpressionOnce	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testObjectDestructuringUsesAssignmentTargets	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testReadyFilter	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testReadyFunction	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testReadyTest	pending	
+tests/ExpressionParserTest.php	ExpressionParserTest::testObjectDestructuringUsesAssignmentTargets	ported	crates/twig/tests/expression_parser_test.rs::testObjectDestructuringUsesAssignmentTargets
+tests/ExpressionParserTest.php	ExpressionParserTest::testReadyFilter	n/a: checks a PHP subclass of the expression node (node_class) and the #[FirstClassTwigCallableReady] attribute on its constructor; the port has no user node classes	
+tests/ExpressionParserTest.php	ExpressionParserTest::testReadyFunction	n/a: checks a PHP subclass of the expression node (node_class) and the #[FirstClassTwigCallableReady] attribute on its constructor; the port has no user node classes	
+tests/ExpressionParserTest.php	ExpressionParserTest::testReadyTest	n/a: checks a PHP subclass of the expression node (node_class) and the #[FirstClassTwigCallableReady] attribute on its constructor; the port has no user node classes	
 tests/ExpressionParserTest.php	ExpressionParserTest::testSequenceCompilationError	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testSequenceDestructuringUsesAssignmentTargets	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testSequenceExpression	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testSequenceSyntaxError	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testStringExpression	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testStringExpressionDoesNotConcatenateTwoConsecutiveStrings	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testTwoWordTestPrecedence	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testUnaryPrecedenceChange	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testUnknownFilter	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testUnknownFilterWithoutSuggestions	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testUnknownFunction	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testUnknownFunctionWithoutSuggestions	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testUnknownTest	pending	
-tests/ExpressionParserTest.php	ExpressionParserTest::testUnknownTestWithoutSuggestions	pending	
+tests/ExpressionParserTest.php	ExpressionParserTest::testSequenceDestructuringUsesAssignmentTargets	ported	crates/twig/tests/expression_parser_test.rs::testSequenceDestructuringUsesAssignmentTargets
+tests/ExpressionParserTest.php	ExpressionParserTest::testSequenceExpression	ported	crates/twig/tests/expression_parser_test.rs::testSequenceExpression
+tests/ExpressionParserTest.php	ExpressionParserTest::testSequenceSyntaxError	ported	crates/twig/tests/expression_parser_test.rs::testSequenceSyntaxError
+tests/ExpressionParserTest.php	ExpressionParserTest::testStringExpression	ported	crates/twig/tests/expression_parser_test.rs::testStringExpression
+tests/ExpressionParserTest.php	ExpressionParserTest::testStringExpressionDoesNotConcatenateTwoConsecutiveStrings	ported	crates/twig/tests/expression_parser_test.rs::testStringExpressionDoesNotConcatenateTwoConsecutiveStrings
+tests/ExpressionParserTest.php	ExpressionParserTest::testTwoWordTestPrecedence	ported	crates/twig/tests/expression_parser_test.rs::testTwoWordTestPrecedence
+tests/ExpressionParserTest.php	ExpressionParserTest::testUnaryPrecedenceChange	ported	crates/twig/tests/expression_parser_test.rs::testUnaryPrecedenceChange
+tests/ExpressionParserTest.php	ExpressionParserTest::testUnknownFilter	ported	crates/twig/tests/expression_parser_test.rs::testUnknownFilter
+tests/ExpressionParserTest.php	ExpressionParserTest::testUnknownFilterWithoutSuggestions	ported	crates/twig/tests/expression_parser_test.rs::testUnknownFilterWithoutSuggestions
+tests/ExpressionParserTest.php	ExpressionParserTest::testUnknownFunction	ported	crates/twig/tests/expression_parser_test.rs::testUnknownFunction
+tests/ExpressionParserTest.php	ExpressionParserTest::testUnknownFunctionWithoutSuggestions	ported	crates/twig/tests/expression_parser_test.rs::testUnknownFunctionWithoutSuggestions
+tests/ExpressionParserTest.php	ExpressionParserTest::testUnknownTest	ported	crates/twig/tests/expression_parser_test.rs::testUnknownTest
+tests/ExpressionParserTest.php	ExpressionParserTest::testUnknownTestWithoutSuggestions	ported	crates/twig/tests/expression_parser_test.rs::testUnknownTestWithoutSuggestions
 tests/Extension/AttributeExtensionTest.php	AttributeExtensionTest::testFilter	pending	
 tests/Extension/AttributeExtensionTest.php	AttributeExtensionTest::testFilterRequireOneArgument	pending	
 tests/Extension/AttributeExtensionTest.php	AttributeExtensionTest::testFunction	pending	
@@ -386,7 +386,7 @@ tests/IntegrationTest.php	IntegrationTest::testLegacyIntegration	pending
 tests/LexerTest.php	LexerTest::testBigNumbers	ported	crates/twig/tests/lexer_test.rs::testBigNumbers
 tests/LexerTest.php	LexerTest::testBlockTagDelimitersPointAtTheMarkers	ported	crates/twig/tests/lexer_test.rs::testBlockTagDelimitersPointAtTheMarkers
 tests/LexerTest.php	LexerTest::testBracketsNesting	ported	crates/twig/tests/lexer_test.rs::testBracketsNesting
-tests/LexerTest.php	LexerTest::testClosingDelimiterLineMatchesTheMarkerLine	pending	
+tests/LexerTest.php	LexerTest::testClosingDelimiterLineMatchesTheMarkerLine	ported	crates/twig/tests/lexer_test.rs::testClosingDelimiterLineMatchesTheMarkerLine
 tests/LexerTest.php	LexerTest::testErrorsAtTheEndOfTheStream	ported	crates/twig/tests/lexer_test.rs::testErrorsAtTheEndOfTheStream
 tests/LexerTest.php	LexerTest::testFilterAndAttributeNamedAfterOperator	ported	crates/twig/tests/lexer_test.rs::testFilterAndAttributeNamedAfterOperator
 tests/LexerTest.php	LexerTest::testInlineCommentForBlock	ported	crates/twig/tests/lexer_test.rs::testInlineCommentForBlock
@@ -415,7 +415,7 @@ tests/LexerTest.php	LexerTest::testStringWithNestedInterpolations	ported	crates/
 tests/LexerTest.php	LexerTest::testStringWithNestedInterpolationsInBlock	ported	crates/twig/tests/lexer_test.rs::testStringWithNestedInterpolationsInBlock
 tests/LexerTest.php	LexerTest::testStringWithUnterminatedInterpolation	ported	crates/twig/tests/lexer_test.rs::testStringWithUnterminatedInterpolation
 tests/LexerTest.php	LexerTest::testStrings	ported	crates/twig/tests/lexer_test.rs::testStrings
-tests/LexerTest.php	LexerTest::testSyntaxErrorColumnUsesOriginalSourceOffsets	pending	
+tests/LexerTest.php	LexerTest::testSyntaxErrorColumnUsesOriginalSourceOffsets	ported	crates/twig/tests/lexer_test.rs::testSyntaxErrorColumnUsesOriginalSourceOffsets
 tests/LexerTest.php	LexerTest::testSyntaxErrorReportsTheColumn	ported	crates/twig/tests/lexer_test.rs::testSyntaxErrorReportsTheColumn
 tests/LexerTest.php	LexerTest::testSyntheticTokensHaveNoOffset	ported	crates/twig/tests/lexer_test.rs::testSyntheticTokensHaveNoOffset
 tests/LexerTest.php	LexerTest::testTokensCarryTheirSourceOffset	ported	crates/twig/tests/lexer_test.rs::testTokensCarryTheirSourceOffset
@@ -548,16 +548,16 @@ tests/Node/ModuleTest.php	ModuleTest::testCompile	pending
 tests/Node/ModuleTest.php	ModuleTest::testConstructor	pending	
 tests/Node/ModuleTest.php	ModuleTest::testConstructorAcceptsDeprecatedMacrosNode	pending	
 tests/Node/ModuleTest.php	ModuleTest::testUseTagTemplateNameDoesNotInjectPhpInCompiledOutput	pending	
-tests/Node/NodeTest.php	NodeTest::testAttributeDeprecationIgnore	pending	
-tests/Node/NodeTest.php	NodeTest::testAttributeDeprecationWithAlternative	pending	
-tests/Node/NodeTest.php	NodeTest::testAttributeDeprecationWithoutAlternative	pending	
-tests/Node/NodeTest.php	NodeTest::testNodeAttributeDeprecationWithAlternative	pending	
-tests/Node/NodeTest.php	NodeTest::testNodeDeprecationIgnore	pending	
-tests/Node/NodeTest.php	NodeTest::testNodeDeprecationWithoutAlternative	pending	
-tests/Node/NodeTest.php	NodeTest::testToString	pending	
-tests/Node/NodeTest.php	NodeTest::testToStringWithDocumentation	pending	
-tests/Node/NodeTest.php	NodeTest::testToStringWithTag	pending	
-tests/Node/NodeTest.php	NodeTest::testToStringWithTwigCallables	pending	
+tests/Node/NodeTest.php	NodeTest::testAttributeDeprecationIgnore	n/a: deprecateAttribute()/deprecateNode() are not ported; no ported code reads a deprecated node or attribute name (crates/twig/src/node/mod.rs)	
+tests/Node/NodeTest.php	NodeTest::testAttributeDeprecationWithAlternative	n/a: deprecateAttribute()/deprecateNode() are not ported; no ported code reads a deprecated node or attribute name (crates/twig/src/node/mod.rs)	
+tests/Node/NodeTest.php	NodeTest::testAttributeDeprecationWithoutAlternative	n/a: deprecateAttribute()/deprecateNode() are not ported; no ported code reads a deprecated node or attribute name (crates/twig/src/node/mod.rs)	
+tests/Node/NodeTest.php	NodeTest::testNodeAttributeDeprecationWithAlternative	n/a: deprecateAttribute()/deprecateNode() are not ported; no ported code reads a deprecated node or attribute name (crates/twig/src/node/mod.rs)	
+tests/Node/NodeTest.php	NodeTest::testNodeDeprecationIgnore	n/a: deprecateAttribute()/deprecateNode() are not ported; no ported code reads a deprecated node or attribute name (crates/twig/src/node/mod.rs)	
+tests/Node/NodeTest.php	NodeTest::testNodeDeprecationWithoutAlternative	n/a: deprecateAttribute()/deprecateNode() are not ported; no ported code reads a deprecated node or attribute name (crates/twig/src/node/mod.rs)	
+tests/Node/NodeTest.php	NodeTest::testToString	n/a: a PHP closure as a node attribute value; port attributes cannot hold a closure (testToStringWithTwigCallables covers callables)	
+tests/Node/NodeTest.php	NodeTest::testToStringWithDocumentation	ported	crates/twig/tests/node_test.rs::testToStringWithDocumentation
+tests/Node/NodeTest.php	NodeTest::testToStringWithTag	ported	crates/twig/tests/node_test.rs::testToStringWithTag
+tests/Node/NodeTest.php	NodeTest::testToStringWithTwigCallables	ported	crates/twig/tests/node_test.rs::testToStringWithTwigCallables
 tests/Node/PrintTest.php	PrintTest::testCompile	pending	
 tests/Node/PrintTest.php	PrintTest::testConstructor	pending	
 tests/Node/SandboxTest.php	SandboxTest::testCompile	pending	
@@ -587,33 +587,33 @@ tests/NodeVisitor/SandboxTest.php	SandboxTest::testSelfIsNeverWrapped	pending
 tests/ParserTest.php	ParserTest::testADynamicMacroCallWithoutParenthesesIsReportedWithoutAName	pending	
 tests/ParserTest.php	ParserTest::testAMacroCallWithParenthesesDoesNotSilenceOneWithoutOnTheSameLine	pending	
 tests/ParserTest.php	ParserTest::testAMacroCallWithoutParenthesesIsReportedOncePerCallSite	pending	
-tests/ParserTest.php	ParserTest::testBodyForChildTemplates	pending	
-tests/ParserTest.php	ParserTest::testBodyForParentTemplates	pending	
-tests/ParserTest.php	ParserTest::testCleanupBodyAcceptsAnUnregisteredBlockReference	pending	
-tests/ParserTest.php	ParserTest::testCleanupBodyForChildTemplatesWithASingleNodeBody	pending	
-tests/ParserTest.php	ParserTest::testCustomTokenParserCanSetDocumentationTarget	pending	
+tests/ParserTest.php	ParserTest::testBodyForChildTemplates	ported	crates/twig/tests/parser_test.rs::testBodyForChildTemplates
+tests/ParserTest.php	ParserTest::testBodyForParentTemplates	ported	crates/twig/tests/parser_test.rs::testBodyForParentTemplates
+tests/ParserTest.php	ParserTest::testCleanupBodyAcceptsAnUnregisteredBlockReference	ported	crates/twig/tests/parser_test.rs::testCleanupBodyAcceptsAnUnregisteredBlockReference
+tests/ParserTest.php	ParserTest::testCleanupBodyForChildTemplatesWithASingleNodeBody	ported	crates/twig/tests/parser_test.rs::testCleanupBodyForChildTemplatesWithASingleNodeBody
+tests/ParserTest.php	ParserTest::testCustomTokenParserCanSetDocumentationTarget	ported	crates/twig/tests/parser_test.rs::testCustomTokenParserCanSetDocumentationTarget
 tests/ParserTest.php	ParserTest::testDistinctMacroCallsWithoutParenthesesOnTheSameLineAreBothReported	pending	
-tests/ParserTest.php	ParserTest::testDocumentationIsAttachedToAssignmentTargets	pending	
-tests/ParserTest.php	ParserTest::testDocumentationIsAttachedToMacroNode	pending	
-tests/ParserTest.php	ParserTest::testDocumentationIsAttachedToNodes	pending	
+tests/ParserTest.php	ParserTest::testDocumentationIsAttachedToAssignmentTargets	ported	crates/twig/tests/parser_test.rs::testDocumentationIsAttachedToAssignmentTargets
+tests/ParserTest.php	ParserTest::testDocumentationIsAttachedToMacroNode	ported	crates/twig/tests/parser_test.rs::testDocumentationIsAttachedToMacroNode
+tests/ParserTest.php	ParserTest::testDocumentationIsAttachedToNodes	ported	crates/twig/tests/parser_test.rs::testDocumentationIsAttachedToNodes
 tests/ParserTest.php	ParserTest::testDocumentationIsAvailableToNodeVisitors	pending	
 tests/ParserTest.php	ParserTest::testDocumentationIsRemovedFromUnsupportedOptimizedNodes	pending	
-tests/ParserTest.php	ParserTest::testDuplicateMacroDeprecationsReferToPreviousDefinition	pending	
-tests/ParserTest.php	ParserTest::testDuplicateMacroKeepsOnlyTheLastDocumentation	pending	
+tests/ParserTest.php	ParserTest::testDuplicateMacroDeprecationsReferToPreviousDefinition	ported	crates/twig/tests/parser_test.rs::testDuplicateMacroDeprecationsReferToPreviousDefinition
+tests/ParserTest.php	ParserTest::testDuplicateMacroKeepsOnlyTheLastDocumentation	ported	crates/twig/tests/parser_test.rs::testDuplicateMacroKeepsOnlyTheLastDocumentation
 tests/ParserTest.php	ParserTest::testEachMacroCallWithoutParenthesesIsReportedOnItsOwnLine	pending	
-tests/ParserTest.php	ParserTest::testEmbeddedTemplatesHaveSequentialIndices	pending	
-tests/ParserTest.php	ParserTest::testEmptyCommentIsNotLexedAsDocumentation	pending	
-tests/ParserTest.php	ParserTest::testGetVarName	pending	
-tests/ParserTest.php	ParserTest::testImplicitMacroArgumentDefaultValues	pending	
-tests/ParserTest.php	ParserTest::testInlineDocumentationBeforeATagNameIsIgnored	pending	
-tests/ParserTest.php	ParserTest::testMacroDeclarationIsRepresentedInTheTemplateBody	pending	
-tests/ParserTest.php	ParserTest::testMacroTargetsOnlyCompileAsMacroReferences	pending	
-tests/ParserTest.php	ParserTest::testMacroTargetsWithParenthesesAreDeprecatedInDefinedTest	pending	
-tests/ParserTest.php	ParserTest::testMacroTargetsWithoutParenthesesAreAllowedInDefinedTest	pending	
+tests/ParserTest.php	ParserTest::testEmbeddedTemplatesHaveSequentialIndices	ported	crates/twig/tests/parser_test.rs::testEmbeddedTemplatesHaveSequentialIndices
+tests/ParserTest.php	ParserTest::testEmptyCommentIsNotLexedAsDocumentation	ported	crates/twig/tests/parser_test.rs::testEmptyCommentIsNotLexedAsDocumentation
+tests/ParserTest.php	ParserTest::testGetVarName	ported	crates/twig/tests/parser_test.rs::testGetVarName
+tests/ParserTest.php	ParserTest::testImplicitMacroArgumentDefaultValues	ported	crates/twig/tests/parser_test.rs::testImplicitMacroArgumentDefaultValues
+tests/ParserTest.php	ParserTest::testInlineDocumentationBeforeATagNameIsIgnored	ported	crates/twig/tests/parser_test.rs::testInlineDocumentationBeforeATagNameIsIgnored
+tests/ParserTest.php	ParserTest::testMacroDeclarationIsRepresentedInTheTemplateBody	ported	crates/twig/tests/parser_test.rs::testMacroDeclarationIsRepresentedInTheTemplateBody
+tests/ParserTest.php	ParserTest::testMacroTargetsOnlyCompileAsMacroReferences	ported	crates/twig/tests/parser_test.rs::testMacroTargetsOnlyCompileAsMacroReferences
+tests/ParserTest.php	ParserTest::testMacroTargetsWithParenthesesAreDeprecatedInDefinedTest	ported	crates/twig/tests/parser_test.rs::testMacroTargetsWithParenthesesAreDeprecatedInDefinedTest
+tests/ParserTest.php	ParserTest::testMacroTargetsWithoutParenthesesAreAllowedInDefinedTest	ported	crates/twig/tests/parser_test.rs::testMacroTargetsWithoutParenthesesAreAllowedInDefinedTest
 tests/ParserTest.php	ParserTest::testMacroTargetsWithoutParenthesesAreDeprecated	pending	
-tests/ParserTest.php	ParserTest::testParseIsReentrant	pending	
-tests/ParserTest.php	ParserTest::testUnknownTag	pending	
-tests/ParserTest.php	ParserTest::testUnknownTagWithoutSuggestions	pending	
+tests/ParserTest.php	ParserTest::testParseIsReentrant	ported	crates/twig/tests/parser_test.rs::testParseIsReentrant
+tests/ParserTest.php	ParserTest::testUnknownTag	ported	crates/twig/tests/parser_test.rs::testUnknownTag
+tests/ParserTest.php	ParserTest::testUnknownTagWithoutSuggestions	ported	crates/twig/tests/parser_test.rs::testUnknownTagWithoutSuggestions
 tests/Profiler/Dumper/BlackfireTest.php	BlackfireTest::testDump	pending	
 tests/Profiler/Dumper/HtmlTest.php	HtmlTest::testDump	pending	
 tests/Profiler/Dumper/HtmlTest.php	HtmlTest::testDumpEscapesRootProfileName	pending	
@@ -742,16 +742,16 @@ tests/TemplateWrapperTest.php	TemplateWrapperTest::testStreamBlockIncludesGlobal
 tests/TemplateWrapperTest.php	TemplateWrapperTest::testUnwrapCanBeCalledWithoutArguments	pending	
 tests/TemplateWrapperTest.php	TemplateWrapperTest::testUnwrapChecksTheEnvironment	pending	
 tests/Test/DataProviderCompatibilityTest.php	DataProviderCompatibilityTest::testDataProviderAttributesReferenceStaticMethods	pending	
-tests/TokenParser/BlockTokenParserTest.php	BlockTokenParserTest::testDocumentation	pending	
-tests/TokenParser/BlockTokenParserTest.php	BlockTokenParserTest::testDocumentationCommentRequiresALineBreak	pending	
-tests/TokenParser/BlockTokenParserTest.php	BlockTokenParserTest::testDocumentationDoesNotCrossSpecialConstructs	pending	
-tests/TokenParser/BlockTokenParserTest.php	BlockTokenParserTest::testDocumentationIsMovedFromTheBlockReference	pending	
-tests/TokenParser/BlockTokenParserTest.php	BlockTokenParserTest::testDocumentationIsPreservedInChildTemplates	pending	
+tests/TokenParser/BlockTokenParserTest.php	BlockTokenParserTest::testDocumentation	ported	crates/twig/tests/block_token_parser_test.rs::testDocumentation
+tests/TokenParser/BlockTokenParserTest.php	BlockTokenParserTest::testDocumentationCommentRequiresALineBreak	ported	crates/twig/tests/block_token_parser_test.rs::testDocumentationCommentRequiresALineBreak
+tests/TokenParser/BlockTokenParserTest.php	BlockTokenParserTest::testDocumentationDoesNotCrossSpecialConstructs	ported	crates/twig/tests/block_token_parser_test.rs::testDocumentationDoesNotCrossSpecialConstructs
+tests/TokenParser/BlockTokenParserTest.php	BlockTokenParserTest::testDocumentationIsMovedFromTheBlockReference	ported	crates/twig/tests/block_token_parser_test.rs::testDocumentationIsMovedFromTheBlockReference
+tests/TokenParser/BlockTokenParserTest.php	BlockTokenParserTest::testDocumentationIsPreservedInChildTemplates	ported	crates/twig/tests/block_token_parser_test.rs::testDocumentationIsPreservedInChildTemplates
 tests/TokenParser/BlockTokenParserTest.php	BlockTokenParserTest::testDocumentationWhitespaceControl	pending	
 tests/TokenParser/BlockTokenParserTest.php	BlockTokenParserTest::testShortcutAssignmentNamedDocsRemainsValid	pending	
 tests/TokenParser/GuardTokenParserTest.php	GuardTokenParserTest::testUndefinedHandlers	pending	
-tests/TokenParser/TypesTokenParserTest.php	TypesTokenParserTest::testDocumentationIsAttachedToTypeNodes	pending	
-tests/TokenParser/TypesTokenParserTest.php	TypesTokenParserTest::testMappingParsing	pending	
+tests/TokenParser/TypesTokenParserTest.php	TypesTokenParserTest::testDocumentationIsAttachedToTypeNodes	ported	crates/twig/tests/types_token_parser_test.rs::testDocumentationIsAttachedToTypeNodes
+tests/TokenParser/TypesTokenParserTest.php	TypesTokenParserTest::testMappingParsing	ported	crates/twig/tests/types_token_parser_test.rs::testMappingParsing
 tests/TokenStreamTest.php	TokenStreamTest::testEndOfTemplateLook	pending	
 tests/TokenStreamTest.php	TokenStreamTest::testEndOfTemplateNext	pending	
 tests/TokenStreamTest.php	TokenStreamTest::testNext	pending	

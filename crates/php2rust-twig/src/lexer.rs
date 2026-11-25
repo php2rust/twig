@@ -268,6 +268,15 @@ fn is_name_char(b: u8) -> bool {
     is_name_start(b) || b.is_ascii_digit()
 }
 
+/// The length of the `Lexer::REGEX_NAME` match at the start of `text`
+/// (a name start byte, then name bytes), 0 for none.
+pub(crate) fn name_match_len(text: &[u8]) -> usize {
+    match text.first() {
+        Some(&b) if is_name_start(b) => span(text, 0, is_name_char),
+        _ => 0,
+    }
+}
+
 /// The length of the run of bytes from `at` that pass `f`.
 fn span(code: &[u8], at: usize, f: impl Fn(u8) -> bool) -> usize {
     code.get(at..)

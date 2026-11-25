@@ -1,5 +1,5 @@
 # twig/twig at 8c737079b726af72ff8ef3c595be9f6a810ea1ef: upstream file	classes	code lines	status	rust files
-src/AbstractTwigCallable.php	AbstractTwigCallable	134	pending	
+src/AbstractTwigCallable.php	AbstractTwigCallable	134	ported	crates/twig/src/callable.rs
 src/Attribute/AsTwigFilter.php	AsTwigFilter	21	pending	
 src/Attribute/AsTwigFunction.php	AsTwigFunction	19	pending	
 src/Attribute/AsTwigTest.php	AsTwigTest	17	pending	
@@ -13,42 +13,42 @@ src/Cache/NullCache.php	NullCache	21	pending
 src/Cache/ReadOnlyFilesystemCache.php	ReadOnlyFilesystemCache	7	pending	
 src/Cache/RemovableCacheInterface.php	RemovableCacheInterface	5	pending	
 src/Compiler.php	Compiler	160	pending	
-src/DeprecatedCallableInfo.php	DeprecatedCallableInfo	44	pending	
-src/Environment.php	Environment	489	pending	
+src/DeprecatedCallableInfo.php	DeprecatedCallableInfo	44	ported	crates/twig/src/callable.rs
+src/Environment.php	Environment	489	ported	crates/twig/src/environment.rs
 src/Error/Error.php	Error	131	ported	crates/twig/src/error.rs
 src/Error/LoaderError.php	LoaderError	4	ported	crates/twig/src/error.rs
 src/Error/RuntimeError.php	RuntimeError	4	ported	crates/twig/src/error.rs
 src/Error/SyntaxError.php	SyntaxError	19	ported	crates/twig/src/error.rs
 src/ExpressionParser.php	ExpressionParser	231	pending	
-src/ExpressionParser/AbstractExpressionParser.php	AbstractExpressionParser	20	pending	
-src/ExpressionParser/ExpressionParserDescriptionInterface.php	ExpressionParserDescriptionInterface	5	pending	
-src/ExpressionParser/ExpressionParserInterface.php	ExpressionParserInterface	9	pending	
-src/ExpressionParser/ExpressionParserType.php	ExpressionParserType	16	pending	
-src/ExpressionParser/ExpressionParsers.php	ExpressionParsers	83	pending	
-src/ExpressionParser/Infix/ArgumentsTrait.php	ArgumentsTrait	63	pending	
-src/ExpressionParser/Infix/ArrowExpressionParser.php	ArrowExpressionParser	32	pending	
-src/ExpressionParser/Infix/AssignmentExpressionParser.php	AssignmentExpressionParser	54	pending	
-src/ExpressionParser/Infix/BinaryOperatorExpressionParser.php	BinaryOperatorExpressionParser	52	pending	
-src/ExpressionParser/Infix/ConditionalTernaryExpressionParser.php	ConditionalTernaryExpressionParser	39	pending	
-src/ExpressionParser/Infix/DotExpressionParser.php	DotExpressionParser	81	pending	
-src/ExpressionParser/Infix/FilterExpressionParser.php	FilterExpressionParser	57	pending	
-src/ExpressionParser/Infix/FunctionExpressionParser.php	FunctionExpressionParser	65	pending	
-src/ExpressionParser/Infix/IsExpressionParser.php	IsExpressionParser	63	pending	
-src/ExpressionParser/Infix/IsNotExpressionParser.php	IsNotExpressionParser	16	pending	
-src/ExpressionParser/Infix/SquareBracketExpressionParser.php	SquareBracketExpressionParser	62	pending	
-src/ExpressionParser/InfixAssociativity.php	InfixAssociativity	6	pending	
-src/ExpressionParser/InfixExpressionParserInterface.php	InfixExpressionParserInterface	10	pending	
-src/ExpressionParser/PrecedenceChange.php	PrecedenceChange	22	pending	
-src/ExpressionParser/Prefix/GroupingExpressionParser.php	GroupingExpressionParser	60	pending	
-src/ExpressionParser/Prefix/LiteralExpressionParser.php	LiteralExpressionParser	165	pending	
-src/ExpressionParser/Prefix/UnaryOperatorExpressionParser.php	UnaryOperatorExpressionParser	46	pending	
-src/ExpressionParser/PrefixExpressionParserInterface.php	PrefixExpressionParserInterface	9	pending	
-src/Extension/AbstractExtension.php	AbstractExtension	44	pending	
+src/ExpressionParser/AbstractExpressionParser.php	AbstractExpressionParser	20	ported	crates/twig/src/expression_parser/mod.rs
+src/ExpressionParser/ExpressionParserDescriptionInterface.php	ExpressionParserDescriptionInterface	5	ported	crates/twig/src/expression_parser/mod.rs
+src/ExpressionParser/ExpressionParserInterface.php	ExpressionParserInterface	9	ported	crates/twig/src/expression_parser/mod.rs
+src/ExpressionParser/ExpressionParserType.php	ExpressionParserType	16	ported	crates/twig/src/expression_parser/mod.rs
+src/ExpressionParser/ExpressionParsers.php	ExpressionParsers	83	ported	crates/twig/src/expression_parser/mod.rs
+src/ExpressionParser/Infix/ArgumentsTrait.php	ArgumentsTrait	63	ported	crates/twig/src/expression_parser/infix.rs
+src/ExpressionParser/Infix/ArrowExpressionParser.php	ArrowExpressionParser	32	ported	crates/twig/src/expression_parser/infix.rs
+src/ExpressionParser/Infix/AssignmentExpressionParser.php	AssignmentExpressionParser	54	ported	crates/twig/src/expression_parser/infix.rs
+src/ExpressionParser/Infix/BinaryOperatorExpressionParser.php	BinaryOperatorExpressionParser	52	ported	crates/twig/src/expression_parser/infix.rs
+src/ExpressionParser/Infix/ConditionalTernaryExpressionParser.php	ConditionalTernaryExpressionParser	39	ported	crates/twig/src/expression_parser/infix.rs
+src/ExpressionParser/Infix/DotExpressionParser.php	DotExpressionParser	81	ported	crates/twig/src/expression_parser/infix.rs
+src/ExpressionParser/Infix/FilterExpressionParser.php	FilterExpressionParser	57	ported	crates/twig/src/expression_parser/infix.rs
+src/ExpressionParser/Infix/FunctionExpressionParser.php	FunctionExpressionParser	65	ported	crates/twig/src/expression_parser/infix.rs
+src/ExpressionParser/Infix/IsExpressionParser.php	IsExpressionParser	63	ported	crates/twig/src/expression_parser/infix.rs
+src/ExpressionParser/Infix/IsNotExpressionParser.php	IsNotExpressionParser	16	ported	crates/twig/src/expression_parser/infix.rs
+src/ExpressionParser/Infix/SquareBracketExpressionParser.php	SquareBracketExpressionParser	62	ported	crates/twig/src/expression_parser/infix.rs
+src/ExpressionParser/InfixAssociativity.php	InfixAssociativity	6	ported	crates/twig/src/expression_parser/mod.rs
+src/ExpressionParser/InfixExpressionParserInterface.php	InfixExpressionParserInterface	10	ported	crates/twig/src/expression_parser/mod.rs
+src/ExpressionParser/PrecedenceChange.php	PrecedenceChange	22	ported	crates/twig/src/expression_parser/mod.rs
+src/ExpressionParser/Prefix/GroupingExpressionParser.php	GroupingExpressionParser	60	ported	crates/twig/src/expression_parser/prefix.rs
+src/ExpressionParser/Prefix/LiteralExpressionParser.php	LiteralExpressionParser	165	ported	crates/twig/src/expression_parser/prefix.rs
+src/ExpressionParser/Prefix/UnaryOperatorExpressionParser.php	UnaryOperatorExpressionParser	46	ported	crates/twig/src/expression_parser/prefix.rs
+src/ExpressionParser/PrefixExpressionParserInterface.php	PrefixExpressionParserInterface	9	ported	crates/twig/src/expression_parser/mod.rs
+src/Extension/AbstractExtension.php	AbstractExtension	44	ported	crates/twig/src/extension/mod.rs
 src/Extension/AttributeExtension.php	AttributeExtension	122	pending	
-src/Extension/CoreExtension.php	CoreExtension	1352	pending	
+src/Extension/CoreExtension.php	CoreExtension	1352	ported	crates/twig/src/extension/core.rs
 src/Extension/DebugExtension.php	DebugExtension	38	pending	
-src/Extension/EscaperExtension.php	EscaperExtension	118	pending	
-src/Extension/ExtensionInterface.php	ExtensionInterface	20	pending	
+src/Extension/EscaperExtension.php	EscaperExtension	118	ported	crates/twig/src/extension/escaper.rs
+src/Extension/ExtensionInterface.php	ExtensionInterface	20	ported	crates/twig/src/extension/mod.rs
 src/Extension/GlobalsInterface.php	GlobalsInterface	5	pending	
 src/Extension/LastModifiedExtensionInterface.php	LastModifiedExtensionInterface	5	pending	
 src/Extension/OptimizerExtension.php	OptimizerExtension	13	pending	
@@ -59,7 +59,7 @@ src/Extension/SandboxExtension.php	SandboxExtension	84	pending
 src/Extension/StagingExtension.php	StagingExtension	66	pending	
 src/Extension/StringLoaderExtension.php	StringLoaderExtension	17	pending	
 src/Extension/YieldNotReadyExtension.php	YieldNotReadyExtension	13	pending	
-src/ExtensionSet.php	ExtensionSet	400	pending	
+src/ExtensionSet.php	ExtensionSet	400	ported	crates/twig/src/extension/mod.rs
 src/FileExtensionEscapingStrategy.php	FileExtensionEscapingStrategy	25	pending	
 src/Lexer.php	Lexer	528	ported	crates/twig/src/lexer.rs
 src/Loader/ArrayLoader.php	ArrayLoader	39	pending	
@@ -68,25 +68,25 @@ src/Loader/FilesystemLoader.php	FilesystemLoader	185	pending
 src/Loader/LoaderInterface.php	LoaderInterface	10	pending	
 src/MacroNamespace.php	MacroNamespace	90	pending	
 src/Markup.php	Markup	29	pending	
-src/Node/AutoEscapeNode.php	AutoEscapeNode	15	pending	
-src/Node/BlockNode.php	BlockNode	29	pending	
-src/Node/BlockReferenceNode.php	BlockReferenceNode	18	pending	
-src/Node/BodyNode.php	BodyNode	6	pending	
-src/Node/CaptureNode.php	CaptureNode	37	pending	
+src/Node/AutoEscapeNode.php	AutoEscapeNode	15	ported	crates/twig/src/node/statement.rs
+src/Node/BlockNode.php	BlockNode	29	ported	crates/twig/src/node/statement.rs
+src/Node/BlockReferenceNode.php	BlockReferenceNode	18	ported	crates/twig/src/node/statement.rs
+src/Node/BodyNode.php	BodyNode	6	ported	crates/twig/src/node/statement.rs
+src/Node/CaptureNode.php	CaptureNode	37	ported	crates/twig/src/node/statement.rs
 src/Node/CheckSecurityCallNode.php	CheckSecurityCallNode	13	pending	
 src/Node/CheckSecurityNode.php	CheckSecurityNode	107	pending	
-src/Node/CheckToStringNode.php	CheckToStringNode	24	pending	
+src/Node/CheckToStringNode.php	CheckToStringNode	24	ported	crates/twig/src/node/statement.rs
 src/Node/CoercesChildrenToStringInterface.php	CoercesChildrenToStringInterface	6	pending	
-src/Node/ConfigNode.php	ConfigNode	10	pending	
-src/Node/DeprecatedNode.php	DeprecatedNode	60	pending	
-src/Node/DoNode.php	DoNode	21	pending	
-src/Node/EmbedNode.php	EmbedNode	33	pending	
-src/Node/EmptyNode.php	EmptyNode	14	pending	
-src/Node/Expression/AbstractExpression.php	AbstractExpression	18	pending	
-src/Node/Expression/ArrayExpression.php	ArrayExpression	116	pending	
-src/Node/Expression/ArrowFunctionExpression.php	ArrowFunctionExpression	42	pending	
-src/Node/Expression/AssignNameExpression.php	AssignNameExpression	26	pending	
-src/Node/Expression/Binary/AbstractBinary.php	AbstractBinary	32	pending	
+src/Node/ConfigNode.php	ConfigNode	10	ported	crates/twig/src/node/statement.rs
+src/Node/DeprecatedNode.php	DeprecatedNode	60	ported	crates/twig/src/node/statement.rs
+src/Node/DoNode.php	DoNode	21	ported	crates/twig/src/node/statement.rs
+src/Node/EmbedNode.php	EmbedNode	33	ported	crates/twig/src/node/statement.rs
+src/Node/EmptyNode.php	EmptyNode	14	ported	crates/twig/src/node/mod.rs
+src/Node/Expression/AbstractExpression.php	AbstractExpression	18	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/ArrayExpression.php	ArrayExpression	116	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/ArrowFunctionExpression.php	ArrowFunctionExpression	42	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/AssignNameExpression.php	AssignNameExpression	26	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/Binary/AbstractBinary.php	AbstractBinary	32	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/Binary/AddBinary.php	AddBinary	10	pending	
 src/Node/Expression/Binary/AndBinary.php	AndBinary	16	pending	
 src/Node/Expression/Binary/BinaryInterface.php	BinaryInterface	6	pending	
@@ -95,7 +95,7 @@ src/Node/Expression/Binary/BitwiseOrBinary.php	BitwiseOrBinary	10	pending
 src/Node/Expression/Binary/BitwiseXorBinary.php	BitwiseXorBinary	10	pending	
 src/Node/Expression/Binary/ConcatBinary.php	ConcatBinary	15	pending	
 src/Node/Expression/Binary/DivBinary.php	DivBinary	10	pending	
-src/Node/Expression/Binary/ElvisBinary.php	ElvisBinary	35	pending	
+src/Node/Expression/Binary/ElvisBinary.php	ElvisBinary	35	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/Binary/EndsWithBinary.php	EndsWithBinary	22	pending	
 src/Node/Expression/Binary/EqualBinary.php	EqualBinary	29	pending	
 src/Node/Expression/Binary/FloorDivBinary.php	FloorDivBinary	16	pending	
@@ -112,40 +112,40 @@ src/Node/Expression/Binary/MulBinary.php	MulBinary	10	pending
 src/Node/Expression/Binary/NotEqualBinary.php	NotEqualBinary	29	pending	
 src/Node/Expression/Binary/NotInBinary.php	NotInBinary	25	pending	
 src/Node/Expression/Binary/NotSameAsBinary.php	NotSameAsBinary	10	pending	
-src/Node/Expression/Binary/NullCoalesceBinary.php	NullCoalesceBinary	48	pending	
-src/Node/Expression/Binary/ObjectDestructuringSetBinary.php	ObjectDestructuringSetBinary	58	pending	
+src/Node/Expression/Binary/NullCoalesceBinary.php	NullCoalesceBinary	48	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/Binary/ObjectDestructuringSetBinary.php	ObjectDestructuringSetBinary	58	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/Binary/OrBinary.php	OrBinary	16	pending	
 src/Node/Expression/Binary/PowerBinary.php	PowerBinary	10	pending	
 src/Node/Expression/Binary/RangeBinary.php	RangeBinary	25	pending	
 src/Node/Expression/Binary/SameAsBinary.php	SameAsBinary	10	pending	
-src/Node/Expression/Binary/SequenceDestructuringSetBinary.php	SequenceDestructuringSetBinary	54	pending	
-src/Node/Expression/Binary/SetBinary.php	SetBinary	22	pending	
+src/Node/Expression/Binary/SequenceDestructuringSetBinary.php	SequenceDestructuringSetBinary	54	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/Binary/SetBinary.php	SetBinary	22	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/Binary/SpaceshipBinary.php	SpaceshipBinary	15	pending	
 src/Node/Expression/Binary/StartsWithBinary.php	StartsWithBinary	22	pending	
 src/Node/Expression/Binary/SubBinary.php	SubBinary	10	pending	
 src/Node/Expression/Binary/XorBinary.php	XorBinary	16	pending	
-src/Node/Expression/BlockReferenceExpression.php	BlockReferenceExpression	67	pending	
+src/Node/Expression/BlockReferenceExpression.php	BlockReferenceExpression	67	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/CallExpression.php	CallExpression	293	pending	
 src/Node/Expression/ConditionalExpression.php	ConditionalExpression	35	pending	
-src/Node/Expression/ConstantExpression.php	ConstantExpression	14	pending	
-src/Node/Expression/EmptyExpression.php	EmptyExpression	12	pending	
-src/Node/Expression/Filter/DefaultFilter.php	DefaultFilter	44	pending	
-src/Node/Expression/Filter/EscapeFilter.php	EscapeFilter	26	pending	
-src/Node/Expression/Filter/RawFilter.php	RawFilter	24	pending	
-src/Node/Expression/FilterExpression.php	FilterExpression	58	pending	
-src/Node/Expression/FunctionExpression.php	FunctionExpression	61	pending	
+src/Node/Expression/ConstantExpression.php	ConstantExpression	14	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/EmptyExpression.php	EmptyExpression	12	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/Filter/DefaultFilter.php	DefaultFilter	44	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/Filter/EscapeFilter.php	EscapeFilter	26	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/Filter/RawFilter.php	RawFilter	24	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/FilterExpression.php	FilterExpression	58	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/FunctionExpression.php	FunctionExpression	61	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/FunctionNode/EnumCasesFunction.php	EnumCasesFunction	31	pending	
 src/Node/Expression/FunctionNode/EnumFunction.php	EnumFunction	34	pending	
 src/Node/Expression/FunctionNode/RenderSandboxedFunction.php	RenderSandboxedFunction	55	pending	
-src/Node/Expression/GetAttrExpression.php	GetAttrExpression	170	pending	
+src/Node/Expression/GetAttrExpression.php	GetAttrExpression	170	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/InlinePrint.php	InlinePrint	18	pending	
-src/Node/Expression/ListExpression.php	ListExpression	23	pending	
-src/Node/Expression/MacroReferenceExpression.php	MacroReferenceExpression	66	pending	
+src/Node/Expression/ListExpression.php	ListExpression	23	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/MacroReferenceExpression.php	MacroReferenceExpression	66	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/MethodCallExpression.php	MethodCallExpression	39	pending	
-src/Node/Expression/NameExpression.php	NameExpression	85	pending	
+src/Node/Expression/NameExpression.php	NameExpression	85	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/NullCoalesceExpression.php	NullCoalesceExpression	48	pending	
 src/Node/Expression/OperatorEscapeInterface.php	OperatorEscapeInterface	5	pending	
-src/Node/Expression/ParentExpression.php	ParentExpression	26	pending	
+src/Node/Expression/ParentExpression.php	ParentExpression	26	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/ReturnArrayInterface.php	ReturnArrayInterface	4	pending	
 src/Node/Expression/ReturnBoolInterface.php	ReturnBoolInterface	4	pending	
 src/Node/Expression/ReturnNumberInterface.php	ReturnNumberInterface	4	pending	
@@ -153,19 +153,19 @@ src/Node/Expression/ReturnPrimitiveTypeInterface.php	ReturnPrimitiveTypeInterfac
 src/Node/Expression/ReturnStringInterface.php	ReturnStringInterface	4	pending	
 src/Node/Expression/SupportDefinedTestDeprecationTrait.php	SupportDefinedTestDeprecationTrait	21	pending	
 src/Node/Expression/SupportDefinedTestInterface.php	SupportDefinedTestInterface	6	pending	
-src/Node/Expression/SupportDefinedTestTrait.php	SupportDefinedTestTrait	13	pending	
-src/Node/Expression/TempNameExpression.php	TempNameExpression	30	pending	
-src/Node/Expression/Ternary/ConditionalTernary.php	ConditionalTernary	28	pending	
+src/Node/Expression/SupportDefinedTestTrait.php	SupportDefinedTestTrait	13	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/TempNameExpression.php	TempNameExpression	30	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/Ternary/ConditionalTernary.php	ConditionalTernary	28	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/Test/ConstantTest.php	ConstantTest	25	pending	
-src/Node/Expression/Test/DefinedTest.php	DefinedTest	35	pending	
+src/Node/Expression/Test/DefinedTest.php	DefinedTest	35	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/Test/DivisiblebyTest.php	DivisiblebyTest	20	pending	
 src/Node/Expression/Test/EvenTest.php	EvenTest	19	pending	
 src/Node/Expression/Test/NullTest.php	NullTest	18	pending	
 src/Node/Expression/Test/OddTest.php	OddTest	19	pending	
 src/Node/Expression/Test/SameasTest.php	SameasTest	20	pending	
-src/Node/Expression/Test/TrueTest.php	TrueTest	28	pending	
-src/Node/Expression/TestExpression.php	TestExpression	61	pending	
-src/Node/Expression/Unary/AbstractUnary.php	AbstractUnary	28	pending	
+src/Node/Expression/Test/TrueTest.php	TrueTest	28	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/TestExpression.php	TestExpression	61	ported	crates/twig/src/node/expression.rs
+src/Node/Expression/Unary/AbstractUnary.php	AbstractUnary	28	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/Unary/NegUnary.php	NegUnary	9	pending	
 src/Node/Expression/Unary/NotUnary.php	NotUnary	16	pending	
 src/Node/Expression/Unary/PosUnary.php	PosUnary	9	pending	
@@ -173,37 +173,37 @@ src/Node/Expression/Unary/SpreadUnary.php	SpreadUnary	9	pending
 src/Node/Expression/Unary/StringCastUnary.php	StringCastUnary	9	pending	
 src/Node/Expression/Unary/UnaryInterface.php	UnaryInterface	6	pending	
 src/Node/Expression/Variable/AssignContextVariable.php	AssignContextVariable	5	pending	
-src/Node/Expression/Variable/AssignMacroVariable.php	AssignMacroVariable	27	pending	
+src/Node/Expression/Variable/AssignMacroVariable.php	AssignMacroVariable	27	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/Variable/AssignTemplateVariable.php	AssignTemplateVariable	9	pending	
 src/Node/Expression/Variable/ContextVariable.php	ContextVariable	5	pending	
 src/Node/Expression/Variable/LocalVariable.php	LocalVariable	5	pending	
-src/Node/Expression/Variable/MacroVariable.php	MacroVariable	28	pending	
+src/Node/Expression/Variable/MacroVariable.php	MacroVariable	28	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/Variable/TemplateVariable.php	TemplateVariable	11	pending	
 src/Node/Expression/VariadicExpression.php	VariadicExpression	10	pending	
-src/Node/FlushNode.php	FlushNode	19	pending	
-src/Node/ForElseNode.php	ForElseNode	22	pending	
-src/Node/ForLoopNode.php	ForLoopNode	31	pending	
-src/Node/ForNode.php	ForNode	87	pending	
-src/Node/IfNode.php	IfNode	54	pending	
-src/Node/ImportNode.php	ImportNode	42	pending	
-src/Node/IncludeNode.php	IncludeNode	84	pending	
-src/Node/MacroDeclarationNode.php	MacroDeclarationNode	11	pending	
-src/Node/MacroNode.php	MacroNode	114	pending	
-src/Node/MacrosNode.php	MacrosNode	50	pending	
-src/Node/ModuleNode.php	ModuleNode	422	pending	
+src/Node/FlushNode.php	FlushNode	19	ported	crates/twig/src/node/statement.rs
+src/Node/ForElseNode.php	ForElseNode	22	ported	crates/twig/src/node/statement.rs
+src/Node/ForLoopNode.php	ForLoopNode	31	ported	crates/twig/src/node/statement.rs
+src/Node/ForNode.php	ForNode	87	ported	crates/twig/src/node/statement.rs
+src/Node/IfNode.php	IfNode	54	ported	crates/twig/src/node/statement.rs
+src/Node/ImportNode.php	ImportNode	42	ported	crates/twig/src/node/statement.rs
+src/Node/IncludeNode.php	IncludeNode	84	ported	crates/twig/src/node/statement.rs
+src/Node/MacroDeclarationNode.php	MacroDeclarationNode	11	ported	crates/twig/src/node/statement.rs
+src/Node/MacroNode.php	MacroNode	114	ported	crates/twig/src/node/statement.rs
+src/Node/MacrosNode.php	MacrosNode	50	ported	crates/twig/src/node/statement.rs
+src/Node/ModuleNode.php	ModuleNode	422	ported	crates/twig/src/node/statement.rs
 src/Node/NameDeprecation.php	NameDeprecation	25	pending	
-src/Node/Node.php	Node	213	pending	
+src/Node/Node.php	Node	213	ported	crates/twig/src/node/mod.rs
 src/Node/NodeCaptureInterface.php	NodeCaptureInterface	4	pending	
-src/Node/NodeDocumentation.php	NodeDocumentation	34	pending	
+src/Node/NodeDocumentation.php	NodeDocumentation	34	ported	crates/twig/src/node/mod.rs
 src/Node/NodeOutputInterface.php	NodeOutputInterface	4	pending	
-src/Node/Nodes.php	Nodes	10	pending	
-src/Node/PrintNode.php	PrintNode	42	pending	
-src/Node/SandboxNode.php	SandboxNode	35	pending	
-src/Node/SetNode.php	SetNode	83	pending	
-src/Node/TextNode.php	TextNode	33	pending	
-src/Node/TypeNode.php	TypeNode	10	pending	
-src/Node/TypesNode.php	TypesNode	18	pending	
-src/Node/WithNode.php	WithNode	46	pending	
+src/Node/Nodes.php	Nodes	10	ported	crates/twig/src/node/mod.rs
+src/Node/PrintNode.php	PrintNode	42	ported	crates/twig/src/node/statement.rs
+src/Node/SandboxNode.php	SandboxNode	35	ported	crates/twig/src/node/statement.rs
+src/Node/SetNode.php	SetNode	83	ported	crates/twig/src/node/statement.rs
+src/Node/TextNode.php	TextNode	33	ported	crates/twig/src/node/statement.rs
+src/Node/TypeNode.php	TypeNode	10	ported	crates/twig/src/node/statement.rs
+src/Node/TypesNode.php	TypesNode	18	ported	crates/twig/src/node/statement.rs
+src/Node/WithNode.php	WithNode	46	ported	crates/twig/src/node/statement.rs
 src/NodeTraverser.php	NodeTraverser	43	pending	
 src/NodeVisitor/AbstractNodeVisitor.php	AbstractNodeVisitor	16	pending	
 src/NodeVisitor/CorrectnessNodeVisitor.php	CorrectnessNodeVisitor	177	pending	
@@ -214,7 +214,7 @@ src/NodeVisitor/SafeAnalysisNodeVisitor.php	SafeAnalysisNodeVisitor	120	pending
 src/NodeVisitor/SandboxNodeVisitor.php	SandboxNodeVisitor	208	pending	
 src/NodeVisitor/YieldNotReadyNodeVisitor.php	YieldNotReadyNodeVisitor	35	pending	
 src/OperatorPrecedenceChange.php	OperatorPrecedenceChange	13	pending	
-src/Parser.php	Parser	490	pending	
+src/Parser.php	Parser	490	ported	crates/twig/src/parser.rs
 src/Profiler/Dumper/BaseDumper.php	BaseDumper	42	pending	
 src/Profiler/Dumper/BlackfireDumper.php	BlackfireDumper	51	pending	
 src/Profiler/Dumper/HtmlDumper.php	HtmlDumper	35	pending	
@@ -251,36 +251,36 @@ src/TemplateWrapper.php	TemplateWrapper	70	pending
 src/Test/IntegrationTestCase.php	IntegrationTestCase	255	pending	
 src/Test/NodeTestCase.php	NodeTestCase	75	pending	
 src/Token.php	Token	195	ported	crates/twig/src/token.rs
-src/TokenParser/AbstractTokenParser.php	AbstractTokenParser	39	pending	
-src/TokenParser/ApplyTokenParser.php	ApplyTokenParser	40	pending	
-src/TokenParser/AutoEscapeTokenParser.php	AutoEscapeTokenParser	35	pending	
-src/TokenParser/BlockTokenParser.php	BlockTokenParser	48	pending	
-src/TokenParser/DeprecatedTokenParser.php	DeprecatedTokenParser	35	pending	
-src/TokenParser/DoTokenParser.php	DoTokenParser	17	pending	
-src/TokenParser/EmbedTokenParser.php	EmbedTokenParser	42	pending	
-src/TokenParser/ExtendsTokenParser.php	ExtendsTokenParser	18	pending	
-src/TokenParser/FlushTokenParser.php	FlushTokenParser	16	pending	
-src/TokenParser/ForTokenParser.php	ForTokenParser	47	pending	
-src/TokenParser/FromTokenParser.php	FromTokenParser	40	pending	
-src/TokenParser/GuardTokenParser.php	GuardTokenParser	55	pending	
-src/TokenParser/IfTokenParser.php	IfTokenParser	54	pending	
-src/TokenParser/ImportTokenParser.php	ImportTokenParser	23	pending	
-src/TokenParser/IncludeTokenParser.php	IncludeTokenParser	37	pending	
-src/TokenParser/MacroTokenParser.php	MacroTokenParser	104	pending	
-src/TokenParser/SandboxTokenParser.php	SandboxTokenParser	40	pending	
-src/TokenParser/SetTokenParser.php	SetTokenParser	51	pending	
-src/TokenParser/TokenParserInterface.php	TokenParserInterface	11	pending	
-src/TokenParser/TypesTokenParser.php	TypesTokenParser	61	pending	
-src/TokenParser/UseTokenParser.php	UseTokenParser	39	pending	
-src/TokenParser/WithTokenParser.php	WithTokenParser	29	pending	
+src/TokenParser/AbstractTokenParser.php	AbstractTokenParser	39	ported	crates/twig/src/token_parser/mod.rs
+src/TokenParser/ApplyTokenParser.php	ApplyTokenParser	40	ported	crates/twig/src/token_parser/apply.rs
+src/TokenParser/AutoEscapeTokenParser.php	AutoEscapeTokenParser	35	ported	crates/twig/src/token_parser/auto_escape.rs
+src/TokenParser/BlockTokenParser.php	BlockTokenParser	48	ported	crates/twig/src/token_parser/block.rs
+src/TokenParser/DeprecatedTokenParser.php	DeprecatedTokenParser	35	ported	crates/twig/src/token_parser/deprecated.rs
+src/TokenParser/DoTokenParser.php	DoTokenParser	17	ported	crates/twig/src/token_parser/do_tag.rs
+src/TokenParser/EmbedTokenParser.php	EmbedTokenParser	42	ported	crates/twig/src/token_parser/embed.rs
+src/TokenParser/ExtendsTokenParser.php	ExtendsTokenParser	18	ported	crates/twig/src/token_parser/extends.rs
+src/TokenParser/FlushTokenParser.php	FlushTokenParser	16	ported	crates/twig/src/token_parser/flush.rs
+src/TokenParser/ForTokenParser.php	ForTokenParser	47	ported	crates/twig/src/token_parser/for_tag.rs
+src/TokenParser/FromTokenParser.php	FromTokenParser	40	ported	crates/twig/src/token_parser/from.rs
+src/TokenParser/GuardTokenParser.php	GuardTokenParser	55	ported	crates/twig/src/token_parser/guard.rs
+src/TokenParser/IfTokenParser.php	IfTokenParser	54	ported	crates/twig/src/token_parser/if_tag.rs
+src/TokenParser/ImportTokenParser.php	ImportTokenParser	23	ported	crates/twig/src/token_parser/import.rs
+src/TokenParser/IncludeTokenParser.php	IncludeTokenParser	37	ported	crates/twig/src/token_parser/include.rs
+src/TokenParser/MacroTokenParser.php	MacroTokenParser	104	ported	crates/twig/src/token_parser/macro_tag.rs
+src/TokenParser/SandboxTokenParser.php	SandboxTokenParser	40	ported	crates/twig/src/token_parser/sandbox.rs
+src/TokenParser/SetTokenParser.php	SetTokenParser	51	ported	crates/twig/src/token_parser/set.rs
+src/TokenParser/TokenParserInterface.php	TokenParserInterface	11	ported	crates/twig/src/token_parser/mod.rs
+src/TokenParser/TypesTokenParser.php	TypesTokenParser	61	ported	crates/twig/src/token_parser/types.rs
+src/TokenParser/UseTokenParser.php	UseTokenParser	39	ported	crates/twig/src/token_parser/use_tag.rs
+src/TokenParser/WithTokenParser.php	WithTokenParser	29	ported	crates/twig/src/token_parser/with.rs
 src/TokenStream.php	TokenStream	75	ported	crates/twig/src/token_stream.rs
 src/TwigCallableInterface.php	TwigCallableInterface	20	pending	
-src/TwigFilter.php	TwigFilter	43	pending	
-src/TwigFunction.php	TwigFunction	34	pending	
+src/TwigFilter.php	TwigFilter	43	ported	crates/twig/src/callable.rs
+src/TwigFunction.php	TwigFunction	34	ported	crates/twig/src/callable.rs
 src/TwigMacro.php	TwigMacro	111	pending	
-src/TwigTest.php	TwigTest	37	pending	
-src/Util/CallableArgumentsExtractor.php	CallableArgumentsExtractor	157	pending	
+src/TwigTest.php	TwigTest	37	ported	crates/twig/src/callable.rs
+src/Util/CallableArgumentsExtractor.php	CallableArgumentsExtractor	157	ported	crates/twig/src/util/callable_arguments.rs
 src/Util/CallableParameters.php	CallableParameters	88	pending	
 src/Util/DeprecationCollector.php	DeprecationCollector	38	pending	
-src/Util/ReflectionCallable.php	ReflectionCallable	86	pending	
+src/Util/ReflectionCallable.php	ReflectionCallable	86	ported	crates/twig/src/util/callable_arguments.rs
 src/Util/TemplateDirIterator.php	TemplateDirIterator	14	pending	
