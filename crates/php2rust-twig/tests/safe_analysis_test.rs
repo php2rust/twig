@@ -6,7 +6,10 @@
 //! Upstream: twig/twig tests/NodeVisitor/SafeAnalysisTest.php
 #![allow(non_snake_case, clippy::unwrap_used, clippy::expect_used)]
 
-use twig::{Environment, Source, node::Node, node::WeakNode};
+use twig::{
+    Environment, Source,
+    node::{Node, WeakNode},
+};
 
 /// The `$collect` closure.
 fn collect(node: &Node, refs: &mut Vec<WeakNode>) {
@@ -14,17 +17,18 @@ fn collect(node: &Node, refs: &mut Vec<WeakNode>) {
     for child in node.child_nodes() {
         collect(&child, refs);
     }
+}
 
-    #[test]
-    fn testCompilingDoesNotRetainTheAst() {
-        let env = Environment::new(Vec::new());
-        let source = Source::new(
-            "{{ \"a\"|upper }}{{ foo.bar }}{{ [1, 2]|join(\"-\") }}{{ b ? \"y\" : \"n\" }}",
-            "index",
-        );
+#[test]
+fn testCompilingDoesNotRetainTheAst() {
+    let env = Environment::new(Vec::new());
+    let source = Source::new(
+        "{{ \"a\"|upper }}{{ foo.bar }}{{ [1, 2]|join(\"-\") }}{{ b ? \"y\" : \"n\" }}",
+        "index",
+    );
 
-        let ast = env.parse_source(source).unwrap();
-    }
+    let ast = env.parse_source(source).unwrap();
+
     let mut refs = Vec::new();
     collect(&ast, &mut refs);
     assert!(!refs.is_empty());
