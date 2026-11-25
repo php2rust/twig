@@ -98,6 +98,7 @@ impl<'env> Parser<'env> {
     }
 
     /// `getEnvironment()`.
+    #[must_use]
     pub fn environment(&self) -> &'env Environment {
         self.env
     }
@@ -208,6 +209,7 @@ impl<'env> Parser<'env> {
     }
 
     /// `shouldIgnoreUnknownTwigCallables()`.
+    #[must_use]
     pub fn should_ignore_unknown_twig_callables(&self) -> bool {
         self.state.ignore_unknown_twig_callables
     }
@@ -334,6 +336,7 @@ impl<'env> Parser<'env> {
     }
 
     /// `peekBlockStack()`.
+    #[must_use]
     pub fn peek_block_stack(&self) -> Option<Vec<u8>> {
         self.state.block_stack.last().cloned()
     }
@@ -436,6 +439,7 @@ impl<'env> Parser<'env> {
     }
 
     /// `getImportedSymbol()`.
+    #[must_use]
     pub fn get_imported_symbol(&self, symbol_type: &str, alias: &[u8]) -> Option<ImportedSymbol> {
         let key = (symbol_type.to_owned(), alias.to_vec());
         self.state
@@ -447,6 +451,7 @@ impl<'env> Parser<'env> {
     }
 
     /// `isMainScope()`.
+    #[must_use]
     pub fn is_main_scope(&self) -> bool {
         self.state.imported_symbols.len() == 1
     }
@@ -500,6 +505,7 @@ impl<'env> Parser<'env> {
     }
 
     /// `hasInheritance()`.
+    #[must_use]
     pub fn has_inheritance(&self) -> bool {
         self.state.parent.is_some() || !self.state.traits.is_empty()
     }
@@ -521,6 +527,7 @@ impl<'env> Parser<'env> {
     }
 
     /// `getStream()`.
+    #[must_use]
     pub fn stream(&self) -> &TokenStream {
         &self.stream
     }
@@ -531,6 +538,7 @@ impl<'env> Parser<'env> {
     }
 
     /// `getCurrentToken()`.
+    #[must_use]
     pub fn current_token(&self) -> &Token {
         self.stream().current()
     }

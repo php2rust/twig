@@ -54,16 +54,19 @@ pub struct BlockRef {
 pub struct Blocks(Vec<(Vec<u8>, BlockRef)>);
 
 impl Blocks {
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
     /// `isset($blocks[$name])`.
+    #[must_use]
     pub fn contains(&self, name: &[u8]) -> bool {
         self.get(name).is_some()
     }
 
     /// `$blocks[$name]`.
+    #[must_use]
     pub fn get(&self, name: &[u8]) -> Option<&BlockRef> {
         self.0.iter().find(|(n, _)| n == name).map(|(_, b)| b)
     }
@@ -96,10 +99,12 @@ impl Blocks {
     }
 
     /// `array_keys($blocks)`.
+    #[must_use]
     pub fn names(&self) -> Vec<Vec<u8>> {
         self.0.iter().map(|(n, _)| n.clone()).collect()
     }
 
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
@@ -177,6 +182,7 @@ pub struct Template {
     this: Weak<Template>,
     /// `$this->parent`: `None` is null (not resolved yet), `Some(None)`
     /// is `false`.
+    #[allow(clippy::option_option)]
     parent: RefCell<Option<Option<Rc<Template>>>>,
     parents: RefCell<Vec<(Vec<u8>, Rc<Template>)>>,
     blocks: RefCell<Blocks>,
@@ -430,6 +436,7 @@ impl Template {
     }
 
     /// `yieldBlock()` / `displayBlock()`.
+    #[allow(clippy::too_many_arguments)] // the PHP parameters, and the output
     pub fn display_block(
         &self,
         env: &Environment,
@@ -602,11 +609,13 @@ impl TemplateWrapper {
     }
 
     /// The wrapper as a value.
+    #[must_use]
     pub fn value(self) -> Value {
         Value::Object(Arc::new(self))
     }
 
     /// `getTemplateName()`.
+    #[must_use]
     pub fn name(&self) -> &[u8] {
         &self.name
     }

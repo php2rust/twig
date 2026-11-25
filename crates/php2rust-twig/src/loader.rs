@@ -29,13 +29,17 @@ pub trait TemplateLoader {
 /// `ArrayLoader` gives templates: generated code lists them.
 pub struct CompiledArrayLoader {
     /// Name, index, the compiled template, and the source code.
-    pub templates: &'static [(
-        &'static [u8],
-        Option<i64>,
-        &'static dyn CompiledTemplate,
-        &'static [u8],
-    )],
+    pub templates: &'static [CompiledEntry],
 }
+
+/// A template of a [`CompiledArrayLoader`]: name, embed index, the
+/// compiled template and the source code.
+pub type CompiledEntry = (
+    &'static [u8],
+    Option<i64>,
+    &'static dyn CompiledTemplate,
+    &'static [u8],
+);
 
 fn not_defined(name: &[u8]) -> Error {
     Error::loader(

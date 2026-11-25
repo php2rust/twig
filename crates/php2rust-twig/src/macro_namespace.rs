@@ -16,6 +16,9 @@ use crate::{
     twig_macro::TwigMacro,
 };
 
+/// A macro name as given, and as declared.
+type NamePair = (Vec<u8>, Vec<u8>);
+
 /// `Twig\MacroNamespace`.
 pub struct MacroNamespace {
     template: Rc<Template>,
@@ -123,7 +126,7 @@ impl MacroNamespace {
         env: &Environment,
         name: &[u8],
         context: &Context,
-    ) -> Result<Option<(Vec<u8>, Vec<u8>)>, Error> {
+    ) -> Result<Option<NamePair>, Error> {
         let mut namespace: Option<Rc<Self>> = None;
         loop {
             let current = namespace.as_deref().unwrap_or(self);

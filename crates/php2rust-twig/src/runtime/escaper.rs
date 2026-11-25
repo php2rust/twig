@@ -7,7 +7,7 @@
 //!
 //! Upstream: twig/twig src/Runtime/EscaperRuntime.php
 
-use std::{collections::HashMap, fmt};
+use std::{collections::HashMap, fmt, fmt::Write as _};
 
 use php_value::{PhpString, Value};
 
@@ -33,6 +33,7 @@ impl fmt::Debug for EscaperRuntime {
 const BUILT_IN: [&str; 6] = ["html", "js", "url", "css", "html_attr", "html_attr_relaxed"];
 
 impl EscaperRuntime {
+    #[must_use]
     pub fn new(charset: &[u8]) -> Self {
         Self {
             charset: charset.to_vec(),
@@ -51,6 +52,7 @@ impl EscaperRuntime {
     }
 
     /// `array_keys(getEscapers())`.
+    #[must_use]
     pub fn escaper_names(&self) -> Vec<Vec<u8>> {
         self.escapers.iter().map(|(s, _)| s.clone()).collect()
     }
@@ -162,6 +164,7 @@ fn valid_utf8(s: &[u8]) -> Result<&str, Error> {
 }
 
 /// `htmlspecialchars($string, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')`.
+#[must_use]
 pub fn html(s: &[u8]) -> Vec<u8> {
     let text = String::from_utf8_lossy(s);
     let mut out = Vec::with_capacity(s.len());
@@ -201,12 +204,12 @@ fn js(s: &str) -> Vec<u8> {
         }
         let codepoint = u32::from(c);
         if codepoint < 0x10000 {
-            out.push_str(&format!("\\u{codepoint:04X}"));
+            let _ = write!(out, "\\u{codepoint:04X}");
         } else {
             let u = codepoint - 0x10000;
             let high = 0xD800 | (u >> 10);
             let low = 0xDC00 | (u & 0x3FF);
-            out.push_str(&format!("\\u{high:04X}\\u{low:04X}"));
+            let _ = write!(out, "\\u{high:04X}\\u{low:04X}");
         }
     }
     out.into_bytes()
@@ -218,7 +221,7 @@ fn css(s: &str) -> Vec<u8> {
         if c.is_ascii_alphanumeric() {
             out.push(c);
         } else {
-            out.push_str(&format!("\\{:X} ", u32::from(c)));
+            let _ = write!(out, "\\{:X} ", u32::from(c));
         }
     }
     out.into_bytes()
@@ -252,11 +255,13 @@ fn html_attr(s: &str, relaxed: bool) -> Vec<u8> {
                 38 => out.push_str("&amp;"),
                 60 => out.push_str("&lt;"),
                 62 => out.push_str("&gt;"),
-                _ => out.push_str(&format!("&#x{ord:02X};")),
+                _ => {
+                    let _ = write!(out, "&#x{ord:02X};");
+                }
             }
             continue;
         }
-        out.push_str(&format!("&#x{ord:04X};"));
+        let _ = write!(out, "&#x{ord:04X};");
     }
     out.into_bytes()
 }

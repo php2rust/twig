@@ -32,14 +32,17 @@ impl Source {
         }
     }
 
+    #[must_use]
     pub fn code(&self) -> &[u8] {
         &self.code
     }
 
+    #[must_use]
     pub fn name(&self) -> &str {
         &self.name
     }
 
+    #[must_use]
     pub fn path(&self) -> &[u8] {
         &self.path
     }
@@ -47,6 +50,7 @@ impl Source {
     /// `getColumn()`: the 1-based column of a 0-based byte offset, counting
     /// `\r\n` and `\r` as one newline. An offset past the end counts up to
     /// the end, as `substr()` does.
+    #[must_use]
     pub fn column(&self, offset: usize) -> usize {
         let before = normalize_newlines(&self.code[..offset.min(self.code.len())]);
         match before.iter().rposition(|&b| b == b'\n') {

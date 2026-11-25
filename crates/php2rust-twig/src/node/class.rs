@@ -155,6 +155,7 @@ pub enum NodeInterface {
 
 impl NodeClass {
     /// The fully qualified PHP class name.
+    #[must_use]
     pub fn php_class(self) -> &'static str {
         match self {
             Self::AutoEscapeNode => "Twig\\Node\\AutoEscapeNode",
@@ -293,6 +294,7 @@ impl NodeClass {
     }
 
     /// Whether the class is abstract.
+    #[must_use]
     pub fn is_abstract(self) -> bool {
         matches!(
             self,
@@ -304,6 +306,7 @@ impl NodeClass {
     }
 
     /// The parent class.
+    #[must_use]
     pub fn parent(self) -> Option<Self> {
         match self {
             Self::AutoEscapeNode => Some(Self::Node),
@@ -432,6 +435,7 @@ impl NodeClass {
     }
 
     /// `instanceof` another class: this class or one of its parents.
+    #[must_use]
     pub fn is_a(self, class: Self) -> bool {
         let mut c = Some(self);
         while let Some(current) = c {
@@ -444,6 +448,7 @@ impl NodeClass {
     }
 
     /// `instanceof` an interface.
+    #[must_use]
     pub fn implements(self, interface: NodeInterface) -> bool {
         match interface {
             NodeInterface::CoercesChildrenToString => matches!(

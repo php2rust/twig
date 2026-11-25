@@ -151,6 +151,7 @@ pub struct ExtensionSet {
 
 impl ExtensionSet {
     /// `initExtensions()` over these extensions, in order.
+    #[must_use]
     pub fn new(extensions: Vec<Rc<dyn Extension>>) -> Self {
         let mut set = Self {
             extensions: Vec::new(),

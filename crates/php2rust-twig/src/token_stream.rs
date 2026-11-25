@@ -25,6 +25,7 @@ pub struct TokenStream {
 impl TokenStream {
     /// `new TokenStream($tokens, $source)`. The last token should be
     /// `EOF_TYPE`, as the lexer makes it.
+    #[must_use]
     pub fn new(tokens: Vec<Token>, source: Arc<Source>) -> Self {
         Self {
             tokens,
@@ -158,21 +159,25 @@ impl TokenStream {
     }
 
     /// `test($type)` on the current token.
+    #[must_use]
     pub fn test(&self, ty: TokenType) -> bool {
         self.current().test(ty)
     }
 
     /// `test($type, $value)` on the current token.
+    #[must_use]
     pub fn test_value(&self, ty: TokenType, value: &[u8]) -> bool {
         self.current().test_value(ty, value)
     }
 
     /// `test($type, [$value, ...])` on the current token.
+    #[must_use]
     pub fn test_values(&self, ty: TokenType, values: &[&[u8]]) -> bool {
         self.current().test_values(ty, values)
     }
 
     /// `isEOF()`.
+    #[must_use]
     pub fn is_eof(&self) -> bool {
         self.current().test(TokenType::Eof)
     }
@@ -182,11 +187,13 @@ impl TokenStream {
     /// # Panics
     ///
     /// When the stream has no tokens, which the lexer never produces.
+    #[must_use]
     pub fn current(&self) -> &Token {
         &self.tokens[self.current.min(self.tokens.len().saturating_sub(1))]
     }
 
     /// `getSourceContext()`.
+    #[must_use]
     pub fn source_context(&self) -> &Arc<Source> {
         &self.source
     }

@@ -31,21 +31,25 @@ impl Markup {
     }
 
     /// `__toString()`.
+    #[must_use]
     pub fn content(&self) -> &PhpString {
         &self.content
     }
 
     /// `getCharset()`.
+    #[must_use]
     pub fn charset(&self) -> &PhpString {
         &self.charset
     }
 
     /// `count()`: `mb_strlen($content, $charset)`.
+    #[must_use]
     pub fn count(&self) -> i64 {
         crate::runtime::string::mb_strlen(self.content.as_bytes(), self.charset.as_bytes())
     }
 
     /// Whether a value is a `Markup`.
+    #[must_use]
     pub fn is(value: &Value) -> bool {
         matches!(value, Value::Object(o) if o.downcast_ref::<Self>().is_some())
     }

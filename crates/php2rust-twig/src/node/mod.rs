@@ -41,6 +41,7 @@ pub enum Key {
 
 impl Key {
     /// The key as PHP's `(string)` gives it.
+    #[must_use]
     pub fn to_php_string(&self) -> Vec<u8> {
         match self {
             Self::Int(i) => i.to_string().into_bytes(),
@@ -123,6 +124,7 @@ impl Attr {
         Self::Str(s.into())
     }
 
+    #[must_use]
     pub fn as_bool(&self) -> Option<bool> {
         match self {
             Self::Bool(b) => Some(*b),
@@ -130,6 +132,7 @@ impl Attr {
         }
     }
 
+    #[must_use]
     pub fn as_bytes(&self) -> Option<&[u8]> {
         match self {
             Self::Str(s) => Some(s),
@@ -137,6 +140,7 @@ impl Attr {
         }
     }
 
+    #[must_use]
     pub fn as_int(&self) -> Option<i64> {
         match self {
             Self::Int(i) => Some(*i),
@@ -144,6 +148,7 @@ impl Attr {
         }
     }
 
+    #[must_use]
     pub fn as_callable(&self) -> Option<&Rc<TwigCallable>> {
         match self {
             Self::Callable(c) => Some(c),
@@ -151,11 +156,13 @@ impl Attr {
         }
     }
 
+    #[must_use]
     pub fn is_null(&self) -> bool {
         matches!(self, Self::Null)
     }
 
     /// PHP truthiness of a scalar or array (a callable or node is true).
+    #[must_use]
     pub fn is_truthy(&self) -> bool {
         match self {
             Self::Null => false,
@@ -170,6 +177,7 @@ impl Attr {
 
     /// `(string) $value` for a scalar (`true` is "1", `null` and `false`
     /// are ""); `None` for an array, callable or node.
+    #[must_use]
     pub fn to_php_string(&self) -> Option<Vec<u8>> {
         match self {
             Self::Null | Self::Bool(false) => Some(Vec::new()),
@@ -299,6 +307,7 @@ impl fmt::Debug for Node {
 
 impl Node {
     /// `parent::__construct($nodes, $attributes, $lineno)` for a class.
+    #[must_use]
     pub fn new(
         class: NodeClass,
         nodes: Vec<(Key, Node)>,
@@ -324,11 +333,13 @@ impl Node {
     }
 
     /// `new Nodes($nodes, $lineno)`.
+    #[must_use]
     pub fn nodes(nodes: Vec<(Key, Node)>, lineno: i64) -> Self {
         Self::new(NodeClass::Nodes, nodes, Vec::new(), lineno)
     }
 
     /// `new Nodes([$a, $b, ...], $lineno)`: a list keyed 0, 1, ...
+    #[must_use]
     pub fn list(nodes: Vec<Node>, lineno: i64) -> Self {
         Self::nodes(
             nodes
@@ -341,51 +352,61 @@ impl Node {
     }
 
     /// `new EmptyNode($lineno)`.
+    #[must_use]
     pub fn empty(lineno: i64) -> Self {
         Self::new(NodeClass::EmptyNode, Vec::new(), Vec::new(), lineno)
     }
 
     /// The node's identity, for maps keyed by node (PHP's `WeakMap`,
     /// `SplObjectStorage`). Stable while a handle to the node is kept.
+    #[must_use]
     pub fn id(&self) -> usize {
         Rc::as_ptr(&self.0).addr()
     }
 
     /// `WeakReference::create($node)`.
+    #[must_use]
     pub fn downgrade(&self) -> WeakNode {
         WeakNode(Rc::downgrade(&self.0))
     }
 
     /// Whether both handles are the same node (`===`).
+    #[must_use]
     pub fn ptr_eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
     }
 
+    #[must_use]
     pub fn class(&self) -> NodeClass {
         self.0.borrow().class
     }
 
     /// `instanceof` a class.
+    #[must_use]
     pub fn is(&self, class: NodeClass) -> bool {
         self.class().is_a(class)
     }
 
     /// `instanceof` an interface.
+    #[must_use]
     pub fn implements(&self, interface: NodeInterface) -> bool {
         self.class().implements(interface)
     }
 
     /// `instanceof AbstractExpression`.
+    #[must_use]
     pub fn is_expression(&self) -> bool {
         self.is(NodeClass::AbstractExpression)
     }
 
     /// `getTemplateLine()`.
+    #[must_use]
     pub fn line(&self) -> i64 {
         self.0.borrow().lineno
     }
 
     /// `getNodeTag()`.
+    #[must_use]
     pub fn tag(&self) -> Option<String> {
         self.0.borrow().tag.clone()
     }
@@ -401,6 +422,7 @@ impl Node {
     }
 
     /// `getDocumentation()`.
+    #[must_use]
     pub fn documentation(&self) -> Option<Vec<u8>> {
         self.0.borrow().documentation.clone()
     }
@@ -411,11 +433,13 @@ impl Node {
     }
 
     /// `hasAttribute()`.
+    #[must_use]
     pub fn has_attr(&self, name: &str) -> bool {
         self.0.borrow().attributes.iter().any(|(k, _)| k == name)
     }
 
     /// `getAttribute()`, `None` where upstream throws.
+    #[must_use]
     pub fn attr(&self, name: &str) -> Option<Attr> {
         self.0
             .borrow()
@@ -436,11 +460,13 @@ impl Node {
     }
 
     /// A boolean attribute that is set and true.
+    #[must_use]
     pub fn attr_true(&self, name: &str) -> bool {
         self.attr(name).is_some_and(|a| a.as_bool() == Some(true))
     }
 
     /// A string attribute's bytes.
+    #[must_use]
     pub fn attr_bytes(&self, name: &str) -> Option<Vec<u8>> {
         self.attr(name)
             .and_then(|a| a.as_bytes().map(<[u8]>::to_vec))
@@ -463,6 +489,7 @@ impl Node {
     }
 
     /// The attributes, in order.
+    #[must_use]
     pub fn attributes(&self) -> Vec<(String, Attr)> {
         self.0.borrow().attributes.clone()
     }
@@ -534,16 +561,19 @@ impl Node {
     }
 
     /// `count()`.
+    #[must_use]
     pub fn count(&self) -> usize {
         self.0.borrow().nodes.len()
     }
 
     /// `getIterator()`: the children with their keys.
+    #[must_use]
     pub fn children(&self) -> Vec<(Key, Node)> {
         self.0.borrow().nodes.clone()
     }
 
     /// The child nodes without their keys.
+    #[must_use]
     pub fn child_nodes(&self) -> Vec<Node> {
         self.0
             .borrow()
@@ -554,11 +584,13 @@ impl Node {
     }
 
     /// `getTemplateName()`.
+    #[must_use]
     pub fn template_name(&self) -> Option<String> {
         self.source_context().map(|s| s.name().to_owned())
     }
 
     /// `getSourceContext()`.
+    #[must_use]
     pub fn source_context(&self) -> Option<Arc<Source>> {
         self.0.borrow().source.clone()
     }
@@ -615,6 +647,7 @@ impl Node {
     }
 
     /// `MacroReferenceExpression::hasCallParentheses()`.
+    #[must_use]
     pub fn has_call_parentheses(&self) -> bool {
         self.0.borrow().has_call_parentheses
     }
@@ -625,6 +658,7 @@ impl Node {
     }
 
     /// `SupportDefinedTestTrait::isDefinedTestEnabled()`.
+    #[must_use]
     pub fn is_defined_test_enabled(&self) -> bool {
         self.0.borrow().defined_test
     }
@@ -671,6 +705,7 @@ impl Node {
 impl Node {
     /// `__toString()`: the class, tag, documentation, attributes
     /// (`var_export()` without newlines) and children, indented.
+    #[must_use]
     pub fn repr(&self) -> Vec<u8> {
         let data = self.0.borrow();
         let mut repr: Vec<u8> = data.class.php_class().as_bytes().to_vec();

@@ -318,6 +318,7 @@ pub fn parse_attribute_function(
 }
 
 /// `Rc` of the core definitions, for tests.
+#[must_use]
 pub fn core_extension() -> Rc<dyn Extension> {
     Rc::new(CoreExtension)
 }

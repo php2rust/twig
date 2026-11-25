@@ -15,6 +15,7 @@ pub struct OptimizerExtension {
 impl OptimizerExtension {
     /// `new OptimizerExtension($optimizers)`, for a mode that
     /// `OptimizerNodeVisitor::check_mode()` accepted.
+    #[must_use]
     pub fn new(optimizers: i64) -> Self {
         Self { optimizers }
     }

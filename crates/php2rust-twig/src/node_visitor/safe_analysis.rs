@@ -36,6 +36,7 @@ impl SafeAnalysisNodeVisitor {
     }
 
     /// `getSafe()`.
+    #[must_use]
     pub fn get_safe(&self, node: &Node) -> Safe {
         let mut safe = self
             .data

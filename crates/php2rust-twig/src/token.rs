@@ -38,6 +38,7 @@ pub enum TokenType {
 
 impl TokenType {
     /// The PHP constant's value.
+    #[must_use]
     pub fn code(self) -> i64 {
         match self {
             Self::Eof => -1,
@@ -59,6 +60,7 @@ impl TokenType {
     }
 
     /// `Token::typeToString($type, $short)`.
+    #[must_use]
     pub fn to_php_string(self, short: bool) -> String {
         let name = match self {
             Self::Eof => "EOF_TYPE",
@@ -85,6 +87,7 @@ impl TokenType {
     }
 
     /// `Token::typeToEnglish($type)`.
+    #[must_use]
     pub fn to_english(self) -> &'static str {
         match self {
             Self::Eof => "end of template",
@@ -115,6 +118,7 @@ pub enum TokenValue {
 
 impl TokenValue {
     /// `(string) $value`.
+    #[must_use]
     pub fn to_bytes(&self) -> Vec<u8> {
         match self {
             Self::Bytes(b) => b.clone(),
@@ -123,6 +127,7 @@ impl TokenValue {
     }
 
     /// The bytes of a string-valued token; `None` for a number.
+    #[must_use]
     pub fn as_bytes(&self) -> Option<&[u8]> {
         match self {
             Self::Bytes(b) => Some(b),
@@ -131,6 +136,7 @@ impl TokenValue {
     }
 
     /// PHP truthiness (`'' ` and `'0'` and `0` are false).
+    #[must_use]
     pub fn is_truthy(&self) -> bool {
         match self {
             Self::Bytes(b) => php_value::string::truthy(b),
@@ -214,6 +220,7 @@ impl Token {
     }
 
     /// `new Token($type, $value, $lineno, $offset, $documentation)`.
+    #[must_use]
     pub fn with_value(
         ty: TokenType,
         value: TokenValue,
@@ -245,27 +252,32 @@ impl Token {
     }
 
     /// `test($type)`: the type matches.
+    #[must_use]
     pub fn test(&self, ty: TokenType) -> bool {
         self.test_impl(ty, Values::Any)
     }
 
     /// `test($type, $value)`: the type matches and the value `==` it.
+    #[must_use]
     pub fn test_value(&self, ty: TokenType, value: &[u8]) -> bool {
         self.test_impl(ty, Values::One(value))
     }
 
     /// `test($type, [$value, ...])`: the type matches and the value is
     /// one of them (strictly).
+    #[must_use]
     pub fn test_values(&self, ty: TokenType, values: &[&[u8]]) -> bool {
         self.test_impl(ty, Values::Many(values))
     }
 
     /// `test('name')`: a name token with this value.
+    #[must_use]
     pub fn test_name(&self, value: &[u8]) -> bool {
         self.test_value(TokenType::Name, value)
     }
 
     /// `test(['a', 'b'])`: a name token with one of these values.
+    #[must_use]
     pub fn test_names(&self, values: &[&[u8]]) -> bool {
         self.test_values(TokenType::Name, values)
     }
@@ -322,38 +334,45 @@ impl Token {
     }
 
     /// `getLine()`.
+    #[must_use]
     pub fn line(&self) -> usize {
         self.lineno
     }
 
     /// `getOffset()`: the byte offset in the source, `None` for a token
     /// that was not lexed from a source.
+    #[must_use]
     pub fn offset(&self) -> Option<usize> {
         self.offset
     }
 
     /// `getDocumentation()`.
+    #[must_use]
     pub fn documentation(&self) -> Option<&[u8]> {
         self.documentation.as_deref()
     }
 
     /// The type (`getType()`, deprecated upstream; the Rust parser needs
     /// it to match on tokens).
+    #[must_use]
     pub fn token_type(&self) -> TokenType {
         self.ty
     }
 
     /// `getValue()`.
+    #[must_use]
     pub fn value(&self) -> &TokenValue {
         &self.value
     }
 
     /// `getValue()` of a string-valued token, or the number as text.
+    #[must_use]
     pub fn value_bytes(&self) -> Vec<u8> {
         self.value.to_bytes()
     }
 
     /// `toEnglish()`.
+    #[must_use]
     pub fn to_english(&self) -> &'static str {
         self.ty.to_english()
     }

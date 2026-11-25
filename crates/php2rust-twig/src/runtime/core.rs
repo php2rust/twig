@@ -15,7 +15,12 @@
 //!
 //! Upstream: twig/twig src/Extension/CoreExtension.php
 
-use std::{cmp::Ordering, sync::Arc};
+// The callables share one signature (`fn(&Call, Vec<Value>) -> R`), so
+// they take the arguments by value even when they only read them; the
+// short names follow the PHP code.
+#![allow(clippy::needless_pass_by_value, clippy::many_single_char_names)]
+
+use std::{cmp::Ordering, fmt::Write as _, sync::Arc};
 
 use php_value::{Key, PhpArray, PhpObject, PhpString, Thrown, Value, ops};
 
@@ -71,18 +76,20 @@ const DEFAULT_TRIM_CHARS: &[u8] = b" \t\n\r\0\x0B";
 pub struct Arrow(usize);
 
 impl Arrow {
+    #[must_use]
     pub fn id(self) -> usize {
         self.0
     }
 
     /// The arrow as a value.
+    #[must_use]
     pub fn value(id: usize) -> Value {
         Value::Object(Arc::new(Self(id)))
     }
 }
 
 impl PhpObject for Arrow {
-    fn class(&self) -> &str {
+    fn class(&self) -> &'static str {
         "Closure"
     }
 
@@ -155,6 +162,7 @@ pub fn string_argument(value: &Value) -> R<PhpString> {
 }
 
 /// `is_iterable($value)`.
+#[must_use]
 pub fn is_iterable_value(value: &Value) -> bool {
     match value {
         Value::Array(_) => true,
@@ -205,6 +213,7 @@ fn values_of(array: &PhpArray) -> PhpArray {
 }
 
 /// `ensureTraversable()`.
+#[must_use]
 pub fn ensure_traversable(seq: Value) -> Value {
     if is_iterable_value(&seq) {
         return seq;
@@ -233,6 +242,7 @@ fn array_of(seq: &Value, preserve_keys: bool) -> R<PhpArray> {
 
 /// `CoreExtension::compare()`: PHP 8's `<=>` with the string to number
 /// comparison rules of PHP 8 applied to PHP 7 too.
+#[must_use]
 pub fn compare(a: &Value, b: &Value) -> i64 {
     const WS: &[u8] = b" \t\n\r\x0B\x0C";
     let trim = |s: &[u8]| -> Vec<u8> {
@@ -246,15 +256,8 @@ pub fn compare(a: &Value, b: &Value) -> i64 {
     let int_cmp = |x: i64, s: &[u8], swap: bool| -> i64 {
         let t = trim(s);
         let tv = Value::String(PhpString::from(t.clone()));
-        let r = if !php_value::numeric::is_numeric(&t) {
-            let l = Value::String(PhpString::from(x.to_string()));
-            let rr = Value::String(PhpString::from(s));
-            if swap {
-                ops::spaceship(&rr, &l)
-            } else {
-                ops::spaceship(&l, &rr)
-            }
-        } else {
+
+        if php_value::numeric::is_numeric(&t) {
             let as_int = php_value::numeric::string_to_int(&t);
             if php_value::compare::loose_equals(&Value::Int(as_int), &tv) {
                 if swap {
@@ -269,8 +272,15 @@ pub fn compare(a: &Value, b: &Value) -> i64 {
                 let (l, r) = if swap { (f, xf) } else { (xf, f) };
                 l.partial_cmp(&r).map_or(1, |o| o as i64)
             }
-        };
-        r
+        } else {
+            let l = Value::String(PhpString::from(x.to_string()));
+            let rr = Value::String(PhpString::from(s));
+            if swap {
+                ops::spaceship(&rr, &l)
+            } else {
+                ops::spaceship(&l, &rr)
+            }
+        }
     };
     let float_cmp = |x: f64, s: &[u8], swap: bool| -> i64 {
         if x.is_nan() {
@@ -340,10 +350,7 @@ pub fn matches(regexp: &Value, subject: &Value) -> R {
     let pattern = string_of(regexp)?;
     let subject = string_or_empty(subject)?;
     let regex = php_pcre::Pcre::new(&pattern).map_err(|e| {
-        let message = match e {
-            php_pcre::PcreError::Compile(m) => m,
-            php_pcre::PcreError::Unsupported(m) => m,
-        };
+        let (php_pcre::PcreError::Compile(message) | php_pcre::PcreError::Unsupported(message)) = e;
         runtime(format!(
             "Regexp \"{}\" passed to \"matches\" is not valid: {message}",
             text(&pattern)
@@ -384,10 +391,10 @@ pub fn test_empty_value(value: &Value) -> R<bool> {
 
 fn sequence_value(value: &Value) -> R<Option<PhpArray>> {
     if let Value::Object(o) = value {
-        if o.class() == "ArrayObject" {
-            if let Some(Ok(Value::Array(a))) = o.call_method("getArrayCopy", &[]) {
-                return Ok(Some(a));
-            }
+        if o.class() == "ArrayObject"
+            && let Some(Ok(Value::Array(a))) = o.call_method("getArrayCopy", &[])
+        {
+            return Ok(Some(a));
         }
         if o.instance_of("Traversable") {
             return Ok(Some(iterator_to_array(value, true)?));
@@ -516,7 +523,7 @@ pub fn php_round(value: f64, places: i64) -> f64 {
     for d in &kept {
         text.push(char::from(b'0' + d));
     }
-    text.push_str(&format!("e{point}"));
+    let _ = write!(text, "e{point}");
     let rounded: f64 = text.parse().unwrap_or(value.abs());
     rounded.copysign(value)
 }
@@ -546,6 +553,7 @@ pub fn round(_: &Call<'_>, args: Vec<Value>) -> R {
 }
 
 /// PHP's `number_format()`.
+#[must_use]
 pub fn number_format(number: f64, decimals: i64, point: &[u8], separator: &[u8]) -> Vec<u8> {
     let decimals = decimals.max(0);
     let rounded = php_round(number, decimals);
@@ -675,7 +683,7 @@ pub fn strip_tags(s: &[u8], allowed: &[Vec<u8>]) -> Vec<u8> {
         }
         let next = s.get(i + 1).copied();
         // a "<" followed by a space or the end is text
-        if next.is_none() || next.is_some_and(|n| n.is_ascii_whitespace()) {
+        if next.is_none_or(|n| n.is_ascii_whitespace()) {
             out.push(c);
             i += 1;
             continue;
@@ -719,7 +727,7 @@ pub fn strip_tags(s: &[u8], allowed: &[Vec<u8>]) -> Vec<u8> {
                 .take_while(|b| b.is_ascii_alphanumeric())
                 .map(u8::to_ascii_lowercase)
                 .collect();
-            if allowed.iter().any(|a| *a == name) {
+            if allowed.contains(&name) {
                 out.extend_from_slice(tag);
                 if j < s.len() {
                     out.push(b'>');
@@ -792,7 +800,7 @@ fn charmask(chars: &[u8]) -> [bool; 256] {
     let mut mask = [false; 256];
     let mut i = 0;
     while i < chars.len() {
-        if i + 3 < chars.len() + 0
+        if i + 3 < chars.len()
             && chars.get(i + 1) == Some(&b'.')
             && chars.get(i + 2) == Some(&b'.')
             && i + 3 < chars.len()
@@ -1032,6 +1040,7 @@ pub fn replace(_: &Call<'_>, args: Vec<Value>) -> R {
 }
 
 /// PHP's `strtr($string, $pairs)`: longest match first, no rescanning.
+#[must_use]
 pub fn strtr(s: &[u8], pairs: &[(Vec<u8>, Vec<u8>)]) -> Vec<u8> {
     let pairs: Vec<&(Vec<u8>, Vec<u8>)> = pairs.iter().filter(|(k, _)| !k.is_empty()).collect();
     if pairs.is_empty() {
@@ -1044,15 +1053,12 @@ pub fn strtr(s: &[u8], pairs: &[(Vec<u8>, Vec<u8>)]) -> Vec<u8> {
             .iter()
             .filter(|(k, _)| s[i..].starts_with(k))
             .max_by_key(|(k, _)| k.len());
-        match best {
-            Some((k, v)) => {
-                out.extend_from_slice(v);
-                i += k.len();
-            }
-            None => {
-                out.push(s[i]);
-                i += 1;
-            }
+        if let Some((k, v)) = best {
+            out.extend_from_slice(v);
+            i += k.len();
+        } else {
+            out.push(s[i]);
+            i += 1;
         }
     }
     out
@@ -1554,6 +1560,7 @@ pub fn array_every(env: &Environment, array: &Value, arrow: &Value) -> R<bool> {
 }
 
 /// PHP's `sprintf()`.
+#[allow(clippy::too_many_lines)]
 pub fn php_sprintf(format: &[u8], values: &[Value]) -> R<Vec<u8>> {
     let mut out = Vec::new();
     let mut i = 0;
@@ -1639,13 +1646,12 @@ pub fn php_sprintf(format: &[u8], values: &[Value]) -> R<Vec<u8>> {
             return Err(value_error("Missing format specifier at end of string"));
         };
         i += 1;
-        let index = match argnum {
-            Some(n) => n,
-            None => {
-                let n = next_arg;
-                next_arg += 1;
-                n
-            }
+        let index = if let Some(n) = argnum {
+            n
+        } else {
+            let n = next_arg;
+            next_arg += 1;
+            n
         };
         let value = values.get(index).ok_or_else(|| too_few(index + 1))?;
         let mut body: Vec<u8> = match spec {
@@ -1857,7 +1863,7 @@ pub fn range_values(start: &Value, end: &Value, step: &Value) -> R {
     if is_float {
         let (a, b) = (ops::to_float(&s), ops::to_float(&e));
         let step = step_f.abs();
-        if (b - a).abs() < step && a != b {
+        if (b - a).abs() < step && (b - a).abs() > 0.0 {
             return Err(value_error(
                 "range(): Argument #3 ($step) must not exceed the specified range",
             ));
@@ -2011,6 +2017,7 @@ pub fn random(_: &Call<'_>, args: Vec<Value>) -> R {
 
 /// The constants the `constant` function and test can read: PHP's
 /// predefined constants that templates use.
+#[must_use]
 pub fn php_constant(name: &[u8]) -> Option<Value> {
     Some(match name {
         b"PHP_EOL" => Value::from("\n"),
@@ -2025,9 +2032,8 @@ pub fn php_constant(name: &[u8]) -> Option<Value> {
         b"JSON_PRETTY_PRINT" => Value::Int(128),
         b"JSON_UNESCAPED_SLASHES" => Value::Int(64),
         b"JSON_UNESCAPED_UNICODE" => Value::Int(256),
-        b"JSON_HEX_TAG" => Value::Int(1),
         b"JSON_THROW_ON_ERROR" => Value::Int(4_194_304),
-        b"ArrayObject::STD_PROP_LIST" => Value::Int(1),
+        b"ArrayObject::STD_PROP_LIST" | b"JSON_HEX_TAG" => Value::Int(1),
         b"ArrayObject::ARRAY_AS_PROPS" => Value::Int(2),
         _ => return None,
     })
@@ -2191,7 +2197,7 @@ fn class_methods(object: &dyn PhpObject) -> Vec<(String, String)> {
     let set = |cache: &mut Vec<(String, String)>, key: String, method: &str, overwrite: bool| {
         if let Some(slot) = cache.iter_mut().find(|(k, _)| *k == key) {
             if overwrite {
-                slot.1 = method.to_owned();
+                method.clone_into(&mut slot.1);
             }
         } else {
             cache.push((key, method.to_owned()));
@@ -2205,8 +2211,8 @@ fn class_methods(object: &dyn PhpObject) -> Vec<(String, String)> {
             3
         } else if lc_name.starts_with("is") {
             2
-        } else if lc_name.starts_with("has") {
-            if lc.contains(&format!("is{}", &lc_name[3..])) {
+        } else if let Some(rest) = lc_name.strip_prefix("has") {
+            if lc.contains(&format!("is{rest}")) {
                 continue;
             }
             3

@@ -58,6 +58,7 @@ impl TwigMacro {
         }
     }
 
+    #[must_use]
     pub fn name(&self) -> &[u8] {
         &self.name
     }

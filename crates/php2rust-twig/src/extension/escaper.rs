@@ -53,6 +53,7 @@ impl Extension for EscaperExtension {
 
 /// `EscaperExtension::escapeFilterIsSafe()`: the strategy when the first
 /// argument is a constant, nothing when it is not, `html` without one.
+#[must_use]
 pub fn escape_filter_is_safe(filter_args: &Node) -> Option<Vec<Vec<u8>>> {
     match filter_args.child_nodes().first() {
         Some(arg) if arg.is(NodeClass::ConstantExpression) => Some(vec![

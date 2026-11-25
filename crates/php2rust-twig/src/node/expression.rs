@@ -49,6 +49,7 @@ impl Node {
     }
 
     /// `AbstractExpression::hasExplicitParentheses()`.
+    #[must_use]
     pub fn has_explicit_parentheses(&self) -> bool {
         self.attr_true("with_parentheses")
     }
@@ -93,11 +94,13 @@ pub fn constant(value: impl Into<Attr>, lineno: i64) -> Node {
 }
 
 /// `new EmptyExpression($lineno)`.
+#[must_use]
 pub fn empty_expression(lineno: i64) -> Node {
     Node::new(NodeClass::EmptyExpression, Vec::new(), Vec::new(), lineno)
 }
 
 /// `new ContextVariable($name, $lineno)` (the `NameExpression` constructor).
+#[must_use]
 pub fn context_variable(name: &[u8], lineno: i64) -> Node {
     name_expression(NodeClass::ContextVariable, name, lineno)
 }
@@ -174,6 +177,7 @@ pub fn macro_variable(name: Attr, lineno: i64) -> Result<Node, Error> {
 }
 
 /// `new AssignMacroVariable($var, $global)`.
+#[must_use]
 pub fn assign_macro_variable(var: Node, global: bool) -> Node {
     let lineno = var.line();
     Node::new(
@@ -188,11 +192,13 @@ pub fn assign_macro_variable(var: Node, global: bool) -> Node {
 
 /// `new ArrayExpression($elements, $lineno)`: `elements` alternate keys
 /// and values.
+#[must_use]
 pub fn array(elements: Vec<Node>, lineno: i64) -> Node {
     array_of_class(NodeClass::ArrayExpression, elements, lineno)
 }
 
 /// `new ArrayExpression` for a subclass (`VariadicExpression`).
+#[must_use]
 pub fn array_of_class(class: NodeClass, elements: Vec<Node>, lineno: i64) -> Node {
     let node = Node::new(
         class,
@@ -229,6 +235,7 @@ fn array_index_of(value: &Attr) -> Option<i64> {
 
 impl Node {
     /// `ArrayExpression::getKeyValuePairs()`.
+    #[must_use]
     pub fn key_value_pairs(&self) -> Vec<(Node, Node)> {
         let nodes = self.child_nodes();
         nodes
@@ -241,6 +248,7 @@ impl Node {
     }
 
     /// `ArrayExpression::hasElement()`.
+    #[must_use]
     pub fn has_element(&self, key: &Node) -> bool {
         let wanted = key.repr();
         self.key_value_pairs()
@@ -249,6 +257,7 @@ impl Node {
     }
 
     /// `ArrayExpression::isSequence()`.
+    #[must_use]
     pub fn is_sequence(&self) -> bool {
         for (i, (key, _)) in self.key_value_pairs().into_iter().enumerate() {
             let value = if key.is(NodeClass::TempNameExpression) {
@@ -279,6 +288,7 @@ impl Node {
 }
 
 /// `new ListExpression($items, $lineno)`.
+#[must_use]
 pub fn list(items: Vec<Node>, lineno: i64) -> Node {
     Node::new(
         NodeClass::ListExpression,
@@ -318,6 +328,7 @@ pub fn arrow_function(expr: Node, names: Node, lineno: i64) -> Result<Node, Erro
 // ---- references ----
 
 /// `new BlockReferenceExpression($name, $template, $lineno)`.
+#[must_use]
 pub fn block_reference(name: Node, template: Option<Node>, lineno: i64) -> Node {
     let mut nodes = vec![("name", name)];
     if let Some(template) = template {
@@ -332,6 +343,7 @@ pub fn block_reference(name: Node, template: Option<Node>, lineno: i64) -> Node 
 }
 
 /// `new ParentExpression($name, $lineno)`.
+#[must_use]
 pub fn parent(name: &[u8], lineno: i64) -> Node {
     Node::new(
         NodeClass::ParentExpression,
@@ -351,6 +363,7 @@ pub enum MacroName {
 }
 
 /// `new MacroReferenceExpression($template, $name, $arguments, $lineno)`.
+#[must_use]
 pub fn macro_reference(template: Node, name: MacroName, arguments: Node, lineno: i64) -> Node {
     let mut nodes = vec![("template", template), ("arguments", arguments)];
     let mut name_attr = Attr::Null;
@@ -367,6 +380,7 @@ pub fn macro_reference(template: Node, name: MacroName, arguments: Node, lineno:
 }
 
 /// `new GetAttrExpression($node, $attribute, $arguments, $type, $lineno, $nullSafe)`.
+#[must_use]
 pub fn get_attr(
     node: Node,
     attribute: Node,
@@ -482,6 +496,7 @@ fn default_filter(
 }
 
 /// `new RawFilter($node)`: the `raw` filter with no arguments.
+#[must_use]
 pub fn raw_filter(node: Node) -> Node {
     let line = node.line();
     filter_expression(
@@ -494,6 +509,7 @@ pub fn raw_filter(node: Node) -> Node {
 }
 
 /// `new $class($function, $arguments, $lineno)` for a function node class.
+#[must_use]
 pub fn function(
     class: NodeClass,
     function: Rc<TwigCallable>,
@@ -582,6 +598,7 @@ fn builtin_test(name: &str) -> TwigCallable {
 }
 
 /// `TrueTest::wrap($node)`.
+#[must_use]
 pub fn true_test_wrap(node: Node) -> Node {
     if node.implements(NodeInterface::ReturnPrimitiveType) {
         return node;
@@ -597,6 +614,7 @@ pub fn true_test_wrap(node: Node) -> Node {
 }
 
 /// `new ConditionalTernary($test, $left, $right, $lineno)`.
+#[must_use]
 pub fn conditional_ternary(test: Node, left: Node, right: Node, lineno: i64) -> Node {
     Node::new(
         NodeClass::ConditionalTernary,
@@ -743,6 +761,7 @@ fn abstract_binary(class: NodeClass, left: Node, right: Node, lineno: i64) -> No
 }
 
 /// `new $class($node, $lineno)` for a unary node class.
+#[must_use]
 pub fn unary(class: NodeClass, node: Node, lineno: i64) -> Node {
     let node = if class == NodeClass::NotUnary {
         true_test_wrap(node)

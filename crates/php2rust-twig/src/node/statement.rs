@@ -22,6 +22,7 @@ fn named(nodes: Vec<(&str, Node)>) -> Vec<(Key, Node)> {
 }
 
 /// `new AutoEscapeNode($value, $body, $lineno)`.
+#[must_use]
 pub fn auto_escape(value: Attr, body: Node, lineno: i64) -> Node {
     Node::new(
         NodeClass::AutoEscapeNode,
@@ -32,6 +33,7 @@ pub fn auto_escape(value: Attr, body: Node, lineno: i64) -> Node {
 }
 
 /// `new BlockNode($name, $body, $lineno)`.
+#[must_use]
 pub fn block(name: &[u8], body: Node, lineno: i64) -> Node {
     Node::new(
         NodeClass::BlockNode,
@@ -42,6 +44,7 @@ pub fn block(name: &[u8], body: Node, lineno: i64) -> Node {
 }
 
 /// `new BlockReferenceNode($name, $lineno)`.
+#[must_use]
 pub fn block_reference(name: &[u8], lineno: i64) -> Node {
     Node::new(
         NodeClass::BlockReferenceNode,
@@ -52,6 +55,7 @@ pub fn block_reference(name: &[u8], lineno: i64) -> Node {
 }
 
 /// `new BodyNode([$a, ...], [], $lineno)`.
+#[must_use]
 pub fn body(nodes: Vec<Node>, lineno: i64) -> Node {
     Node::new(
         NodeClass::BodyNode,
@@ -66,6 +70,7 @@ pub fn body(nodes: Vec<Node>, lineno: i64) -> Node {
 }
 
 /// `new CaptureNode($body, $lineno)`.
+#[must_use]
 pub fn capture(body: Node, lineno: i64) -> Node {
     Node::new(
         NodeClass::CaptureNode,
@@ -76,6 +81,7 @@ pub fn capture(body: Node, lineno: i64) -> Node {
 }
 
 /// `new CheckToStringNode($expr, $spread)`.
+#[must_use]
 pub fn check_to_string(expr: Node, spread: bool) -> Node {
     let lineno = expr.line();
     Node::new(
@@ -87,6 +93,7 @@ pub fn check_to_string(expr: Node, spread: bool) -> Node {
 }
 
 /// `new DeprecatedNode($expr, $lineno)`.
+#[must_use]
 pub fn deprecated(expr: Node, lineno: i64) -> Node {
     Node::new(
         NodeClass::DeprecatedNode,
@@ -97,6 +104,7 @@ pub fn deprecated(expr: Node, lineno: i64) -> Node {
 }
 
 /// `new DoNode($expr, $lineno)`.
+#[must_use]
 pub fn do_node(expr: Node, lineno: i64) -> Node {
     Node::new(
         NodeClass::DoNode,
@@ -107,6 +115,7 @@ pub fn do_node(expr: Node, lineno: i64) -> Node {
 }
 
 /// `new IncludeNode($expr, $variables, $only, $ignoreMissing, $lineno)`.
+#[must_use]
 pub fn include(
     expr: Node,
     variables: Option<Node>,
@@ -148,6 +157,7 @@ fn include_of_class(
 }
 
 /// `new EmbedNode($name, $index, $variables, $only, $ignoreMissing, $lineno)`.
+#[must_use]
 pub fn embed(
     name: &[u8],
     index: i64,
@@ -170,11 +180,13 @@ pub fn embed(
 }
 
 /// `new FlushNode($lineno)`.
+#[must_use]
 pub fn flush(lineno: i64) -> Node {
     Node::new(NodeClass::FlushNode, Vec::new(), Vec::new(), lineno)
 }
 
 /// `new ForElseNode($body, $lineno)`.
+#[must_use]
 pub fn for_else(body: Node, lineno: i64) -> Node {
     Node::new(
         NodeClass::ForElseNode,
@@ -185,6 +197,7 @@ pub fn for_else(body: Node, lineno: i64) -> Node {
 }
 
 /// `new ForNode($keyTarget, $valueTarget, $seq, null, $body, $else, $lineno)`.
+#[must_use]
 pub fn for_node(
     key_target: Node,
     value_target: Node,
@@ -249,6 +262,7 @@ pub fn if_node(tests: Node, else_node: Option<Node>, lineno: i64) -> Result<Node
 }
 
 /// `new ImportNode($expr, $var, $lineno)`.
+#[must_use]
 pub fn import(expr: Node, var: Node, lineno: i64) -> Node {
     Node::new(
         NodeClass::ImportNode,
@@ -259,6 +273,7 @@ pub fn import(expr: Node, var: Node, lineno: i64) -> Node {
 }
 
 /// `new MacroDeclarationNode($name, $lineno)`.
+#[must_use]
 pub fn macro_declaration(name: &[u8], lineno: i64) -> Node {
     let node = Node::new(
         NodeClass::MacroDeclarationNode,
@@ -339,11 +354,13 @@ pub fn macro_node(
 }
 
 /// `new MacrosNode($macros)`.
+#[must_use]
 pub fn macros(macros: Vec<(Key, Node)>) -> Node {
     Node::new(NodeClass::MacrosNode, macros, Vec::new(), 0)
 }
 
 /// `new ModuleNode($body, $parent, $blocks, $macros, $traits, $embeddedTemplates, $source)`.
+#[must_use]
 pub fn module(
     body: Node,
     parent: Option<Node>,
@@ -383,6 +400,7 @@ pub fn module(
 }
 
 /// `new PrintNode($expr, $lineno)`.
+#[must_use]
 pub fn print(expr: Node, lineno: i64) -> Node {
     Node::new(
         NodeClass::PrintNode,
@@ -393,6 +411,7 @@ pub fn print(expr: Node, lineno: i64) -> Node {
 }
 
 /// `new SandboxNode($body, $lineno)`.
+#[must_use]
 pub fn sandbox(body: Node, lineno: i64) -> Node {
     Node::new(
         NodeClass::SandboxNode,
@@ -440,6 +459,7 @@ fn capture_node(body: Node, lineno: i64) -> Node {
 }
 
 /// `new TextNode($data, $lineno)`.
+#[must_use]
 pub fn text(data: &[u8], lineno: i64) -> Node {
     Node::new(
         NodeClass::TextNode,
@@ -451,6 +471,7 @@ pub fn text(data: &[u8], lineno: i64) -> Node {
 
 impl Node {
     /// `TextNode::isBlank()`.
+    #[must_use]
     pub fn is_blank(&self) -> bool {
         let data = self.attr_bytes("data").unwrap_or_default();
         if ctype_space(&data) {
@@ -480,6 +501,7 @@ pub struct TypeEntry {
 }
 
 /// `new TypesNode($types, $lineno)`.
+#[must_use]
 pub fn types(types: Vec<TypeEntry>, lineno: i64) -> Node {
     let mut nodes = Vec::new();
     let mut mapping = Vec::new();
@@ -514,6 +536,7 @@ pub fn types(types: Vec<TypeEntry>, lineno: i64) -> Node {
 }
 
 /// `new WithNode($body, $variables, $only, $lineno)`.
+#[must_use]
 pub fn with(body: Node, variables: Option<Node>, only: bool, lineno: i64) -> Node {
     let mut nodes = vec![("body", body)];
     if let Some(variables) = variables {

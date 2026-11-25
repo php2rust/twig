@@ -33,6 +33,7 @@ pub enum ExpressionParserType {
 }
 
 impl ExpressionParserType {
+    #[must_use]
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Prefix => "prefix",
@@ -50,6 +51,7 @@ pub struct PrecedenceChange {
 }
 
 impl PrecedenceChange {
+    #[must_use]
     pub fn new(package: &str, version: &str, new_precedence: i64) -> Self {
         Self {
             package: package.to_owned(),
@@ -58,14 +60,17 @@ impl PrecedenceChange {
         }
     }
 
+    #[must_use]
     pub fn package(&self) -> &str {
         &self.package
     }
 
+    #[must_use]
     pub fn version(&self) -> &str {
         &self.version
     }
 
+    #[must_use]
     pub fn new_precedence(&self) -> i64 {
         self.new_precedence
     }
@@ -107,6 +112,7 @@ pub enum ParserKind {
 
 impl ParserKind {
     /// The PHP class (short name), as `getByClass()` keys it.
+    #[must_use]
     pub fn php_class(self) -> &'static str {
         match self {
             Self::Unary { .. } => "UnaryOperatorExpressionParser",
@@ -126,6 +132,7 @@ impl ParserKind {
     }
 
     /// `ExpressionParserType::getType()`.
+    #[must_use]
     pub fn parser_type(self) -> ExpressionParserType {
         match self {
             Self::Unary { .. } | Self::Grouping | Self::Literal => ExpressionParserType::Prefix,
@@ -148,6 +155,7 @@ pub struct ExpressionParser {
 
 impl ExpressionParser {
     /// `new UnaryOperatorExpressionParser($class, $name, $precedence)`.
+    #[must_use]
     pub fn unary(class: NodeClass, name: &str, precedence: i64) -> Self {
         Self {
             kind: ParserKind::Unary {
@@ -164,6 +172,7 @@ impl ExpressionParser {
     }
 
     /// `new BinaryOperatorExpressionParser($class, $name, $precedence, $associativity)`.
+    #[must_use]
     pub fn binary(
         class: NodeClass,
         name: &str,
@@ -182,6 +191,7 @@ impl ExpressionParser {
     }
 
     /// One of the core parsers with a class of its own.
+    #[must_use]
     pub fn builtin(kind: ParserKind) -> Self {
         let (name, precedence, associativity, description, aliases, change): (
             &str,
@@ -303,36 +313,43 @@ impl ExpressionParser {
         self
     }
 
+    #[must_use]
     pub fn kind(&self) -> ParserKind {
         self.kind
     }
 
     /// `getName()`.
+    #[must_use]
     pub fn name(&self) -> &str {
         &self.name
     }
 
     /// `getPrecedence()`.
+    #[must_use]
     pub fn precedence(&self) -> i64 {
         self.precedence
     }
 
     /// `getPrecedenceChange()`.
+    #[must_use]
     pub fn precedence_change(&self) -> Option<&PrecedenceChange> {
         self.precedence_change.as_ref()
     }
 
     /// `getAssociativity()`.
+    #[must_use]
     pub fn associativity(&self) -> Associativity {
         self.associativity
     }
 
     /// `getDescription()`.
+    #[must_use]
     pub fn description(&self) -> &str {
         &self.description
     }
 
     /// `getAliases()`.
+    #[must_use]
     pub fn aliases(&self) -> &[String] {
         &self.aliases
     }

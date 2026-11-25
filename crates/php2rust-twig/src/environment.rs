@@ -49,6 +49,9 @@ pub enum Autoescape {
     Callback(fn(&[u8]) -> Option<Vec<u8>>),
 }
 
+/// A loaded template: its name and its embed index.
+type TemplateKey = (Vec<u8>, Option<i64>);
+
 /// The `Environment` constructor options that change parsing.
 #[derive(Clone, Debug)]
 pub struct EnvironmentOptions {
@@ -97,7 +100,7 @@ pub struct Environment {
     charset: Vec<u8>,
     strict_variables: bool,
     loader: RefCell<Option<Rc<dyn TemplateLoader>>>,
-    loaded: RefCell<HashMap<(Vec<u8>, Option<i64>), Rc<Template>>>,
+    loaded: RefCell<HashMap<TemplateKey, Rc<Template>>>,
     globals: RefCell<PhpArray>,
     arrows: RefCell<Vec<Rc<ArrowFn>>>,
     core: RefCell<CoreOptions>,
@@ -114,11 +117,13 @@ impl Environment {
     /// `new Environment($loader)`: the core, escaper and optimizer
     /// extensions, then these ones (`addExtension()`), with the default
     /// options.
+    #[must_use]
     pub fn new(extensions: Vec<Rc<dyn Extension>>) -> Self {
         Self::build(extensions, EnvironmentOptions::default())
     }
 
     /// As [`Environment::new`], with `setLexer(new Lexer($env, $options))`.
+    #[must_use]
     pub fn with_lexer_options(extensions: Vec<Rc<dyn Extension>>, options: LexerOptions) -> Self {
         Self::build(
             extensions,

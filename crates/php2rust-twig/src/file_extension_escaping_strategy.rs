@@ -5,6 +5,7 @@
 
 /// `FileExtensionEscapingStrategy::guess()`: the strategy, or `None`
 /// (`false`) to disable escaping.
+#[must_use]
 pub fn guess(name: &[u8]) -> Option<&'static [u8]> {
     if matches!(name.last(), Some(b'/' | b'\\')) {
         return Some(b"html"); // return html for directories

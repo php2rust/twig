@@ -42,6 +42,7 @@ pub enum ErrorKind {
 
 impl ErrorKind {
     /// The fully qualified PHP class name.
+    #[must_use]
     pub fn class(self) -> &'static str {
         match self {
             Self::Error => "Twig\\Error\\Error",
@@ -55,6 +56,7 @@ impl ErrorKind {
     }
 
     /// Whether the class is `Twig\Error\Error` or a subclass.
+    #[must_use]
     pub fn is_twig_error(self) -> bool {
         matches!(
             self,
@@ -130,6 +132,7 @@ impl Error {
     }
 
     /// The PHP class (`$e::class`).
+    #[must_use]
     pub fn class(&self) -> &str {
         match (&self.class, self.kind) {
             (Some(class), ErrorKind::Exception) => class,
@@ -168,21 +171,25 @@ impl Error {
         self
     }
 
+    #[must_use]
     pub fn kind(&self) -> ErrorKind {
         self.kind
     }
 
     /// `getMessage()`.
+    #[must_use]
     pub fn message(&self) -> &[u8] {
         &self.message
     }
 
     /// `getRawMessage()`.
+    #[must_use]
     pub fn raw_message(&self) -> &[u8] {
         &self.raw_message
     }
 
     /// `getTemplateLine()`.
+    #[must_use]
     pub fn template_line(&self) -> i64 {
         self.lineno
     }
@@ -194,6 +201,7 @@ impl Error {
     }
 
     /// `getTemplateColumn()`.
+    #[must_use]
     pub fn template_column(&self) -> Option<usize> {
         self.columnno
     }
@@ -205,6 +213,7 @@ impl Error {
     }
 
     /// `getSourceContext()`.
+    #[must_use]
     pub fn source_context(&self) -> Option<&Arc<Source>> {
         self.source.as_ref()
     }

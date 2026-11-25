@@ -51,6 +51,7 @@ pub trait TokenParser {
 }
 
 /// The core tags of `CoreExtension::getTokenParsers()`, in order.
+#[must_use]
 pub fn core_token_parsers() -> Vec<Rc<dyn TokenParser>> {
     vec![
         Rc::new(apply::ApplyTokenParser),

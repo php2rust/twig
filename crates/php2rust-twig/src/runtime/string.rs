@@ -13,6 +13,7 @@ use crate::error::Error;
 
 /// The characters of a string: each valid UTF-8 sequence, or each byte
 /// of an invalid one.
+#[must_use]
 pub fn chars(s: &[u8]) -> Vec<&[u8]> {
     let mut out = Vec::new();
     let mut rest = s;
@@ -48,11 +49,13 @@ pub fn chars(s: &[u8]) -> Vec<&[u8]> {
 }
 
 /// `mb_strlen($s, $charset)`.
+#[must_use]
 pub fn mb_strlen(s: &[u8], _charset: &[u8]) -> i64 {
     i64::try_from(chars(s).len()).unwrap_or(i64::MAX)
 }
 
 /// `mb_substr($s, $start, $length, $charset)`.
+#[must_use]
 pub fn mb_substr(s: &[u8], start: i64, length: Option<i64>, _charset: &[u8]) -> Vec<u8> {
     let chars = chars(s);
     let len = i64::try_from(chars.len()).unwrap_or(i64::MAX);
@@ -119,6 +122,7 @@ fn is_cased(c: char) -> bool {
 
 /// `mb_convert_case($s, MB_CASE_TITLE, $charset)`: the first cased letter
 /// of each word in title case, the others in lower case.
+#[must_use]
 pub fn mb_title_case(s: &[u8], _charset: &[u8]) -> Vec<u8> {
     let mut out = Vec::with_capacity(s.len());
     let mut in_word = false;

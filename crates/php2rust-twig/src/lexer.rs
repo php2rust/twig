@@ -146,6 +146,7 @@ struct TagStart {
 impl Lexer {
     /// `new Lexer($env, $options)` for an environment with the core
     /// extension only.
+    #[must_use]
     pub fn new(options: LexerOptions) -> Self {
         Self::with_operators(CORE_OPERATOR_TOKENS.iter().map(|s| s.as_bytes()), options)
     }
@@ -171,6 +172,7 @@ impl Lexer {
         }
     }
 
+    #[must_use]
     pub fn options(&self) -> &LexerOptions {
         &self.options
     }

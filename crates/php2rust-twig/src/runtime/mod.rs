@@ -57,11 +57,13 @@ impl<'a> Call<'a> {
     }
 
     /// `$this->env->getCharset()`.
+    #[must_use]
     pub fn charset(&self) -> &[u8] {
         self.env.charset()
     }
 
     /// `$this->source`.
+    #[must_use]
     pub fn source(&self) -> &Arc<Source> {
         self.template.source()
     }
@@ -74,11 +76,13 @@ impl<'a> Call<'a> {
 pub type Callable = fn(&Call<'_>, Vec<Value>) -> R;
 
 /// A string literal.
+#[must_use]
 pub fn s(bytes: &[u8]) -> Value {
     Value::String(PhpString::from(bytes))
 }
 
 /// `$context['name'] ?? null`.
+#[must_use]
 pub fn get(context: &Context, name: &[u8]) -> Value {
     context
         .get(&Key::from_bytes(name))
@@ -103,6 +107,7 @@ pub fn get_strict(context: &Context, name: &[u8], line: i64, template: &Template
 }
 
 /// `array_key_exists($name, $context)`.
+#[must_use]
 pub fn has(context: &Context, name: &[u8]) -> bool {
     context.contains_key(&Key::from_bytes(name))
 }
@@ -146,46 +151,55 @@ pub fn echo(out: &mut Vec<u8>, value: &Value) -> R<()> {
 }
 
 /// `(bool) $value`.
+#[must_use]
 pub fn truthy(value: &Value) -> bool {
     value.is_truthy()
 }
 
 /// `$a == $b`.
+#[must_use]
 pub fn eq(a: &Value, b: &Value) -> Value {
     Value::Bool(php_value::compare::loose_equals(a, b))
 }
 
 /// `$a != $b`.
+#[must_use]
 pub fn ne(a: &Value, b: &Value) -> Value {
     Value::Bool(!php_value::compare::loose_equals(a, b))
 }
 
 /// `$a < $b`.
+#[must_use]
 pub fn lt(a: &Value, b: &Value) -> Value {
     Value::Bool(ops::compare(a, b) == std::cmp::Ordering::Less)
 }
 
 /// `$a <= $b`.
+#[must_use]
 pub fn le(a: &Value, b: &Value) -> Value {
     Value::Bool(ops::compare(a, b) != std::cmp::Ordering::Greater)
 }
 
 /// `$a > $b` (PHP compares `$b < $a`).
+#[must_use]
 pub fn gt(a: &Value, b: &Value) -> Value {
     Value::Bool(ops::compare(b, a) == std::cmp::Ordering::Less)
 }
 
 /// `$a >= $b` (PHP compares `$b <= $a`).
+#[must_use]
 pub fn ge(a: &Value, b: &Value) -> Value {
     Value::Bool(ops::compare(b, a) != std::cmp::Ordering::Greater)
 }
 
 /// `$a <=> $b`.
+#[must_use]
 pub fn spaceship(a: &Value, b: &Value) -> Value {
     Value::Int(ops::spaceship(a, b))
 }
 
 /// `$a === $b`.
+#[must_use]
 pub fn same(a: &Value, b: &Value) -> Value {
     Value::Bool(a.identical(b))
 }
@@ -199,6 +213,7 @@ pub fn floor_div(a: &Value, b: &Value) -> R {
 }
 
 /// `is_string($a) && is_string($b) && str_starts_with($a, $b)`.
+#[must_use]
 pub fn starts_with(a: &Value, b: &Value) -> Value {
     Value::Bool(match (a, b) {
         (Value::String(a), Value::String(b)) => a.as_bytes().starts_with(b.as_bytes()),
@@ -207,6 +222,7 @@ pub fn starts_with(a: &Value, b: &Value) -> Value {
 }
 
 /// `is_string($a) && is_string($b) && str_ends_with($a, $b)`.
+#[must_use]
 pub fn ends_with(a: &Value, b: &Value) -> Value {
     Value::Bool(match (a, b) {
         (Value::String(a), Value::String(b)) => a.as_bytes().ends_with(b.as_bytes()),
@@ -216,8 +232,9 @@ pub fn ends_with(a: &Value, b: &Value) -> Value {
 
 /// `$tmp instanceof Markup ? (string) $tmp : $tmp` (the `true` test,
 /// which makes an empty `Markup` false).
-pub fn true_test(value: Value) -> bool {
-    match &value {
+#[must_use]
+pub fn true_test(value: &Value) -> bool {
+    match value {
         Value::Object(o) => match o.downcast_ref::<Markup>() {
             Some(markup) => php_value::string::truthy(markup.content().as_bytes()),
             None => true,
@@ -238,6 +255,7 @@ fn illegal_offset(key: &Value) -> Error {
 pub struct ArrayBuilder(PhpArray);
 
 impl ArrayBuilder {
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
@@ -272,10 +290,12 @@ impl ArrayBuilder {
         Ok(self)
     }
 
+    #[must_use]
     pub fn array(self) -> PhpArray {
         self.0
     }
 
+    #[must_use]
     pub fn done(self) -> Value {
         Value::Array(self.0)
     }
@@ -489,4 +509,73 @@ pub fn load_optional(
         Err(e) if e.kind() == ErrorKind::Loader => Ok(None),
         Err(e) => Err(e),
     }
+}
+
+/// The arguments of a macro call, compiled as an array expression.
+#[must_use]
+pub fn args_array(value: Value) -> PhpArray {
+    match value {
+        Value::Array(a) => a,
+        _ => PhpArray::new(),
+    }
+}
+
+/// `new RuntimeError($message, $line, $this->getSourceContext())`.
+pub fn runtime_error(message: Vec<u8>, line: i64, template: &Template) -> Error {
+    Error::runtime(message, line, Some(template.source().clone()))
+}
+
+/// `SequenceDestructuringSetBinary`: `[$context['a'], $context['b']] =
+/// array_pad($v, 2, null)` for an array, or
+/// `CoreExtension::destructureSequence()` for a `\Traversable`. The value
+/// of the expression is the padded array or the sequence.
+pub fn destructure_sequence(context: &mut Context, names: &[Option<&[u8]>], value: Value) -> R {
+    match &value {
+        Value::Object(o) if o.instance_of("Traversable") => {
+            if names.is_empty() {
+                return Ok(value);
+            }
+            let values = iterate(&value)?;
+            for (i, name) in names.iter().enumerate() {
+                if let Some(name) = name {
+                    let v = values.get(i).map_or(Value::Null, |(_, v)| v.clone());
+                    set(context, name, v);
+                }
+            }
+            Ok(value)
+        }
+        Value::Array(a) => {
+            let mut padded = a.clone();
+            let count = i64::try_from(names.len()).unwrap_or(i64::MAX);
+            let mut len = i64::try_from(padded.len()).unwrap_or(i64::MAX);
+            while len < count {
+                let _ = padded.push(Value::Null);
+                len += 1;
+            }
+            for (i, name) in names.iter().enumerate() {
+                if let Some(name) = name {
+                    let key = Key::Int(i64::try_from(i).unwrap_or(i64::MAX));
+                    let v = padded.get(&key).cloned().unwrap_or(Value::Null);
+                    set(context, name, v);
+                }
+            }
+            Ok(Value::Array(padded))
+        }
+        other => Err(Error::exception(
+            "TypeError",
+            format!(
+                "array_pad(): Argument #1 ($array) must be of type array, {} given",
+                other.debug_type()
+            )
+            .into_bytes(),
+        )),
+    }
+}
+
+/// `$vars + $context + $this->env->getGlobals()` (`WithNode`).
+pub fn with_context(vars: PhpArray, context: &Context, env: &Environment) -> Context {
+    let mut out = vars;
+    out.union(context);
+    out.union(&env.globals());
+    out
 }

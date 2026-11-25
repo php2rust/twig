@@ -28,6 +28,7 @@ pub enum CallableType {
 
 impl CallableType {
     /// `getType()`.
+    #[must_use]
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Filter => "filter",
@@ -37,6 +38,7 @@ impl CallableType {
     }
 
     /// The PHP class of the callable object.
+    #[must_use]
     pub fn php_class(self) -> &'static str {
         match self {
             Self::Filter => "Twig\\TwigFilter",
@@ -65,6 +67,7 @@ pub struct DeprecatedCallableInfo {
 }
 
 impl DeprecatedCallableInfo {
+    #[must_use]
     pub fn new(package: &str, version: &str) -> Self {
         Self {
             package: package.to_owned(),
@@ -157,6 +160,16 @@ pub struct TwigCallable {
     pub(crate) preserves_safety: Option<Vec<Vec<u8>>>,
     pub(crate) parser_callable: Option<ParserCallable>,
     pub(crate) one_mandatory_argument: bool,
+    rust: Option<std::rc::Rc<RustCallable>>,
+}
+
+/// The Rust function that the compiler calls for a callable: a path to a
+/// `fn(&twig::runtime::Call, Vec<Value>) -> twig::runtime::R`, and the
+/// PHP parameters of the callable (used to bind named arguments).
+#[derive(Debug, Clone)]
+pub struct RustCallable {
+    pub path: String,
+    pub parameters: Vec<crate::util::callable_arguments::Parameter>,
 }
 
 impl TwigCallable {
@@ -185,7 +198,29 @@ impl TwigCallable {
             preserves_safety: None,
             parser_callable: None,
             one_mandatory_argument: false,
+            rust: None,
         }
+    }
+
+    /// Sets the Rust function that compiled templates call (this port
+    /// does not call PHP callables).
+    #[must_use]
+    pub fn rust(
+        mut self,
+        path: &str,
+        parameters: Vec<crate::util::callable_arguments::Parameter>,
+    ) -> Self {
+        self.rust = Some(std::rc::Rc::new(RustCallable {
+            path: path.to_owned(),
+            parameters,
+        }));
+        self
+    }
+
+    /// The Rust function set with [`Self::rust`].
+    #[must_use]
+    pub fn rust_callable(&self) -> Option<&RustCallable> {
+        self.rust.as_deref()
     }
 
     /// `new TwigFilter($name, $callable)`.
@@ -294,66 +329,79 @@ impl TwigCallable {
     // getters
 
     /// `getType()`.
+    #[must_use]
     pub fn callable_type(&self) -> CallableType {
         self.callable_type
     }
 
     /// `getName()`.
+    #[must_use]
     pub fn name(&self) -> &[u8] {
         &self.name
     }
 
     /// `getDynamicName()`.
+    #[must_use]
     pub fn dynamic_name(&self) -> &[u8] {
         &self.dynamic_name
     }
 
     /// `getCallable()`, by name.
+    #[must_use]
     pub fn callable(&self) -> Option<&str> {
         self.callable.as_deref()
     }
 
     /// `getArguments()`: the parts a dynamic name matched.
+    #[must_use]
     pub fn arguments(&self) -> &[Vec<u8>] {
         &self.arguments
     }
 
     /// `getNodeClass()`.
+    #[must_use]
     pub fn get_node_class(&self) -> NodeClass {
         self.node_class
     }
 
     /// `needsCharset()` (always false for a test).
+    #[must_use]
     pub fn get_needs_charset(&self) -> bool {
         self.callable_type != CallableType::Test && self.needs_charset
     }
 
     /// `needsEnvironment()` (always false for a test).
+    #[must_use]
     pub fn get_needs_environment(&self) -> bool {
         self.callable_type != CallableType::Test && self.needs_environment
     }
 
     /// `needsContext()` (always false for a test).
+    #[must_use]
     pub fn get_needs_context(&self) -> bool {
         self.callable_type != CallableType::Test && self.needs_context
     }
 
     /// `needsIsSandboxed()`.
+    #[must_use]
     pub fn get_needs_is_sandboxed(&self) -> bool {
         self.needs_is_sandboxed
     }
 
     /// `isVariadic()`.
+    #[must_use]
     pub fn is_variadic(&self) -> bool {
         self.is_variadic
     }
 
     /// `isAlwaysAllowedInSandbox()`.
+    #[must_use]
     pub fn is_always_allowed_in_sandbox(&self) -> bool {
         self.always_allowed_in_sandbox
     }
 
     /// `isDeprecated()`.
+    #[must_use]
     pub fn is_deprecated(&self) -> bool {
         self.deprecation_info.is_some()
     }
@@ -366,16 +414,19 @@ impl TwigCallable {
     }
 
     /// `getParserCallable()` (functions only).
+    #[must_use]
     pub fn get_parser_callable(&self) -> Option<ParserCallable> {
         self.parser_callable
     }
 
     /// `hasOneMandatoryArgument()` (tests only).
+    #[must_use]
     pub fn has_one_mandatory_argument(&self) -> bool {
         self.one_mandatory_argument
     }
 
     /// `getSafe()` (filters and functions).
+    #[must_use]
     pub fn get_safe(&self, arguments: &Node) -> Option<Vec<Vec<u8>>> {
         if let Some(safe) = &self.is_safe {
             return Some(safe.clone());
@@ -387,11 +438,13 @@ impl TwigCallable {
     }
 
     /// `getPreservesSafety()` (filters).
+    #[must_use]
     pub fn get_preserves_safety(&self) -> Vec<Vec<u8>> {
         self.preserves_safety.clone().unwrap_or_default()
     }
 
     /// `getPreEscape()` (filters).
+    #[must_use]
     pub fn get_pre_escape(&self) -> Option<&[u8]> {
         self.pre_escape.as_deref()
     }
@@ -412,6 +465,7 @@ impl TwigCallable {
     }
 
     /// `getMinimalNumberOfRequiredArguments()`.
+    #[must_use]
     pub fn minimal_number_of_required_arguments(&self) -> usize {
         usize::from(self.needs_charset)
             + usize::from(self.needs_environment)

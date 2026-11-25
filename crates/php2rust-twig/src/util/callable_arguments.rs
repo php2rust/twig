@@ -35,6 +35,7 @@ pub struct Parameter {
 }
 
 impl Parameter {
+    #[must_use]
     pub fn required(name: &str) -> Self {
         Self {
             name: name.to_owned(),
@@ -45,6 +46,7 @@ impl Parameter {
         }
     }
 
+    #[must_use]
     pub fn with_default(name: &str, default: Attr) -> Self {
         Self {
             default: Some(default),
@@ -53,11 +55,13 @@ impl Parameter {
     }
 
     /// `$name = null`.
+    #[must_use]
     pub fn optional_null(name: &str) -> Self {
         Self::with_default(name, Attr::Null)
     }
 
     /// `array $name = []`.
+    #[must_use]
     pub fn array_default(name: &str) -> Self {
         Self {
             array_default_empty: true,
@@ -66,6 +70,7 @@ impl Parameter {
     }
 
     /// `...$name`.
+    #[must_use]
     pub fn variadic(name: &str) -> Self {
         Self {
             variadic: true,
