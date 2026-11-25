@@ -628,34 +628,7 @@ pub fn binary(class: NodeClass, left: Node, right: Node, lineno: i64) -> Result<
             left.set_attr("always_defined", true);
             Ok(node)
         }
-        NodeClass::NullCoalesceBinary => {
-            let node = abstract_binary(class, left.clone(), right, lineno);
-            let line = left.line();
-            let mut test = defined_test(
-                left.deep_clone(),
-                Rc::new(builtin_test("defined")),
-                Some(Node::empty(0)),
-                line,
-            )?;
-            if !left.is(NodeClass::BlockReferenceExpression) {
-                let null = test_expression(
-                    NodeClass::NullTest,
-                    left.clone(),
-                    Rc::new(builtin_test("null")),
-                    Some(Node::empty(0)),
-                    line,
-                );
-                test = binary(
-                    NodeClass::AndBinary,
-                    test,
-                    unary(NodeClass::NotUnary, null, line),
-                    line,
-                )?;
-            }
-            left.set_attr("always_defined", true);
-            node.set_node("test", test)?;
-            Ok(node)
-        }
+        NodeClass::NullCoalesceBinary => null_coalesce_binary(&left, right, lineno),
         NodeClass::ObjectDestructuringSetBinary => {
             if !left.is(NodeClass::ArrayExpression) {
                 return Err(Error::logic(
@@ -700,25 +673,63 @@ pub fn binary(class: NodeClass, left: Node, right: Node, lineno: i64) -> Result<
             true_test_wrap(right),
             lineno,
         )),
-        NodeClass::MatchesBinary => {
-            if right.is(NodeClass::ConstantExpression) {
-                let regexp = right
-                    .attr("value")
-                    .and_then(|v| v.to_php_string())
-                    .unwrap_or_default();
-                if let Err(php_pcre::PcreError::Compile(message)) = php_pcre::Pcre::new(&regexp) {
-                    let mut text = b"Regexp \"".to_vec();
-                    text.extend_from_slice(&regexp);
-                    text.extend_from_slice(b"\" passed to \"matches\" is not valid: ");
-                    text.extend_from_slice(message.as_bytes());
-                    text.push(b'.');
-                    return Err(Error::syntax(text, lineno, None));
-                }
-            }
-            Ok(abstract_binary(class, left, right, lineno))
-        }
+        NodeClass::MatchesBinary => matches_binary(left, right, lineno),
         _ => Ok(abstract_binary(class, left, right, lineno)),
     }
+}
+
+/// `NullCoalesceBinary::__construct()`.
+fn null_coalesce_binary(left: &Node, right: Node, lineno: i64) -> Result<Node, Error> {
+    let node = abstract_binary(NodeClass::NullCoalesceBinary, left.clone(), right, lineno);
+    let line = left.line();
+    let mut test = defined_test(
+        left.deep_clone(),
+        Rc::new(builtin_test("defined")),
+        Some(Node::empty(0)),
+        line,
+    )?;
+    if !left.is(NodeClass::BlockReferenceExpression) {
+        let null = test_expression(
+            NodeClass::NullTest,
+            left.clone(),
+            Rc::new(builtin_test("null")),
+            Some(Node::empty(0)),
+            line,
+        );
+        test = binary(
+            NodeClass::AndBinary,
+            test,
+            unary(NodeClass::NotUnary, null, line),
+            line,
+        )?;
+    }
+    left.set_attr("always_defined", true);
+    node.set_node("test", test)?;
+    Ok(node)
+}
+
+/// `MatchesBinary::__construct()`.
+fn matches_binary(left: Node, right: Node, lineno: i64) -> Result<Node, Error> {
+    if right.is(NodeClass::ConstantExpression) {
+        let regexp = right
+            .attr("value")
+            .and_then(|v| v.to_php_string())
+            .unwrap_or_default();
+        if let Err(php_pcre::PcreError::Compile(message)) = php_pcre::Pcre::new(&regexp) {
+            let mut text = b"Regexp \"".to_vec();
+            text.extend_from_slice(&regexp);
+            text.extend_from_slice(b"\" passed to \"matches\" is not valid: ");
+            text.extend_from_slice(message.as_bytes());
+            text.push(b'.');
+            return Err(Error::syntax(text, lineno, None));
+        }
+    }
+    Ok(abstract_binary(
+        NodeClass::MatchesBinary,
+        left,
+        right,
+        lineno,
+    ))
 }
 
 /// The `AbstractBinary` constructor.

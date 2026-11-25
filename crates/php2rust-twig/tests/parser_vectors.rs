@@ -125,7 +125,7 @@ fn var_export(value: &Attr, indent: usize, out: &mut Vec<u8>) {
         Attr::Bool(b) => out.extend_from_slice(if *b { b"true" } else { b"false" }),
         Attr::Int(i) => out.extend_from_slice(i.to_string().as_bytes()),
         Attr::Float(f) => {
-            out.extend_from_slice(php_value::numeric::var_export_float(*f).as_bytes())
+            out.extend_from_slice(php_value::numeric::var_export_float(*f).as_bytes());
         }
         Attr::Str(s) => {
             out.push(b'\'');
