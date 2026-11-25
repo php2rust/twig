@@ -1,13 +1,16 @@
-//! Port of the parse-time part of Twig\Environment.php: the options that
-//! change parsing (`autoescape`, `optimizations`), the extensions, the
-//! lexer, the node visitors, `tokenize()` and `parse()`.
+//! Port of Twig\Environment.php: the options, the extensions, the lexer,
+//! the node visitors, `tokenize()`, `parse()` and `compile()`, and at run
+//! time the loading of compiled templates, the globals and `render()`.
 //!
-//! Loading, caching, compiling and rendering come with the emitter and
-//! the runtime.
+//! Templates are compiled to Rust ahead of time, so the loader gives
+//! compiled templates ([`TemplateLoader`]); there is no cache and no
+//! `auto_reload`, and `createTemplate()` cannot compile at run time.
 //!
 //! Upstream: twig/twig src/Environment.php
 
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
+
+use php_value::{PhpArray, PhpString, Value};
 
 use crate::{
     callable::TwigCallable,
@@ -19,10 +22,13 @@ use crate::{
     },
     file_extension_escaping_strategy,
     lexer::{Lexer, LexerOptions},
+    loader::TemplateLoader,
     node::Node,
     node_visitor::{self, NodeVisitor, optimizer::OptimizerNodeVisitor},
     parser::Parser,
+    runtime::{core::CoreOptions, escaper::EscaperRuntime},
     source::Source,
+    template::{Context, Template, TemplateWrapper},
     token_parser::TokenParser,
     token_stream::TokenStream,
 };
@@ -52,6 +58,12 @@ pub struct EnvironmentOptions {
     pub optimizations: i64,
     /// `setLexer(new Lexer($env, $options))`.
     pub lexer: LexerOptions,
+    /// `debug`, default false.
+    pub debug: bool,
+    /// `charset`, default `'UTF-8'`.
+    pub charset: Vec<u8>,
+    /// `strict_variables`, default false.
+    pub strict_variables: bool,
 }
 
 impl Default for EnvironmentOptions {
@@ -60,9 +72,16 @@ impl Default for EnvironmentOptions {
             autoescape: Autoescape::Strategy(b"html".to_vec()),
             optimizations: -1,
             lexer: LexerOptions::default(),
+            debug: false,
+            charset: b"UTF-8".to_vec(),
+            strict_variables: false,
         }
     }
 }
+
+/// A compiled arrow function (`x => ...`): the environment and the
+/// arguments.
+pub type ArrowFn = dyn Fn(&Environment, &[Value]) -> Result<Value, Error>;
 
 /// `Environment`, for parsing.
 pub struct Environment {
@@ -74,6 +93,15 @@ pub struct Environment {
     /// PHP (a parse that fails in the middle of a traversal can leave the
     /// optimizer inside a loop).
     visitors: RefCell<Option<Vec<Box<dyn NodeVisitor>>>>,
+    debug: bool,
+    charset: Vec<u8>,
+    strict_variables: bool,
+    loader: RefCell<Option<Rc<dyn TemplateLoader>>>,
+    loaded: RefCell<HashMap<(Vec<u8>, Option<i64>), Rc<Template>>>,
+    globals: RefCell<PhpArray>,
+    arrows: RefCell<Vec<Rc<ArrowFn>>>,
+    core: RefCell<CoreOptions>,
+    escaper: RefCell<EscaperRuntime>,
 }
 
 impl Default for Environment {
@@ -121,12 +149,188 @@ impl Environment {
         let extension_set = ExtensionSet::new(all);
         let operators = extension_set.expression_parsers().operator_tokens();
         let lexer = Lexer::with_operators(operators.iter().map(Vec::as_slice), options.lexer);
+        let charset = match options.charset.to_ascii_uppercase() {
+            c if c == b"UTF8" || c.is_empty() => b"UTF-8".to_vec(),
+            _ => options.charset.clone(),
+        };
         Self {
             extension_set,
             lexer,
             autoescape: options.autoescape,
             visitors: RefCell::new(None),
+            debug: options.debug,
+            escaper: RefCell::new(EscaperRuntime::new(&charset)),
+            charset,
+            strict_variables: options.strict_variables,
+            loader: RefCell::new(None),
+            loaded: RefCell::new(HashMap::new()),
+            globals: RefCell::new(PhpArray::new()),
+            arrows: RefCell::new(Vec::new()),
+            core: RefCell::new(CoreOptions::default()),
         }
+    }
+
+    /// `isDebug()`.
+    pub fn is_debug(&self) -> bool {
+        self.debug
+    }
+
+    /// `getCharset()`.
+    pub fn charset(&self) -> &[u8] {
+        &self.charset
+    }
+
+    /// `isStrictVariables()`.
+    pub fn is_strict_variables(&self) -> bool {
+        self.strict_variables
+    }
+
+    /// `hasExtension(SandboxExtension::class)`: the sandbox is not ported
+    /// yet.
+    pub fn has_sandbox(&self) -> bool {
+        false
+    }
+
+    /// `setLoader()`: where compiled templates come from.
+    pub fn set_loader(&self, loader: Rc<dyn TemplateLoader>) {
+        *self.loader.borrow_mut() = Some(loader);
+        self.loaded.borrow_mut().clear();
+    }
+
+    /// `getLoader()`.
+    pub fn loader(&self) -> Option<Rc<dyn TemplateLoader>> {
+        self.loader.borrow().clone()
+    }
+
+    /// `addGlobal()`.
+    pub fn add_global(&self, name: &str, value: Value) {
+        self.globals.borrow_mut().insert(name, value);
+    }
+
+    /// `getGlobals()`: the extensions' globals, then the ones added.
+    pub fn globals(&self) -> PhpArray {
+        let mut globals = self.extension_set.globals();
+        for (key, value) in self.globals.borrow().iter() {
+            globals.insert(key.clone(), value.clone());
+        }
+        globals
+    }
+
+    /// `getExtension(CoreExtension::class)`'s date and number settings.
+    pub fn core_options(&self) -> std::cell::Ref<'_, CoreOptions> {
+        self.core.borrow()
+    }
+
+    /// `getExtension(CoreExtension::class)`'s settings, to change them.
+    pub fn core_options_mut(&self) -> std::cell::RefMut<'_, CoreOptions> {
+        self.core.borrow_mut()
+    }
+
+    /// `getRuntime(EscaperRuntime::class)`.
+    pub fn escaper(&self) -> std::cell::Ref<'_, EscaperRuntime> {
+        self.escaper.borrow()
+    }
+
+    /// `getRuntime(EscaperRuntime::class)`, to configure it.
+    pub fn escaper_mut(&self) -> std::cell::RefMut<'_, EscaperRuntime> {
+        self.escaper.borrow_mut()
+    }
+
+    /// Keeps a compiled arrow function for the rest of the environment's
+    /// life and gives it as a `\Closure` value.
+    pub fn register_arrow(&self, arrow: Rc<ArrowFn>) -> Value {
+        let mut arrows = self.arrows.borrow_mut();
+        arrows.push(arrow);
+        crate::runtime::core::Arrow::value(arrows.len() - 1)
+    }
+
+    /// The arrow function a [`crate::runtime::core::Arrow`] value stands for.
+    pub fn arrow(&self, id: usize) -> Option<Rc<ArrowFn>> {
+        self.arrows.borrow().get(id).cloned()
+    }
+
+    /// `loadTemplate($cls, $name, $index)`: the loaded instance of a
+    /// compiled template.
+    pub fn load_template(&self, name: &[u8], index: Option<i64>) -> Result<Rc<Template>, Error> {
+        let key = (name.to_vec(), index);
+        if let Some(template) = self.loaded.borrow().get(&key) {
+            return Ok(Rc::clone(template));
+        }
+        let loader = self.loader().ok_or_else(|| {
+            Error::loader(
+                format!(
+                    "Template \"{}\" is not defined.",
+                    String::from_utf8_lossy(name)
+                ),
+                -1,
+                None,
+            )
+        })?;
+        let compiled = loader.compiled(name, index)?;
+        let template = Template::new(compiled, self)?;
+        self.loaded.borrow_mut().insert(key, Rc::clone(&template));
+        Ok(template)
+    }
+
+    /// `load($name)`.
+    pub fn load(&self, name: &[u8]) -> Result<TemplateWrapper, Error> {
+        let template = self.load_template(name, None)?;
+        Ok(TemplateWrapper::of(&template))
+    }
+
+    /// `render($name, $context)`.
+    pub fn render(&self, name: &[u8], context: Context) -> Result<Vec<u8>, Error> {
+        self.load_template(name, None)?.render(self, context)
+    }
+
+    /// `resolveTemplate($names)` for an array of names.
+    pub fn resolve_template(&self, names: &PhpArray) -> Result<TemplateWrapper, Error> {
+        let count = names.len();
+        let mut listed = Vec::new();
+        for name in names.values() {
+            if let Value::Object(o) = name
+                && let Some(wrapper) = o.downcast_ref::<TemplateWrapper>()
+            {
+                return Ok(wrapper.clone());
+            }
+            let name = crate::runtime::core::string_argument(name)?;
+            listed.push(name.clone());
+            if count != 1 && !self.loader().is_some_and(|l| l.exists(name.as_bytes())) {
+                continue;
+            }
+            return self.load(name.as_bytes());
+        }
+        let names: Vec<String> = listed
+            .iter()
+            .map(|n| n.to_string_lossy().into_owned())
+            .collect();
+        Err(Error::loader(
+            format!(
+                "Unable to find one of the following templates: \"{}\".",
+                names.join("\", \"")
+            ),
+            -1,
+            None,
+        ))
+    }
+
+    /// `compileSource($source)`: the Rust code of a template (see
+    /// [`crate::compiler`]).
+    pub fn compile_source(&self, source: Source) -> Result<String, Error> {
+        let arc = std::sync::Arc::new(source.clone());
+        let compile = || -> Result<String, Error> {
+            let module = self.parse_source(source)?;
+            crate::compiler::Compiler::new(self).compile(&module)
+        };
+        compile().map_err(|mut e| {
+            e.set_source_context(Some(arc));
+            e
+        })
+    }
+
+    /// The charset as a PHP string.
+    pub fn charset_string(&self) -> PhpString {
+        PhpString::from(self.charset.clone())
     }
 
     /// `getExtension(EscaperExtension::class)->getDefaultStrategy($name)`:

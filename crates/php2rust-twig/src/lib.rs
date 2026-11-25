@@ -10,19 +10,26 @@
 #![forbid(unsafe_code)]
 
 pub mod callable;
+pub mod compiler;
 pub mod environment;
 pub mod error;
 pub mod expression_parser;
 pub mod extension;
 pub mod file_extension_escaping_strategy;
 pub mod lexer;
+pub mod loader;
+pub mod macro_namespace;
+pub mod markup;
 pub mod node;
 pub mod node_visitor;
 pub mod parser;
+pub mod runtime;
 pub mod source;
+pub mod template;
 pub mod token;
 pub mod token_parser;
 pub mod token_stream;
+pub mod twig_macro;
 pub mod util;
 
 pub use callable::TwigCallable;

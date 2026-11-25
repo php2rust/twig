@@ -5,8 +5,13 @@
 //! message is rebuilt from the raw message, the template name, line and
 //! column each time one of them changes, as `updateRepr()` does. Not
 //! ported: `guess()` (it reads PHP's backtrace and the compiled PHP
-//! template's debug info; compiled Rust templates set the line when they
-//! raise the error) and the PHP file/line of the exception.
+//! template's debug info; compiled Rust templates keep the line of the
+//! last debug info they passed and give it to the error, see
+//! [`Error::guess_line`]) and the PHP file/line of the exception.
+//!
+//! Exceptions that are not Twig errors (a `\LogicException`, or what a
+//! PHP method or operator threw, `ErrorKind::Exception` with its class)
+//! use the same type; their message is not decorated.
 //!
 //! Upstream: twig/twig src/Error/Error.php src/Error/SyntaxError.php src/Error/LoaderError.php src/Error/RuntimeError.php
 
@@ -30,6 +35,9 @@ pub enum ErrorKind {
     Logic,
     /// PHP's `\InvalidArgumentException`: an invalid option value.
     InvalidArgument,
+    /// Any other PHP exception or error (`TypeError`, `\Exception`, ...):
+    /// the class is [`Error::class`].
+    Exception,
 }
 
 impl ErrorKind {
@@ -42,7 +50,16 @@ impl ErrorKind {
             Self::Runtime => "Twig\\Error\\RuntimeError",
             Self::Logic => "LogicException",
             Self::InvalidArgument => "InvalidArgumentException",
+            Self::Exception => "Exception",
         }
+    }
+
+    /// Whether the class is `Twig\Error\Error` or a subclass.
+    pub fn is_twig_error(self) -> bool {
+        matches!(
+            self,
+            Self::Error | Self::Syntax | Self::Loader | Self::Runtime
+        )
     }
 }
 
@@ -50,6 +67,8 @@ impl ErrorKind {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Error {
     kind: ErrorKind,
+    /// The class of an `ErrorKind::Exception`.
+    class: Option<String>,
     raw_message: Vec<u8>,
     lineno: i64,
     columnno: Option<usize>,
@@ -67,6 +86,7 @@ impl Error {
     ) -> Self {
         let mut error = Self {
             kind,
+            class: None,
             raw_message: message.into(),
             lineno,
             columnno: None,
@@ -90,6 +110,55 @@ impl Error {
     /// An `\InvalidArgumentException`: no template location, the message as is.
     pub fn invalid_argument(message: impl Into<Vec<u8>>) -> Self {
         Self::new(ErrorKind::InvalidArgument, message, -1, None)
+    }
+
+    /// `new RuntimeError($message, $lineno, $source)`.
+    pub fn runtime(message: impl Into<Vec<u8>>, lineno: i64, source: Option<Arc<Source>>) -> Self {
+        Self::new(ErrorKind::Runtime, message, lineno, source)
+    }
+
+    /// `new LoaderError($message, $lineno, $source)`.
+    pub fn loader(message: impl Into<Vec<u8>>, lineno: i64, source: Option<Arc<Source>>) -> Self {
+        Self::new(ErrorKind::Loader, message, lineno, source)
+    }
+
+    /// A PHP exception of another class (`TypeError`, `\Exception`, ...).
+    pub fn exception(class: impl Into<String>, message: impl Into<Vec<u8>>) -> Self {
+        let mut error = Self::new(ErrorKind::Exception, message, -1, None);
+        error.class = Some(class.into());
+        error
+    }
+
+    /// The PHP class (`$e::class`).
+    pub fn class(&self) -> &str {
+        match (&self.class, self.kind) {
+            (Some(class), ErrorKind::Exception) => class,
+            (_, kind) => kind.class(),
+        }
+    }
+
+    /// `Template::handleException()`: a Twig error gets the template's
+    /// source when it has none, and `line` when its line is unknown (PHP
+    /// guesses it from the debug info of the code that threw); any other
+    /// exception becomes a `RuntimeError` "An exception has been thrown
+    /// during the rendering of a template".
+    #[must_use]
+    pub fn guess_line(mut self, line: i64, source: &Arc<Source>) -> Self {
+        if self.kind.is_twig_error() {
+            if self.source.is_none() {
+                self.source = Some(Arc::clone(source));
+            }
+            if self.lineno == -1 {
+                self.lineno = line;
+            }
+            self.update_repr();
+            return self;
+        }
+        let mut message =
+            b"An exception has been thrown during the rendering of a template (\"".to_vec();
+        message.extend_from_slice(&self.message);
+        message.extend_from_slice(b"\").");
+        Self::new(ErrorKind::Runtime, message, line, Some(Arc::clone(source)))
     }
 
     /// The same error with the `columnno` constructor argument.
@@ -186,6 +255,10 @@ impl Error {
 
     fn update_repr(&mut self) {
         let mut message = self.raw_message.clone();
+        if !self.kind.is_twig_error() {
+            self.message = message;
+            return;
+        }
         let punctuation = match message.last() {
             Some(&last @ (b'.' | b'?')) => {
                 message.pop();
@@ -223,6 +296,12 @@ impl fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
+
+impl From<php_value::Thrown> for Error {
+    fn from(thrown: php_value::Thrown) -> Self {
+        Self::exception(thrown.class, thrown.message.as_bytes().to_vec())
+    }
+}
 
 #[cfg(test)]
 mod tests {

@@ -2,8 +2,9 @@
 //! the extensions an environment holds and the registry of their filters,
 //! functions, tests, tag parsers, expression parsers and node visitors.
 //!
-//! An extension's runtime parts come with the emitter and the runtime. `getOperators()` (deprecated since 3.21) and the
-//! undefined-callable callbacks are not ported.
+//! `getOperators()` (deprecated since 3.21) and the undefined-callable
+//! callbacks are not ported. The runtime part of an extension's callables
+//! is the Rust function each callable names (see [`TwigCallable`]).
 //!
 //! Upstream: twig/twig src/Extension/ExtensionInterface.php src/Extension/AbstractExtension.php src/ExtensionSet.php
 
@@ -48,6 +49,11 @@ pub trait Extension {
     /// `getNodeVisitors()`: new visitors (one set for each parser).
     fn node_visitors(&self) -> Vec<Box<dyn NodeVisitor>> {
         Vec::new()
+    }
+
+    /// `GlobalsInterface::getGlobals()`.
+    fn globals(&self) -> php_value::PhpArray {
+        php_value::PhpArray::new()
     }
 }
 
@@ -214,6 +220,17 @@ impl ExtensionSet {
     /// `getExpressionParsers()`.
     pub fn expression_parsers(&self) -> &ExpressionParsers {
         &self.expression_parsers
+    }
+
+    /// `getGlobals()`: the extensions' globals merged in order.
+    pub fn globals(&self) -> php_value::PhpArray {
+        let mut globals = php_value::PhpArray::new();
+        for extension in &self.extensions {
+            for (key, value) in extension.globals().iter() {
+                globals.insert(key.clone(), value.clone());
+            }
+        }
+        globals
     }
 
     /// `getNodeVisitors()`: new visitors, in extension order.
