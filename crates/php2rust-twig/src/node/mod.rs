@@ -18,7 +18,12 @@ pub mod class;
 pub mod expression;
 pub mod statement;
 
-use std::{cell::RefCell, fmt, rc::Rc, sync::Arc};
+use std::{
+    cell::RefCell,
+    fmt,
+    rc::{Rc, Weak},
+    sync::Arc,
+};
 
 pub use class::{NodeClass, NodeInterface};
 
@@ -273,6 +278,19 @@ struct Data {
 #[derive(Clone)]
 pub struct Node(Rc<RefCell<Data>>);
 
+/// A weak node handle (PHP's `WeakReference`, a `WeakMap` key): it does
+/// not keep the node alive, and while it exists no other node gets the
+/// same [`Node::id`].
+#[derive(Clone)]
+pub struct WeakNode(Weak<RefCell<Data>>);
+
+impl WeakNode {
+    /// `WeakReference::get()`: the node, if it is still alive.
+    pub fn upgrade(&self) -> Option<Node> {
+        self.0.upgrade().map(Node)
+    }
+}
+
 impl fmt::Debug for Node {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.to_string())
@@ -331,6 +349,11 @@ impl Node {
     /// `SplObjectStorage`). Stable while a handle to the node is kept.
     pub fn id(&self) -> usize {
         Rc::as_ptr(&self.0).addr()
+    }
+
+    /// `WeakReference::create($node)`.
+    pub fn downgrade(&self) -> WeakNode {
+        WeakNode(Rc::downgrade(&self.0))
     }
 
     /// Whether both handles are the same node (`===`).

@@ -4,18 +4,18 @@
 //! contains the text. `expectDeprecation` and `collectDeprecations()` use
 //! `symfony_deprecation_contracts::collect`.
 //!
-//! Not here (pending, it needs a user node visitor class): testDocumentationIsAvailableToNodeVisitors.
 //!
 //! Upstream: twig/twig tests/ParserTest.php
 #![allow(non_snake_case, clippy::unwrap_used, clippy::expect_used)]
 
-use std::{rc::Rc, sync::Arc};
+use std::{cell::RefCell, rc::Rc, sync::Arc};
 
 use twig::{
     Environment, Source,
     error::{Error, ErrorKind},
     extension::Extension,
     node::{Attr, Key, Node, NodeClass, expression, statement},
+    node_visitor::NodeVisitor,
     parser::Parser,
     token::{Token, TokenType},
     token_parser::TokenParser,
@@ -453,6 +453,63 @@ impl TokenParser for DocumentationTargetTokenParser {
     fn tag(&self) -> &'static str {
         "documentation_target"
     }
+}
+
+/// `DocumentationReadingNodeVisitor`: the documentation of block and
+/// macro nodes, by class.
+struct DocumentationReadingNodeVisitor(Rc<RefCell<Vec<(NodeClass, String)>>>);
+
+impl NodeVisitor for DocumentationReadingNodeVisitor {
+    fn enter_node(&mut self, node: Node, _env: &Environment) -> Result<Node, Error> {
+        if (node.is(NodeClass::BlockNode) || node.is(NodeClass::MacroNode))
+            && let Some(documentation) = doc(&node)
+        {
+            // `$this->documentation[$node::class] = ...`: a key keeps its place
+            let mut seen = self.0.borrow_mut();
+            let class = node.class();
+            match seen.iter_mut().find(|(c, _)| *c == class) {
+                Some(slot) => slot.1 = documentation,
+                None => seen.push((class, documentation)),
+            }
+        }
+        Ok(node)
+    }
+
+    fn leave_node(&mut self, node: Node, _env: &Environment) -> Result<Option<Node>, Error> {
+        Ok(Some(node))
+    }
+
+    fn priority(&self) -> i64 {
+        -1024
+    }
+}
+
+#[test]
+fn testDocumentationIsAvailableToNodeVisitors() {
+    struct VisitorExtension(Rc<RefCell<Vec<(NodeClass, String)>>>);
+    impl Extension for VisitorExtension {
+        fn name(&self) -> &'static str {
+            "VisitorExtension"
+        }
+        fn node_visitors(&self) -> Vec<Box<dyn NodeVisitor>> {
+            vec![Box::new(DocumentationReadingNodeVisitor(self.0.clone()))]
+        }
+    }
+    let documentation = Rc::new(RefCell::new(Vec::new()));
+    let env = Environment::new(vec![Rc::new(VisitorExtension(documentation.clone()))]);
+
+    parse(
+        &env,
+        "{## Block documentation #}{% block content %}{% endblock %}{## Macro documentation #}{% macro input() %}{% endmacro %}",
+    );
+
+    assert_eq!(
+        *documentation.borrow(),
+        [
+            (NodeClass::BlockNode, "Block documentation".to_owned()),
+            (NodeClass::MacroNode, "Macro documentation".to_owned()),
+        ]
+    );
 }
 
 #[test]

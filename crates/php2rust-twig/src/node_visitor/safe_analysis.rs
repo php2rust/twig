@@ -12,7 +12,7 @@ use crate::{
     callable::TwigCallable,
     environment::Environment,
     error::Error,
-    node::{Attr, Node, NodeClass, NodeInterface},
+    node::{Attr, Node, NodeClass, NodeInterface, WeakNode},
 };
 
 /// A list of strategy names (`['html', 'js']`, `['all']`).
@@ -21,9 +21,11 @@ pub type Safe = Vec<Vec<u8>>;
 /// `SafeAnalysisNodeVisitor`.
 #[derive(Default)]
 pub struct SafeAnalysisNodeVisitor {
-    /// `$data`, a `WeakMap` in PHP: by node identity, with a handle that
-    /// keeps the identity valid.
-    data: HashMap<usize, (Node, Safe)>,
+    /// `$data`, a `WeakMap`: by node identity, with a weak handle (it
+    /// keeps the identity from being reused and tells a dead entry).
+    data: HashMap<usize, (WeakNode, Safe)>,
+    /// The size of `data` after the last removal of dead entries.
+    live: usize,
     safe_vars: Vec<Vec<u8>>,
 }
 
@@ -38,6 +40,7 @@ impl SafeAnalysisNodeVisitor {
         let mut safe = self
             .data
             .get(&node.id())
+            .filter(|(weak, _)| weak.upgrade().is_some())
             .map(|(_, s)| s.clone())
             .unwrap_or_default();
         if contains(&safe, b"html_attr") {
@@ -51,7 +54,11 @@ impl SafeAnalysisNodeVisitor {
     }
 
     fn set_safe(&mut self, node: &Node, safe: Safe) {
-        self.data.insert(node.id(), (node.clone(), safe));
+        if self.data.len() >= 2 * self.live.max(512) {
+            self.data.retain(|_, (weak, _)| weak.upgrade().is_some());
+            self.live = self.data.len();
+        }
+        self.data.insert(node.id(), (node.downgrade(), safe));
     }
 
     /// `$filter->getSafe()` with the deprecation for a `null` result.
@@ -167,10 +174,10 @@ impl NodeVisitor for SafeAnalysisNodeVisitor {
             let inner = node.get_node("node")?;
             if inner.is(NodeClass::ContextVariable)
                 && let Attr::Str(name) = inner.get_attr("name")?
-                    && self.safe_vars.contains(&name)
-                {
-                    self.set_safe(&node, vec![b"all".to_vec()]);
-                }
+                && self.safe_vars.contains(&name)
+            {
+                self.set_safe(&node, vec![b"all".to_vec()]);
+            }
         }
         Ok(Some(node))
     }

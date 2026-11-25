@@ -83,9 +83,10 @@ impl NodeVisitor for EscaperNodeVisitor {
             };
             self.status_stack.push(status);
         } else if node.is(NodeClass::ImportNode)
-            && let Attr::Str(name) = node.get_node("var")?.get_node("var")?.get_attr("name")? {
-                self.safe_vars.push(name);
-            }
+            && let Attr::Str(name) = node.get_node("var")?.get_node("var")?.get_attr("name")?
+        {
+            self.safe_vars.push(name);
+        }
         Ok(node)
     }
 

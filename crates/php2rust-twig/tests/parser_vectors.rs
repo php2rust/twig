@@ -283,7 +283,10 @@ fn env_for(
     envs: &mut HashMap<String, Result<Rc<Environment>, Error>>,
     case: &Json,
 ) -> Result<Rc<Environment>, Error> {
-    let autoescape = case.get("autoescape").cloned().unwrap_or(Json::from("html"));
+    let autoescape = case
+        .get("autoescape")
+        .cloned()
+        .unwrap_or(Json::from("html"));
     let optimizations = case
         .get("optimizations")
         .and_then(Json::as_i64)
