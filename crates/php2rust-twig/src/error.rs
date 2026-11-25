@@ -25,6 +25,9 @@ pub enum ErrorKind {
     Loader,
     /// `Twig\Error\RuntimeError`: rendering failed.
     Runtime,
+    /// PHP's `\LogicException`: a misuse of the API (upstream throws it
+    /// for states a template cannot reach).
+    Logic,
 }
 
 impl ErrorKind {
@@ -35,6 +38,7 @@ impl ErrorKind {
             Self::Syntax => "Twig\\Error\\SyntaxError",
             Self::Loader => "Twig\\Error\\LoaderError",
             Self::Runtime => "Twig\\Error\\RuntimeError",
+            Self::Logic => "LogicException",
         }
     }
 }
@@ -73,6 +77,11 @@ impl Error {
     /// `new SyntaxError($message, $lineno, $source)`.
     pub fn syntax(message: impl Into<Vec<u8>>, lineno: i64, source: Option<Arc<Source>>) -> Self {
         Self::new(ErrorKind::Syntax, message, lineno, source)
+    }
+
+    /// A `\LogicException`: no template location, the message as is.
+    pub fn logic(message: impl Into<Vec<u8>>) -> Self {
+        Self::new(ErrorKind::Logic, message, -1, None)
     }
 
     /// The same error with the `columnno` constructor argument.
