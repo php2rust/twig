@@ -1,0 +1,8 @@
+# twig/extra-bundle at aaa2993e19293a99240c4c61aa461d743b0dd569: upstream test	method	status	rust test
+Tests/DependencyInjection/Compiler/TwigCachePoolPassTest.php	TwigCachePoolPassTest::testThePoolIsDecoratedWhenTheAppAdapterIsNotTagAware	pending	
+Tests/DependencyInjection/Compiler/TwigCachePoolPassTest.php	TwigCachePoolPassTest::testThePoolIsNotDecoratedWhenTheAppAdapterIsTagAware	pending	
+Tests/DependencyInjection/TwigExtraExtensionTest.php	TwigExtraExtensionTest::testDefaultConfiguration	pending	
+Tests/ExtensionsTest.php	ExtensionsTest::testCatalogListsEveryDeclaredCallable	pending	
+Tests/ExtensionsTest.php	ExtensionsTest::testCatalogOnlyListsDeclaredCallables	pending	
+Tests/ExtensionsTest.php	ExtensionsTest::testCatalogUsesExtensionsFromCurrentCheckout	pending	
+Tests/IntegrationTest.php	IntegrationTest::testCommonMarkRendering	pending	

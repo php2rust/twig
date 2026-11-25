@@ -1,0 +1,7 @@
+# twig/markdown-extra at 8a8e3c28ed17b03ed4965b2e265a018d61f00ba5: upstream test	method	status	rust test
+Tests/FunctionalTest.php	FunctionalTest::testMarkdown	pending	
+Tests/FunctionalTest.php	FunctionalTest::testMarkdownToHtmlIsNotSafeInJsContext	pending	
+Tests/FunctionalTest.php	FunctionalTest::testStripsCommonIndentation	pending	
+Tests/IntegrationTest.php	IntegrationTest::testIntegration	pending	
+Tests/IntegrationTest.php	IntegrationTest::testLegacyIntegration	pending	
+Tests/LegacyFunctionsTest.php	LegacyFunctionsTest::testHtmlToMarkdown	pending	

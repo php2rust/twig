@@ -1,0 +1,15 @@
+# twig/html-extra at 7147611979df81edb78baf7d003860b72e335c3f: upstream test	method	status	rust test
+Tests/CvaTest.php	CvaTest::testAdditionalClasses	pending	
+Tests/CvaTest.php	CvaTest::testApply	pending	
+Tests/CvaTest.php	CvaTest::testApplyWithNullString	pending	
+Tests/CvaTest.php	CvaTest::testRecipes	pending	
+Tests/HtmlAttrMergeTest.php	HtmlAttrMergeTest::testIncompatibleValuesMergeThrowsException	pending	
+Tests/HtmlAttrMergeTest.php	HtmlAttrMergeTest::testMerge	pending	
+Tests/HtmlAttrTest.php	HtmlAttrTest::testDataAttributeWithNonJsonEncodableValueThrowsRuntimeError	pending	
+Tests/HtmlAttrTest.php	HtmlAttrTest::testHtmlAttrValue	pending	
+Tests/HtmlAttrTest.php	HtmlAttrTest::testIterableObjectCastedToArray	pending	
+Tests/HtmlAttrTest.php	HtmlAttrTest::testNonStringableObjectAsAttributeValueThrowsRuntimeError	pending	
+Tests/HtmlAttrTest.php	HtmlAttrTest::testPrintingAttributes	pending	
+Tests/IntegrationTest.php	IntegrationTest::testIntegration	pending	
+Tests/IntegrationTest.php	IntegrationTest::testLegacyIntegration	pending	
+Tests/LegacyFunctionsTest.php	LegacyFunctionsTest::testHtmlToMarkdown	pending	
