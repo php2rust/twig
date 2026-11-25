@@ -4,17 +4,19 @@
 //! of `Twig\Tests\IntegrationTest` (`oracle/recorders/twig_parser.php`,
 //! `scripts/record.sh twig-parser`). The tree dump (`dump_node()` in the
 //! recorder) must match, or the error's class, message and line, and the
-//! deprecations.
+//! deprecations. `data/parser_visitors.json` has the same templates and
+//! the cases of `data/parser_visitors_extra.json` parsed with the node
+//! visitors on (all but the sandbox's), each with its options.
 //!
 //! Upstream: none
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use std::rc::Rc;
+use std::{collections::HashMap, rc::Rc};
 
 use php_value::base64::decode;
 use serde_json::Value as Json;
 use twig::{
-    Environment, Source, TwigCallable,
+    Autoescape, Environment, EnvironmentOptions, Source, TwigCallable,
     callable::DeprecatedCallableInfo,
     error::Error,
     extension::Extension,
@@ -77,8 +79,9 @@ impl Extension for FixtureExtension {
         let f = |name: &str| TwigCallable::function(name, CLOSURE);
         vec![
             // DebugExtension
+            // is_safe html: the recorder runs on the CLI SAPI
             TwigCallable::function("dump", Some("Twig\\Extension\\DebugExtension::dump"))
-                .safe(&[])
+                .safe(&["html"])
                 .needs_context()
                 .needs_environment()
                 .variadic(),
@@ -263,14 +266,67 @@ fn trees_match_php() {
     let data: Vec<Json> =
         serde_json::from_str(include_str!("data/parser.json")).expect("parser.json");
     assert!(data.len() > 600, "{} cases", data.len());
-    let env = Environment::new(vec![Rc::new(FixtureExtension)]);
+    check_cases(&data, false);
+}
+
+#[test]
+fn visited_trees_match_php() {
+    let data: Vec<Json> = serde_json::from_str(include_str!("data/parser_visitors.json"))
+        .expect("parser_visitors.json");
+    assert!(data.len() > 900, "{} cases", data.len());
+    check_cases(&data, true);
+}
+
+/// The recorder's `make_env()`, one for each option set as the recorder
+/// caches them (the optimizer's deprecations come with the first case).
+fn env_for(
+    envs: &mut HashMap<String, Result<Rc<Environment>, Error>>,
+    case: &Json,
+) -> Result<Rc<Environment>, Error> {
+    let autoescape = case
+        .get("autoescape")
+        .cloned()
+        .unwrap_or(Json::from("html"));
+    let optimizations = case
+        .get("optimizations")
+        .and_then(Json::as_i64)
+        .unwrap_or(-1);
+    let key = format!("{autoescape}/{optimizations}");
+    envs.entry(key)
+        .or_insert_with(|| {
+            let autoescape = match &autoescape {
+                Json::Bool(false) => Autoescape::Off,
+                Json::String(s) if s == "name" => Autoescape::Name,
+                Json::String(s) => Autoescape::Strategy(s.as_bytes().to_vec()),
+                other => panic!("autoescape {other}"),
+            };
+            Environment::with_options(
+                vec![Rc::new(FixtureExtension)],
+                EnvironmentOptions {
+                    autoescape,
+                    optimizations,
+                    ..EnvironmentOptions::default()
+                },
+            )
+            .map(Rc::new)
+        })
+        .clone()
+}
+
+fn check_cases(data: &[Json], visitors: bool) {
+    let mut envs = HashMap::new();
     let mut failures = Vec::new();
-    for case in &data {
+    for case in data {
         let name = case["name"].as_str().unwrap();
         let source = case["source"].as_str().unwrap();
         let template = bytes(&case["template"]);
         let (result, deprecations) = symfony_deprecation_contracts::collect(|| {
-            env.parse_source(Source::new(template.clone(), source))
+            let env = env_for(&mut envs, case)?;
+            let mut parser = Parser::new(&env);
+            if !visitors {
+                parser.set_node_visitors(Vec::new());
+            }
+            parser.parse(env.tokenize(Source::new(template.clone(), source))?)
         });
         let deprecations: Vec<String> = deprecations
             .into_iter()

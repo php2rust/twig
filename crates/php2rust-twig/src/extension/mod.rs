@@ -1,21 +1,22 @@
 //! Port of Twig\Extension\ExtensionInterface.php and Twig\ExtensionSet.php:
 //! the extensions an environment holds and the registry of their filters,
-//! functions, tests, tag parsers and expression parsers.
+//! functions, tests, tag parsers, expression parsers and node visitors.
 //!
-//! An extension's node visitors and runtime parts come with the emitter
-//! and the runtime. `getOperators()` (deprecated since 3.21) and the
+//! An extension's runtime parts come with the emitter and the runtime. `getOperators()` (deprecated since 3.21) and the
 //! undefined-callable callbacks are not ported.
 //!
 //! Upstream: twig/twig src/Extension/ExtensionInterface.php src/Extension/AbstractExtension.php src/ExtensionSet.php
 
 pub mod core;
 pub mod escaper;
+pub mod optimizer;
 
 use std::{collections::HashMap, rc::Rc};
 
 use crate::{
     callable::TwigCallable,
     expression_parser::{ExpressionParser, ExpressionParsers},
+    node_visitor::NodeVisitor,
     token_parser::TokenParser,
 };
 
@@ -41,6 +42,11 @@ pub trait Extension {
     }
 
     fn expression_parsers(&self) -> Vec<ExpressionParser> {
+        Vec::new()
+    }
+
+    /// `getNodeVisitors()`: new visitors (one set for each parser).
+    fn node_visitors(&self) -> Vec<Box<dyn NodeVisitor>> {
         Vec::new()
     }
 }
@@ -208,6 +214,14 @@ impl ExtensionSet {
     /// `getExpressionParsers()`.
     pub fn expression_parsers(&self) -> &ExpressionParsers {
         &self.expression_parsers
+    }
+
+    /// `getNodeVisitors()`: new visitors, in extension order.
+    pub fn node_visitors(&self) -> Vec<Box<dyn NodeVisitor>> {
+        self.extensions
+            .iter()
+            .flat_map(|e| e.node_visitors())
+            .collect()
     }
 }
 

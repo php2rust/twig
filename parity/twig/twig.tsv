@@ -380,7 +380,7 @@ tests/Extension/SandboxTest.php	SandboxTest::testUnsafePhpParamTypesStillWrap	pe
 tests/Extension/StringLoaderExtensionTest.php	StringLoaderExtensionTest::testIncludeWithTemplateStringAndNoSandbox	pending	
 tests/FactoryRuntimeLoaderTest.php	FactoryRuntimeLoaderTest::testLoad	pending	
 tests/FactoryRuntimeLoaderTest.php	FactoryRuntimeLoaderTest::testLoadReturnsNullForUnmappedRuntime	pending	
-tests/FileExtensionEscapingStrategyTest.php	FileExtensionEscapingStrategyTest::testGuess	pending	
+tests/FileExtensionEscapingStrategyTest.php	FileExtensionEscapingStrategyTest::testGuess	ported	crates/twig/tests/file_extension_escaping_strategy_test.rs::testGuess
 tests/IntegrationTest.php	IntegrationTest::testIntegration	pending	
 tests/IntegrationTest.php	IntegrationTest::testLegacyIntegration	pending	
 tests/LexerTest.php	LexerTest::testBigNumbers	ported	crates/twig/tests/lexer_test.rs::testBigNumbers
@@ -569,38 +569,38 @@ tests/Node/TextTest.php	TextTest::testConstructor	pending
 tests/Node/TextTest.php	TextTest::testIsBlank	pending	
 tests/Node/TypesTest.php	TypesTest::testCompile	pending	
 tests/Node/TypesTest.php	TypesTest::testConstructor	pending	
-tests/NodeVisitor/CorrectnessTest.php	CorrectnessTest::testFilterBodyNodes	pending	
-tests/NodeVisitor/CorrectnessTest.php	CorrectnessTest::testFilterBodyNodesThrowsException	pending	
-tests/NodeVisitor/CorrectnessTest.php	CorrectnessTest::testFilterBodyNodesWithBOM	pending	
+tests/NodeVisitor/CorrectnessTest.php	CorrectnessTest::testFilterBodyNodes	ported	crates/twig/tests/correctness_test.rs::testFilterBodyNodes
+tests/NodeVisitor/CorrectnessTest.php	CorrectnessTest::testFilterBodyNodesThrowsException	ported	crates/twig/tests/correctness_test.rs::testFilterBodyNodesThrowsException
+tests/NodeVisitor/CorrectnessTest.php	CorrectnessTest::testFilterBodyNodesWithBOM	ported	crates/twig/tests/correctness_test.rs::testFilterBodyNodesWithBOM
 tests/NodeVisitor/EscaperTest.php	EscaperTest::testEscapeFilterAddedByALaterVisitorStillEscapes	pending	
 tests/NodeVisitor/EscaperTest.php	EscaperTest::testTemplatesFetchTheEscaperOnlyWhenTheyEscape	pending	
-tests/NodeVisitor/OptimizerTest.php	OptimizerTest::testConstructor	pending	
-tests/NodeVisitor/OptimizerTest.php	OptimizerTest::testForLoopOptimizer	pending	
-tests/NodeVisitor/OptimizerTest.php	OptimizerTest::testForVarOptimizer	pending	
-tests/NodeVisitor/OptimizerTest.php	OptimizerTest::testRenderBlockOptimizer	pending	
-tests/NodeVisitor/OptimizerTest.php	OptimizerTest::testRenderParentBlockOptimizer	pending	
-tests/NodeVisitor/SafeAnalysisTest.php	SafeAnalysisTest::testCompilingDoesNotRetainTheAst	pending	
+tests/NodeVisitor/OptimizerTest.php	OptimizerTest::testConstructor	ported	crates/twig/tests/optimizer_test.rs::testConstructor
+tests/NodeVisitor/OptimizerTest.php	OptimizerTest::testForLoopOptimizer	ported	crates/twig/tests/optimizer_test.rs::testForLoopOptimizer
+tests/NodeVisitor/OptimizerTest.php	OptimizerTest::testForVarOptimizer	ported	crates/twig/tests/optimizer_test.rs::testForVarOptimizer
+tests/NodeVisitor/OptimizerTest.php	OptimizerTest::testRenderBlockOptimizer	ported	crates/twig/tests/optimizer_test.rs::testRenderBlockOptimizer
+tests/NodeVisitor/OptimizerTest.php	OptimizerTest::testRenderParentBlockOptimizer	ported	crates/twig/tests/optimizer_test.rs::testRenderParentBlockOptimizer
+tests/NodeVisitor/SafeAnalysisTest.php	SafeAnalysisTest::testCompilingDoesNotRetainTheAst	ported	crates/twig/tests/safe_analysis_test.rs::testCompilingDoesNotRetainTheAst
 tests/NodeVisitor/SandboxTest.php	SandboxTest::testCustomNodeImplementingCoercesChildrenToStringInterfaceIsWrapped	pending	
 tests/NodeVisitor/SandboxTest.php	SandboxTest::testCustomNonExpressionNodeImplementingCoercesChildrenToStringInterfaceIsWrapped	pending	
 tests/NodeVisitor/SandboxTest.php	SandboxTest::testGeneratorExpression	pending	
 tests/NodeVisitor/SandboxTest.php	SandboxTest::testSelfIsNeverWrapped	pending	
-tests/ParserTest.php	ParserTest::testADynamicMacroCallWithoutParenthesesIsReportedWithoutAName	pending	
-tests/ParserTest.php	ParserTest::testAMacroCallWithParenthesesDoesNotSilenceOneWithoutOnTheSameLine	pending	
-tests/ParserTest.php	ParserTest::testAMacroCallWithoutParenthesesIsReportedOncePerCallSite	pending	
+tests/ParserTest.php	ParserTest::testADynamicMacroCallWithoutParenthesesIsReportedWithoutAName	ported	crates/twig/tests/parser_test.rs::testADynamicMacroCallWithoutParenthesesIsReportedWithoutAName
+tests/ParserTest.php	ParserTest::testAMacroCallWithParenthesesDoesNotSilenceOneWithoutOnTheSameLine	ported	crates/twig/tests/parser_test.rs::testAMacroCallWithParenthesesDoesNotSilenceOneWithoutOnTheSameLine
+tests/ParserTest.php	ParserTest::testAMacroCallWithoutParenthesesIsReportedOncePerCallSite	ported	crates/twig/tests/parser_test.rs::testAMacroCallWithoutParenthesesIsReportedOncePerCallSite
 tests/ParserTest.php	ParserTest::testBodyForChildTemplates	ported	crates/twig/tests/parser_test.rs::testBodyForChildTemplates
 tests/ParserTest.php	ParserTest::testBodyForParentTemplates	ported	crates/twig/tests/parser_test.rs::testBodyForParentTemplates
 tests/ParserTest.php	ParserTest::testCleanupBodyAcceptsAnUnregisteredBlockReference	ported	crates/twig/tests/parser_test.rs::testCleanupBodyAcceptsAnUnregisteredBlockReference
 tests/ParserTest.php	ParserTest::testCleanupBodyForChildTemplatesWithASingleNodeBody	ported	crates/twig/tests/parser_test.rs::testCleanupBodyForChildTemplatesWithASingleNodeBody
 tests/ParserTest.php	ParserTest::testCustomTokenParserCanSetDocumentationTarget	ported	crates/twig/tests/parser_test.rs::testCustomTokenParserCanSetDocumentationTarget
-tests/ParserTest.php	ParserTest::testDistinctMacroCallsWithoutParenthesesOnTheSameLineAreBothReported	pending	
+tests/ParserTest.php	ParserTest::testDistinctMacroCallsWithoutParenthesesOnTheSameLineAreBothReported	ported	crates/twig/tests/parser_test.rs::testDistinctMacroCallsWithoutParenthesesOnTheSameLineAreBothReported
 tests/ParserTest.php	ParserTest::testDocumentationIsAttachedToAssignmentTargets	ported	crates/twig/tests/parser_test.rs::testDocumentationIsAttachedToAssignmentTargets
 tests/ParserTest.php	ParserTest::testDocumentationIsAttachedToMacroNode	ported	crates/twig/tests/parser_test.rs::testDocumentationIsAttachedToMacroNode
 tests/ParserTest.php	ParserTest::testDocumentationIsAttachedToNodes	ported	crates/twig/tests/parser_test.rs::testDocumentationIsAttachedToNodes
-tests/ParserTest.php	ParserTest::testDocumentationIsAvailableToNodeVisitors	pending	
-tests/ParserTest.php	ParserTest::testDocumentationIsRemovedFromUnsupportedOptimizedNodes	pending	
+tests/ParserTest.php	ParserTest::testDocumentationIsAvailableToNodeVisitors	ported	crates/twig/tests/parser_test.rs::testDocumentationIsAvailableToNodeVisitors
+tests/ParserTest.php	ParserTest::testDocumentationIsRemovedFromUnsupportedOptimizedNodes	ported	crates/twig/tests/parser_test.rs::testDocumentationIsRemovedFromUnsupportedOptimizedNodes
 tests/ParserTest.php	ParserTest::testDuplicateMacroDeprecationsReferToPreviousDefinition	ported	crates/twig/tests/parser_test.rs::testDuplicateMacroDeprecationsReferToPreviousDefinition
 tests/ParserTest.php	ParserTest::testDuplicateMacroKeepsOnlyTheLastDocumentation	ported	crates/twig/tests/parser_test.rs::testDuplicateMacroKeepsOnlyTheLastDocumentation
-tests/ParserTest.php	ParserTest::testEachMacroCallWithoutParenthesesIsReportedOnItsOwnLine	pending	
+tests/ParserTest.php	ParserTest::testEachMacroCallWithoutParenthesesIsReportedOnItsOwnLine	ported	crates/twig/tests/parser_test.rs::testEachMacroCallWithoutParenthesesIsReportedOnItsOwnLine
 tests/ParserTest.php	ParserTest::testEmbeddedTemplatesHaveSequentialIndices	ported	crates/twig/tests/parser_test.rs::testEmbeddedTemplatesHaveSequentialIndices
 tests/ParserTest.php	ParserTest::testEmptyCommentIsNotLexedAsDocumentation	ported	crates/twig/tests/parser_test.rs::testEmptyCommentIsNotLexedAsDocumentation
 tests/ParserTest.php	ParserTest::testGetVarName	ported	crates/twig/tests/parser_test.rs::testGetVarName
@@ -610,7 +610,7 @@ tests/ParserTest.php	ParserTest::testMacroDeclarationIsRepresentedInTheTemplateB
 tests/ParserTest.php	ParserTest::testMacroTargetsOnlyCompileAsMacroReferences	ported	crates/twig/tests/parser_test.rs::testMacroTargetsOnlyCompileAsMacroReferences
 tests/ParserTest.php	ParserTest::testMacroTargetsWithParenthesesAreDeprecatedInDefinedTest	ported	crates/twig/tests/parser_test.rs::testMacroTargetsWithParenthesesAreDeprecatedInDefinedTest
 tests/ParserTest.php	ParserTest::testMacroTargetsWithoutParenthesesAreAllowedInDefinedTest	ported	crates/twig/tests/parser_test.rs::testMacroTargetsWithoutParenthesesAreAllowedInDefinedTest
-tests/ParserTest.php	ParserTest::testMacroTargetsWithoutParenthesesAreDeprecated	pending	
+tests/ParserTest.php	ParserTest::testMacroTargetsWithoutParenthesesAreDeprecated	ported	crates/twig/tests/parser_test.rs::testMacroTargetsWithoutParenthesesAreDeprecated
 tests/ParserTest.php	ParserTest::testParseIsReentrant	ported	crates/twig/tests/parser_test.rs::testParseIsReentrant
 tests/ParserTest.php	ParserTest::testUnknownTag	ported	crates/twig/tests/parser_test.rs::testUnknownTag
 tests/ParserTest.php	ParserTest::testUnknownTagWithoutSuggestions	ported	crates/twig/tests/parser_test.rs::testUnknownTagWithoutSuggestions

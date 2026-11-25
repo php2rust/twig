@@ -15,10 +15,27 @@ use twig::{
     node::{Node, NodeClass},
 };
 
-fn parse(template: &str, name: &str) -> Node {
-    Environment::new(Vec::new())
-        .parse_source(Source::new(template, name))
+/// `new Environment(new ArrayLoader(), ['autoescape' => false, 'optimizations' => $optimizations])`.
+fn env(optimizations: i64) -> Environment {
+    Environment::with_options(
+        Vec::new(),
+        twig::EnvironmentOptions {
+            autoescape: twig::Autoescape::Off,
+            optimizations,
+            ..twig::EnvironmentOptions::default()
+        },
+    )
+    .unwrap()
+}
+
+fn parse_with(env: &Environment, template: &str, name: &str) -> Node {
+    env.parse_source(Source::new(template, name))
         .unwrap_or_else(|e| panic!("{template}: {e}"))
+}
+
+/// The environment of most of the tests: no auto-escaping, no optimizations.
+fn parse(template: &str, name: &str) -> Node {
+    parse_with(&env(0), template, name)
 }
 
 fn doc(node: &Node) -> Option<String> {
@@ -38,7 +55,7 @@ fn content_block(module: &Node) -> Node {
 
 /// `parseBlock()`.
 fn parse_block(template: &str) -> Node {
-    content_block(&parse(template, ""))
+    content_block(&parse_with(&env(-1), template, ""))
 }
 
 #[test]

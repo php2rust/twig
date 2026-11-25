@@ -46,6 +46,12 @@ impl Extension for CoreExtension {
         CORE
     }
 
+    fn node_visitors(&self) -> Vec<Box<dyn crate::node_visitor::NodeVisitor>> {
+        vec![Box::new(
+            crate::node_visitor::correctness::CorrectnessNodeVisitor::default(),
+        )]
+    }
+
     fn token_parsers(&self) -> Vec<Rc<dyn TokenParser>> {
         token_parser::core_token_parsers()
     }

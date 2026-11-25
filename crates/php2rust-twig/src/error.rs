@@ -28,6 +28,8 @@ pub enum ErrorKind {
     /// PHP's `\LogicException`: a misuse of the API (upstream throws it
     /// for states a template cannot reach).
     Logic,
+    /// PHP's `\InvalidArgumentException`: an invalid option value.
+    InvalidArgument,
 }
 
 impl ErrorKind {
@@ -39,6 +41,7 @@ impl ErrorKind {
             Self::Loader => "Twig\\Error\\LoaderError",
             Self::Runtime => "Twig\\Error\\RuntimeError",
             Self::Logic => "LogicException",
+            Self::InvalidArgument => "InvalidArgumentException",
         }
     }
 }
@@ -82,6 +85,11 @@ impl Error {
     /// A `\LogicException`: no template location, the message as is.
     pub fn logic(message: impl Into<Vec<u8>>) -> Self {
         Self::new(ErrorKind::Logic, message, -1, None)
+    }
+
+    /// An `\InvalidArgumentException`: no template location, the message as is.
+    pub fn invalid_argument(message: impl Into<Vec<u8>>) -> Self {
+        Self::new(ErrorKind::InvalidArgument, message, -1, None)
     }
 
     /// The same error with the `columnno` constructor argument.
