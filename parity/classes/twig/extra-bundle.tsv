@@ -1,0 +1,19 @@
+# twig/extra-bundle at aaa2993e19293a99240c4c61aa461d743b0dd569: upstream file	classes	code lines	status	rust files
+DependencyInjection/Compiler/MissingExtensionSuggestorPass.php	MissingExtensionSuggestorPass MissingExtensionSuggestorPass	37	pending	
+DependencyInjection/Compiler/TwigCachePoolPass.php	TwigCachePoolPass	29	pending	
+DependencyInjection/Configuration.php	Configuration	79	pending	
+DependencyInjection/TwigExtraExtension.php	TwigExtraExtensionTrait TwigExtraExtensionTrait TwigExtraExtension	50	pending	
+Extensions.php	Extensions	113	pending	
+LeagueCommonMarkConverterFactory.php	LeagueCommonMarkConverterFactory	21	pending	
+MissingExtensionSuggestor.php	MissingExtensionSuggestor	26	pending	
+Resources/config/cache.php	-	29	pending	
+Resources/config/cssinliner.php	-	8	pending	
+Resources/config/html.php	-	8	pending	
+Resources/config/inky.php	-	8	pending	
+Resources/config/intl.php	-	8	pending	
+Resources/config/markdown.php	-	17	pending	
+Resources/config/markdown_league.php	-	16	pending	
+Resources/config/string.php	-	8	pending	
+Resources/config/suggestor.php	-	7	pending	
+TwigExtraBundle.php	TwigExtraBundle TwigExtraBundle	28	pending	
+phpunit-bootstrap.php	-	3	pending	

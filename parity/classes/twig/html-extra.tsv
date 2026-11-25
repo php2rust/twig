@@ -1,0 +1,8 @@
+# twig/html-extra at 7147611979df81edb78baf7d003860b72e335c3f: upstream file	classes	code lines	status	rust files
+Cva.php	Cva	50	pending	
+HtmlAttr/AttributeValueInterface.php	AttributeValueInterface	5	pending	
+HtmlAttr/InlineStyle.php	InlineStyle	45	pending	
+HtmlAttr/MergeableInterface.php	MergeableInterface	6	pending	
+HtmlAttr/SeparatedTokenList.php	SeparatedTokenList	41	pending	
+HtmlExtension.php	HtmlExtension	193	pending	
+Resources/functions.php	-	6	pending	
