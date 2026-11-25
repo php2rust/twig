@@ -22,18 +22,21 @@ PHP.
 | `CallableArgumentsExtractor` (named and positional arguments against parameter specs) | `Util/CallableArgumentsExtractor.php` | unit tests; parser vectors |
 | Extensions: `ExtensionInterface` definitions, `ExtensionSet` lookups with PHP's order and dynamic names; `CoreExtension` and `EscaperExtension` filters, functions, tests, tags and operators (definitions only) | `Extension/*.php`, `ExtensionSet.php` | parser vectors |
 | Expression parsers: prefix, infix, precedence, associativity, precedence-change deprecations, arguments | `ExpressionParser/**/*.php` | ExpressionParserTest (22; 9 n/a; 8 pending on the compiler or runtime); parser vectors |
-| `Parser`: subparse, blocks, macros, imports, traits, embedded templates, documentation targets, child-template body cleanup, unknown tag/filter/function/test messages with suggestions | `Parser.php` | ParserTest (22; 8 pending on node visitors) |
+| `Parser`: subparse, blocks, macros, imports, traits, embedded templates, documentation targets, child-template body cleanup, unknown tag/filter/function/test messages with suggestions, the node visitors at the end of each parse | `Parser.php` | ParserTest (30 of 30) |
+| Node visitors and the traverser: correctness checks (content outside blocks, `extends` placement, `block` under a tag, macro calls without parentheses), optimizer (constant prints to text, direct block/parent output, `for` without `loop`), safe analysis, auto-escaping (`autoescape` option, `'name'` strategy, `autoescape` tag, `pre_escape`); one visitor set for each environment, as in PHP | `NodeTraverser.php`, `NodeVisitor/*.php`, `FileExtensionEscapingStrategy.php`, `Extension/OptimizerExtension.php` | CorrectnessTest (3), OptimizerTest (5), SafeAnalysisTest (1), FileExtensionEscapingStrategyTest (1); EscaperTest pending on the runtime; visitor vectors |
 | Token parsers: every core tag (`apply`, `autoescape`, `block`, `deprecated`, `do`, `embed`, `extends`, `flush`, `for`, `from`, `guard`, `if`, `import`, `include`, `macro`, `sandbox`, `set`, `types`, `use`, `with`) | `TokenParser/*.php` | BlockTokenParserTest (5; 2 pending on the runtime), TypesTokenParserTest (2); parser vectors |
-| `Environment`: extension registry, lexer from the registered operators, `tokenize()`, `parse()` | `Environment.php` (parse side) | all of the above |
+| `Environment`: options `autoescape` and `optimizations`, extension registry, lexer from the registered operators, node visitors, `tokenize()`, `parse()` | `Environment.php` (parse side) | all of the above |
 
 Parser vectors: 806 templates (all upstream fixture templates and 145 edge
 cases) parsed by real Twig with the node visitors off and the extensions of
 `IntegrationTest`. The full node tree (classes, attributes, lines, tags,
 documentation, source names), or the error's class, message and line, and
-the deprecations must match.
+the deprecations must match. Visitor vectors: the same templates and 112
+more cases (`tests/data/parser_visitors_extra.json`, each with its
+`autoescape` and `optimizations` options) parsed with the node visitors
+on, except the sandbox visitor.
 
-Not yet ported: node visitors (escaper, optimizer, correctness, safe
-analysis, sandbox), the Rust emitter, the runtime, loaders, the
+Not yet ported: the sandbox (its node visitor), the Rust emitter, the runtime, loaders, the
 undefined-callable callbacks (GuardTokenParserTest pending), the
 `path()`/`app.request` hooks (after the HTTP path merges), and the
 integration fixtures.
@@ -41,7 +44,8 @@ integration fixtures.
 Vectors: `scripts/record.sh twig-lexer` runs
 `oracle/recorders/twig_lexer.php` and writes `tests/data/lexer.json`;
 `scripts/record.sh twig-parser` runs `oracle/recorders/twig_parser.php` and
-writes `tests/data/parser.json`.
+writes `tests/data/parser.json` (visitors off) and
+`tests/data/parser_visitors.json` (visitors on).
 
 Dependencies: `php-pcre` (workspace) checks the `matches` regex as PHP's
 `preg_match()` does; `symfony-deprecation-contracts` (workspace) for

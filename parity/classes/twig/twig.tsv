@@ -51,16 +51,16 @@ src/Extension/EscaperExtension.php	EscaperExtension	118	ported	crates/twig/src/e
 src/Extension/ExtensionInterface.php	ExtensionInterface	20	ported	crates/twig/src/extension/mod.rs
 src/Extension/GlobalsInterface.php	GlobalsInterface	5	pending	
 src/Extension/LastModifiedExtensionInterface.php	LastModifiedExtensionInterface	5	pending	
-src/Extension/OptimizerExtension.php	OptimizerExtension	13	pending	
+src/Extension/OptimizerExtension.php	OptimizerExtension	13	ported	crates/twig/src/extension/optimizer.rs
 src/Extension/ProfilerExtension.php	ProfilerExtension	28	pending	
 src/Extension/RuntimeExtensionInterface.php	RuntimeExtensionInterface	4	pending	
 src/Extension/SandboxBridgeExtension.php	SandboxBridgeExtension	20	pending	
 src/Extension/SandboxExtension.php	SandboxExtension	84	pending	
 src/Extension/StagingExtension.php	StagingExtension	66	pending	
 src/Extension/StringLoaderExtension.php	StringLoaderExtension	17	pending	
-src/Extension/YieldNotReadyExtension.php	YieldNotReadyExtension	13	pending	
+src/Extension/YieldNotReadyExtension.php	YieldNotReadyExtension	13	n/a: only registers YieldNotReadyNodeVisitor (n/a)	
 src/ExtensionSet.php	ExtensionSet	400	ported	crates/twig/src/extension/mod.rs
-src/FileExtensionEscapingStrategy.php	FileExtensionEscapingStrategy	25	pending	
+src/FileExtensionEscapingStrategy.php	FileExtensionEscapingStrategy	25	ported	crates/twig/src/file_extension_escaping_strategy.rs
 src/Lexer.php	Lexer	528	ported	crates/twig/src/lexer.rs
 src/Loader/ArrayLoader.php	ArrayLoader	39	pending	
 src/Loader/ChainLoader.php	ChainLoader	84	pending	
@@ -204,15 +204,15 @@ src/Node/TextNode.php	TextNode	33	ported	crates/twig/src/node/statement.rs
 src/Node/TypeNode.php	TypeNode	10	ported	crates/twig/src/node/statement.rs
 src/Node/TypesNode.php	TypesNode	18	ported	crates/twig/src/node/statement.rs
 src/Node/WithNode.php	WithNode	46	ported	crates/twig/src/node/statement.rs
-src/NodeTraverser.php	NodeTraverser	43	pending	
-src/NodeVisitor/AbstractNodeVisitor.php	AbstractNodeVisitor	16	pending	
-src/NodeVisitor/CorrectnessNodeVisitor.php	CorrectnessNodeVisitor	177	pending	
-src/NodeVisitor/EscaperNodeVisitor.php	EscaperNodeVisitor	152	pending	
-src/NodeVisitor/NodeVisitorInterface.php	NodeVisitorInterface	9	pending	
-src/NodeVisitor/OptimizerNodeVisitor.php	OptimizerNodeVisitor	136	pending	
-src/NodeVisitor/SafeAnalysisNodeVisitor.php	SafeAnalysisNodeVisitor	120	pending	
+src/NodeTraverser.php	NodeTraverser	43	ported	crates/twig/src/node_visitor/mod.rs
+src/NodeVisitor/AbstractNodeVisitor.php	AbstractNodeVisitor	16	n/a: deprecated since Twig 3.9 for NodeVisitorInterface; a Rust visitor implements the NodeVisitor trait	
+src/NodeVisitor/CorrectnessNodeVisitor.php	CorrectnessNodeVisitor	177	ported	crates/twig/src/node_visitor/correctness.rs
+src/NodeVisitor/EscaperNodeVisitor.php	EscaperNodeVisitor	152	ported	crates/twig/src/node_visitor/escaper.rs
+src/NodeVisitor/NodeVisitorInterface.php	NodeVisitorInterface	9	ported	crates/twig/src/node_visitor/mod.rs
+src/NodeVisitor/OptimizerNodeVisitor.php	OptimizerNodeVisitor	136	ported	crates/twig/src/node_visitor/optimizer.rs
+src/NodeVisitor/SafeAnalysisNodeVisitor.php	SafeAnalysisNodeVisitor	120	ported	crates/twig/src/node_visitor/safe_analysis.rs
 src/NodeVisitor/SandboxNodeVisitor.php	SandboxNodeVisitor	208	pending	
-src/NodeVisitor/YieldNotReadyNodeVisitor.php	YieldNotReadyNodeVisitor	35	pending	
+src/NodeVisitor/YieldNotReadyNodeVisitor.php	YieldNotReadyNodeVisitor	35	n/a: reports node classes without #[YieldReady]; every node class of the port is ready and there are no user node classes	
 src/OperatorPrecedenceChange.php	OperatorPrecedenceChange	13	pending	
 src/Parser.php	Parser	490	ported	crates/twig/src/parser.rs
 src/Profiler/Dumper/BaseDumper.php	BaseDumper	42	pending	
