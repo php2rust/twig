@@ -15,10 +15,10 @@ src/Cache/RemovableCacheInterface.php	RemovableCacheInterface	5	pending
 src/Compiler.php	Compiler	160	pending	
 src/DeprecatedCallableInfo.php	DeprecatedCallableInfo	44	pending	
 src/Environment.php	Environment	489	pending	
-src/Error/Error.php	Error	131	pending	
-src/Error/LoaderError.php	LoaderError	4	pending	
-src/Error/RuntimeError.php	RuntimeError	4	pending	
-src/Error/SyntaxError.php	SyntaxError	19	pending	
+src/Error/Error.php	Error	131	ported	crates/twig/src/error.rs
+src/Error/LoaderError.php	LoaderError	4	ported	crates/twig/src/error.rs
+src/Error/RuntimeError.php	RuntimeError	4	ported	crates/twig/src/error.rs
+src/Error/SyntaxError.php	SyntaxError	19	ported	crates/twig/src/error.rs
 src/ExpressionParser.php	ExpressionParser	231	pending	
 src/ExpressionParser/AbstractExpressionParser.php	AbstractExpressionParser	20	pending	
 src/ExpressionParser/ExpressionParserDescriptionInterface.php	ExpressionParserDescriptionInterface	5	pending	
@@ -61,7 +61,7 @@ src/Extension/StringLoaderExtension.php	StringLoaderExtension	17	pending
 src/Extension/YieldNotReadyExtension.php	YieldNotReadyExtension	13	pending	
 src/ExtensionSet.php	ExtensionSet	400	pending	
 src/FileExtensionEscapingStrategy.php	FileExtensionEscapingStrategy	25	pending	
-src/Lexer.php	Lexer	528	pending	
+src/Lexer.php	Lexer	528	ported	crates/twig/src/lexer.rs
 src/Loader/ArrayLoader.php	ArrayLoader	39	pending	
 src/Loader/ChainLoader.php	ChainLoader	84	pending	
 src/Loader/FilesystemLoader.php	FilesystemLoader	185	pending	
@@ -245,12 +245,12 @@ src/Sandbox/SecurityNotAllowedTestError.php	SecurityNotAllowedTestError	14	pendi
 src/Sandbox/SecurityPolicy.php	SecurityPolicy	133	pending	
 src/Sandbox/SecurityPolicyInterface.php	SecurityPolicyInterface	7	pending	
 src/Sandbox/SourcePolicyInterface.php	SourcePolicyInterface	6	pending	
-src/Source.php	Source	31	pending	
+src/Source.php	Source	31	ported	crates/twig/src/source.rs
 src/Template.php	Template	332	pending	
 src/TemplateWrapper.php	TemplateWrapper	70	pending	
 src/Test/IntegrationTestCase.php	IntegrationTestCase	255	pending	
 src/Test/NodeTestCase.php	NodeTestCase	75	pending	
-src/Token.php	Token	195	pending	
+src/Token.php	Token	195	ported	crates/twig/src/token.rs
 src/TokenParser/AbstractTokenParser.php	AbstractTokenParser	39	pending	
 src/TokenParser/ApplyTokenParser.php	ApplyTokenParser	40	pending	
 src/TokenParser/AutoEscapeTokenParser.php	AutoEscapeTokenParser	35	pending	
@@ -273,7 +273,7 @@ src/TokenParser/TokenParserInterface.php	TokenParserInterface	11	pending
 src/TokenParser/TypesTokenParser.php	TypesTokenParser	61	pending	
 src/TokenParser/UseTokenParser.php	UseTokenParser	39	pending	
 src/TokenParser/WithTokenParser.php	WithTokenParser	29	pending	
-src/TokenStream.php	TokenStream	75	pending	
+src/TokenStream.php	TokenStream	75	ported	crates/twig/src/token_stream.rs
 src/TwigCallableInterface.php	TwigCallableInterface	20	pending	
 src/TwigFilter.php	TwigFilter	43	pending	
 src/TwigFunction.php	TwigFunction	34	pending	
