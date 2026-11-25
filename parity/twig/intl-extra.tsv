@@ -1,0 +1,18 @@
+# twig/intl-extra at 211c603b3f7d5a8f6c6543a02fe9f82c09b18025: upstream test	method	status	rust test
+Tests/IntegrationTest.php	IntegrationTest::testIntegration	pending	
+Tests/IntegrationTest.php	IntegrationTest::testLegacyIntegration	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testDateFormatterCacheIsBounded	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testFormatListThrowsOnFailure	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testFormatterCalendarPrecedence	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testFormatterObjectCalendarChangesAreApplied	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testFormatterOverridenProto	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testFormatterProto	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testFormatterProtoDoesNotOverrideExplicitFormats	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testFormatterProtoFormatFailuresFallBackToMedium	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testFormatterProtoPatternDoesNotOverrideAnExplicitLocale	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testFormatterProtoWithCustomPatternIsUsedByDefault	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testFormatterProtoWithoutDateAndTimeStylesKeepsItsLocale	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testFormatterWithoutProto	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testFormatterWithoutProtoFallsBackToCoreExtensionTimezone	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testFormatterWithoutProtoSkipTimezoneConverter	pending	
+Tests/IntlExtensionTest.php	IntlExtensionTest::testNumberFormatterCacheIsBounded	pending	
