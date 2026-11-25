@@ -17,6 +17,7 @@ use crate::{
     error::{Error, ErrorKind},
     expression_parser::{ExpressionParserType, ParserId, infix, prefix},
     node::{Key, Node, NodeClass, statement},
+    node_visitor::{self, NodeVisitor},
     source::Source,
     token::{Token, TokenType},
     token_stream::{TokenStream, to_line},
@@ -66,6 +67,8 @@ pub struct Parser<'env> {
     state: State,
     stream: TokenStream,
     last_embed_index: i64,
+    /// `$visitors`: taken from the environment at the first parse.
+    visitors: Option<Vec<Box<dyn NodeVisitor>>>,
 }
 
 fn line_of(token: &Token) -> i64 {
@@ -83,7 +86,15 @@ impl<'env> Parser<'env> {
                 Arc::new(Source::new("", "")),
             ),
             last_embed_index: 0,
+            visitors: None,
         }
+    }
+
+    /// Sets the node visitors in place of the environment's (upstream's
+    /// tests set the private `$visitors` by reflection; an empty list
+    /// parses without them).
+    pub fn set_node_visitors(&mut self, visitors: Vec<Box<dyn NodeVisitor>>) {
+        self.visitors = Some(visitors);
     }
 
     /// `getEnvironment()`.
@@ -184,6 +195,14 @@ impl<'env> Parser<'env> {
             embedded,
             self.stream().source_context(),
         );
+
+        let mut visitors = self
+            .visitors
+            .take()
+            .unwrap_or_else(|| self.env.node_visitors());
+        let traversed = node_visitor::traverse(self.env, &mut visitors, node);
+        self.visitors = Some(visitors);
+        let node = traversed?;
 
         if let Some(previous) = self.stack.pop() {
             self.state = previous;

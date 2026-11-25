@@ -1,7 +1,8 @@
 //! Port of the definitions in Twig\Extension\EscaperExtension.php: the
 //! `autoescape` tag and the `escape`, `e` and `raw` filters.
 //!
-//! The default strategy and the escaper visitor come with the emitter.
+//! The default strategy (`setDefaultStrategy()`, `getDefaultStrategy()`) is
+//! the environment's `autoescape` option, see `Environment::default_escaping_strategy()`.
 //!
 //! Upstream: twig/twig src/Extension/EscaperExtension.php
 
@@ -23,6 +24,12 @@ const RUNTIME: &str = "Twig\\Runtime\\EscaperRuntime::escape";
 impl Extension for EscaperExtension {
     fn name(&self) -> &'static str {
         "Twig\\Extension\\EscaperExtension"
+    }
+
+    fn node_visitors(&self) -> Vec<Box<dyn crate::node_visitor::NodeVisitor>> {
+        vec![Box::new(
+            crate::node_visitor::escaper::EscaperNodeVisitor::default(),
+        )]
     }
 
     fn token_parsers(&self) -> Vec<Rc<dyn TokenParser>> {

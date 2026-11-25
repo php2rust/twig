@@ -31,8 +31,22 @@ use twig::{
     node::{Node, NodeClass, expression},
 };
 
+/// `new Environment(new ArrayLoader(), ['cache' => false, 'autoescape' => false])`.
 fn env() -> Environment {
-    Environment::new(Vec::new())
+    env_with_options(-1, Vec::new())
+}
+
+/// As [`env`], with `'optimizations' => $optimizations`.
+fn env_with_options(optimizations: i64, extensions: Vec<Rc<dyn Extension>>) -> Environment {
+    Environment::with_options(
+        extensions,
+        twig::EnvironmentOptions {
+            autoescape: twig::Autoescape::Off,
+            optimizations,
+            ..twig::EnvironmentOptions::default()
+        },
+    )
+    .unwrap()
 }
 
 #[derive(Default)]
@@ -212,7 +226,7 @@ fn testSequenceSyntaxError() {
 
 #[test]
 fn testStringExpressionDoesNotConcatenateTwoConsecutiveStrings() {
-    assert_syntax_error(&env(), "{{ \"a\" \"b\" }}", "");
+    assert_syntax_error(&env_with_options(0, Vec::new()), "{{ \"a\" \"b\" }}", "");
 }
 
 #[test]
@@ -261,7 +275,7 @@ fn testObjectDestructuringUsesAssignmentTargets() {
 
 #[test]
 fn testStringExpression() {
-    let env = env();
+    let env = env_with_options(0, Vec::new());
     let cases = vec![
         ("{{ \"foo #{bar}\" }}", concat(c("foo "), var("bar"))),
         (
@@ -379,25 +393,31 @@ fn testUnknownTestWithoutSuggestions() {
 #[test]
 fn testTwoWordTestPrecedence() {
     // a "empty element" test must have precedence over "empty"
-    let env = Environment::new(vec![Rc::new(TestExtension {
-        tests: vec![TwigCallable::test("empty element", Some("foo"))],
-        ..TestExtension::default()
-    })]);
+    let env = env_with_options(
+        -1,
+        vec![Rc::new(TestExtension {
+            tests: vec![TwigCallable::test("empty element", Some("foo"))],
+            ..TestExtension::default()
+        })],
+    );
     parse(&env, "{{ 1 is empty element }}", "index").unwrap_or_else(|e| panic!("{e}"));
 }
 
 #[test]
 fn testUnaryPrecedenceChange() {
-    let env = Environment::new(vec![Rc::new(TestExtension {
-        expression_parsers: vec![ExpressionParser::unary(NodeClass::NotUnary, "!", 50)],
-        ..TestExtension::default()
-    })]);
+    let env = env_with_options(
+        -1,
+        vec![Rc::new(TestExtension {
+            expression_parsers: vec![ExpressionParser::unary(NodeClass::NotUnary, "!", 50)],
+            ..TestExtension::default()
+        })],
+    );
     parse(&env, "{{ !false ? \"OK\" : \"KO\" }}", "index").unwrap_or_else(|e| panic!("{e}"));
 }
 
 #[test]
 fn testLiteralExpressionParserGetOperatorTokensReturnsEmptyArray() {
-    let env = env();
+    let env = Environment::new(Vec::new());
     let parsers = env.expression_parsers();
     let parser = parsers.get(
         parsers
@@ -411,7 +431,7 @@ fn testLiteralExpressionParserGetOperatorTokensReturnsEmptyArray() {
 
 #[test]
 fn testExpressionParserGetOperatorTokensDefaultBehavior() {
-    let env = env();
+    let env = Environment::new(Vec::new());
     let parsers = env.expression_parsers();
     for id in parsers.ids() {
         let parser = parsers.get(id);
@@ -432,7 +452,7 @@ fn testExpressionParserGetOperatorTokensDefaultBehavior() {
 #[test]
 fn testLiteralIsNotRegisteredAsOperator() {
     // Ensure "literal" is not in the operator registry
-    let env = env();
+    let env = Environment::new(Vec::new());
     let parsers = env.expression_parsers();
     assert!(
         parsers

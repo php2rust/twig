@@ -36,7 +36,8 @@ impl CallableType {
         }
     }
 
-    fn php_class(self) -> &'static str {
+    /// The PHP class of the callable object.
+    pub fn php_class(self) -> &'static str {
         match self {
             Self::Filter => "Twig\\TwigFilter",
             Self::Function => "Twig\\TwigFunction",

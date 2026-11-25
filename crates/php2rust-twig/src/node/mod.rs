@@ -327,6 +327,12 @@ impl Node {
         Self::new(NodeClass::EmptyNode, Vec::new(), Vec::new(), lineno)
     }
 
+    /// The node's identity, for maps keyed by node (PHP's `WeakMap`,
+    /// `SplObjectStorage`). Stable while a handle to the node is kept.
+    pub fn id(&self) -> usize {
+        Rc::as_ptr(&self.0).addr()
+    }
+
     /// Whether both handles are the same node (`===`).
     pub fn ptr_eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)

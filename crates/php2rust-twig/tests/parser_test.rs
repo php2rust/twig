@@ -4,16 +4,7 @@
 //! contains the text. `expectDeprecation` and `collectDeprecations()` use
 //! `symfony_deprecation_contracts::collect`.
 //!
-//! Not here (pending, they need the node visitors: `CorrectnessNodeVisitor`
-//! reports macro calls without parentheses, `OptimizerNodeVisitor` turns
-//! constant prints into text): testMacroTargetsWithoutParenthesesAreDeprecated,
-//! testAMacroCallWithoutParenthesesIsReportedOncePerCallSite,
-//! testEachMacroCallWithoutParenthesesIsReportedOnItsOwnLine,
-//! testDistinctMacroCallsWithoutParenthesesOnTheSameLineAreBothReported,
-//! testADynamicMacroCallWithoutParenthesesIsReportedWithoutAName,
-//! testAMacroCallWithParenthesesDoesNotSilenceOneWithoutOnTheSameLine,
-//! testDocumentationIsAvailableToNodeVisitors,
-//! testDocumentationIsRemovedFromUnsupportedOptimizedNodes.
+//! Not here (pending, it needs a user node visitor class): testDocumentationIsAvailableToNodeVisitors.
 //!
 //! Upstream: twig/twig tests/ParserTest.php
 #![allow(non_snake_case, clippy::unwrap_used, clippy::expect_used)]
@@ -35,7 +26,24 @@ fn env() -> Environment {
     Environment::new(Vec::new())
 }
 
+/// `new Environment(new ArrayLoader(), ['autoescape' => false, 'optimizations' => $optimizations])`.
+fn env_without_autoescape(optimizations: i64, extensions: Vec<Rc<dyn Extension>>) -> Environment {
+    Environment::with_options(
+        extensions,
+        twig::EnvironmentOptions {
+            autoescape: twig::Autoescape::Off,
+            optimizations,
+            ..twig::EnvironmentOptions::default()
+        },
+    )
+    .unwrap()
+}
+
 fn env_with(parser: impl TokenParser + 'static) -> Environment {
+    Environment::new(vec![ext(parser)])
+}
+
+fn ext(parser: impl TokenParser + 'static) -> Rc<dyn Extension> {
     struct Ext(Rc<dyn TokenParser>);
     impl Extension for Ext {
         fn name(&self) -> &'static str {
@@ -45,7 +53,7 @@ fn env_with(parser: impl TokenParser + 'static) -> Environment {
             vec![self.0.clone()]
         }
     }
-    Environment::new(vec![Rc::new(Ext(Rc::new(parser)))])
+    Rc::new(Ext(Rc::new(parser)))
 }
 
 fn parse(env: &Environment, template: &str) -> Node {
@@ -176,7 +184,7 @@ impl TokenParser for ReentrantTokenParser {
 
 #[test]
 fn testParseIsReentrant() {
-    let env = env_with(ReentrantTokenParser);
+    let env = env_without_autoescape(0, vec![ext(ReentrantTokenParser)]);
     let mut parser = Parser::new(&env);
     parser
         .parse(stream(vec![
@@ -194,7 +202,7 @@ fn testParseIsReentrant() {
 
 #[test]
 fn testGetVarName() {
-    let env = env();
+    let env = env_without_autoescape(0, Vec::new());
     parse(
         &env,
         "{% from _self import foo %}\n\n{% macro foo() %}\n    {{ foo }}\n{% endmacro %}",
@@ -390,7 +398,7 @@ fn testCleanupBodyAcceptsAnUnregisteredBlockReference() {
 #[test]
 fn testDocumentationIsAttachedToNodes() {
     let module = parse(
-        &env(),
+        &env_without_autoescape(-1, Vec::new()),
         "{## Printed expression #}\n{{ answer }}\n{## Conditional tag #}\n{% if enabled %}Enabled{% endif %}\n{## Do tag #}\n{% do max() %}\n{## Text node #}\nText",
     );
     let body = body(&module);
@@ -412,7 +420,7 @@ fn testDocumentationIsAttachedToNodes() {
 #[test]
 fn testEmptyCommentIsNotLexedAsDocumentation() {
     let module = parse(
-        &env(),
+        &env_without_autoescape(-1, Vec::new()),
         "{##}{{ answer }}\n{% block a %}x{##}{% endblock %}{% block b %}y{% endblock %}",
     );
     let body = body(&module);
@@ -423,7 +431,10 @@ fn testEmptyCommentIsNotLexedAsDocumentation() {
 
 #[test]
 fn testInlineDocumentationBeforeATagNameIsIgnored() {
-    let module = parse(&env(), "{% ## Not tag documentation\ndo max() %}");
+    let module = parse(
+        &env_without_autoescape(-1, Vec::new()),
+        "{% ## Not tag documentation\ndo max() %}",
+    );
     assert_eq!(doc(&body(&module)), None);
 }
 
@@ -462,7 +473,7 @@ fn testCustomTokenParserCanSetDocumentationTarget() {
 #[test]
 fn testDocumentationIsAttachedToAssignmentTargets() {
     let module = parse(
-        &env(),
+        &env_without_autoescape(0, Vec::new()),
         "{% set ## First name\n    first_name, ## Last name\n    last_name = user.first_name, user.last_name\n%}\n{% for ## Product identifier\n    product_id, ## Product\n    product in products\n%}{% endfor %}",
     );
     let body = body(&module);
@@ -557,4 +568,118 @@ fn testBodyForParentTemplates() {
     assert_eq!(child(&body, "2").tag().as_deref(), Some("set"));
     assert!(child(&body, "3").is(NodeClass::TextNode));
     assert_eq!(child(&body, "4").tag().as_deref(), Some("block"));
+}
+
+#[test]
+fn testMacroTargetsWithoutParenthesesAreDeprecated() {
+    let env = env();
+    for (expression, macro_name) in macro_target_expressions_without_parentheses() {
+        let expected = match macro_name {
+            None => "Since twig/twig 3.29: Omitting parentheses when calling a macro is deprecated and will throw a SyntaxError in Twig 4.0; add parentheses after the macro name in \"index\" at line 1.".to_owned(),
+            Some(name) => format!("Since twig/twig 3.29: Omitting parentheses when calling the macro \"{name}\" is deprecated and will throw a SyntaxError in Twig 4.0; add parentheses after the macro name in \"index\" at line 1."),
+        };
+        let (module, deprecations) = deprecations_of(
+            &env,
+            &format!("{{% import _self as macros %}}{{{{ {expression} }}}}"),
+        );
+        assert!(
+            deprecations.contains(&expected),
+            "{expression}: {deprecations:?}"
+        );
+        assert_eq!(collect_expressions(&module), (1, 0), "{expression}");
+    }
+}
+
+#[test]
+fn testAMacroCallWithoutParenthesesIsReportedOncePerCallSite() {
+    let env = env();
+    for expression in [
+        "macros.foo ?? \"x\"",
+        "macros.foo ?: \"x\"",
+        "name|default(macros.foo)",
+    ] {
+        let (_, deprecations) = deprecations_of(
+            &env,
+            &format!("{{% import _self as macros %}}{{{{ {expression} }}}}"),
+        );
+        assert_eq!(
+            deprecations,
+            [
+                "Since twig/twig 3.29: Omitting parentheses when calling the macro \"foo\" is deprecated and will throw a SyntaxError in Twig 4.0; add parentheses after the macro name in \"index\" at line 1."
+            ],
+            "{expression}"
+        );
+    }
+}
+
+#[test]
+fn testEachMacroCallWithoutParenthesesIsReportedOnItsOwnLine() {
+    let (_, deprecations) = deprecations_of(
+        &env(),
+        "{% import _self as macros %}{{ macros.foo ?: 'x' }}\n{{ macros.foo ?: 'x' }}",
+    );
+    assert_eq!(
+        deprecations,
+        [
+            "Since twig/twig 3.29: Omitting parentheses when calling the macro \"foo\" is deprecated and will throw a SyntaxError in Twig 4.0; add parentheses after the macro name in \"index\" at line 1.",
+            "Since twig/twig 3.29: Omitting parentheses when calling the macro \"foo\" is deprecated and will throw a SyntaxError in Twig 4.0; add parentheses after the macro name in \"index\" at line 2.",
+        ]
+    );
+}
+
+#[test]
+fn testDistinctMacroCallsWithoutParenthesesOnTheSameLineAreBothReported() {
+    let (_, deprecations) = deprecations_of(
+        &env(),
+        "{% import _self as macros %}{{ macros.foo }}{{ macros.bar }}",
+    );
+    assert_eq!(
+        deprecations,
+        [
+            "Since twig/twig 3.29: Omitting parentheses when calling the macro \"foo\" is deprecated and will throw a SyntaxError in Twig 4.0; add parentheses after the macro name in \"index\" at line 1.",
+            "Since twig/twig 3.29: Omitting parentheses when calling the macro \"bar\" is deprecated and will throw a SyntaxError in Twig 4.0; add parentheses after the macro name in \"index\" at line 1.",
+        ]
+    );
+}
+
+#[test]
+fn testADynamicMacroCallWithoutParenthesesIsReportedWithoutAName() {
+    let (_, deprecations) = deprecations_of(
+        &env(),
+        "{% import _self as macros %}{{ macros.(name) ?: \"x\" }}",
+    );
+    assert_eq!(
+        deprecations,
+        [
+            "Since twig/twig 3.29: Omitting parentheses when calling a macro is deprecated and will throw a SyntaxError in Twig 4.0; add parentheses after the macro name in \"index\" at line 1."
+        ]
+    );
+}
+
+#[test]
+fn testAMacroCallWithParenthesesDoesNotSilenceOneWithoutOnTheSameLine() {
+    let (_, deprecations) = deprecations_of(
+        &env(),
+        "{% import _self as macros %}{{ macros.foo() }}{{ macros.foo }}",
+    );
+    assert_eq!(
+        deprecations,
+        [
+            "Since twig/twig 3.29: Omitting parentheses when calling the macro \"foo\" is deprecated and will throw a SyntaxError in Twig 4.0; add parentheses after the macro name in \"index\" at line 1."
+        ]
+    );
+}
+
+#[test]
+fn testDocumentationIsRemovedFromUnsupportedOptimizedNodes() {
+    let module = parse(
+        &env_without_autoescape(-1, Vec::new()),
+        "{## Text node #}\n{{ 'Hello' }}\n{## Block reference #}\n{{ block('content') }}\n{% block content %}Content{% endblock %}",
+    );
+    let body = body(&module);
+
+    assert!(child(&body, "0").is(NodeClass::TextNode));
+    assert_eq!(doc(&child(&body, "0")), None);
+    assert!(child(&body, "2").is(NodeClass::BlockReferenceExpression));
+    assert_eq!(doc(&child(&body, "2")), None);
 }

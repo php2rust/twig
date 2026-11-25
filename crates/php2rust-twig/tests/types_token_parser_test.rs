@@ -12,13 +12,20 @@ use twig::{
 };
 
 fn types_node(template: &str) -> Node {
-    Environment::new(Vec::new())
-        .parse_source(Source::new(template, ""))
-        .unwrap_or_else(|e| panic!("{template}: {e}"))
-        .get_node("body")
-        .unwrap()
-        .get_node("0")
-        .unwrap()
+    Environment::with_options(
+        Vec::new(),
+        twig::EnvironmentOptions {
+            autoescape: twig::Autoescape::Off,
+            ..twig::EnvironmentOptions::default()
+        },
+    )
+    .unwrap()
+    .parse_source(Source::new(template, ""))
+    .unwrap_or_else(|e| panic!("{template}: {e}"))
+    .get_node("body")
+    .unwrap()
+    .get_node("0")
+    .unwrap()
 }
 
 fn mapping(node: &Node) -> Vec<(String, String, bool)> {

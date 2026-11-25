@@ -1,5 +1,6 @@
-//! Port of the parse-time part of Twig\Environment.php: the extensions,
-//! the lexer, `tokenize()` and `parse()`.
+//! Port of the parse-time part of Twig\Environment.php: the options that
+//! change parsing (`autoescape`, `optimizations`), the extensions, the
+//! lexer, the node visitors, `tokenize()` and `parse()`.
 //!
 //! Loading, caching, compiling and rendering come with the emitter and
 //! the runtime.
@@ -12,9 +13,14 @@ use crate::{
     callable::TwigCallable,
     error::Error,
     expression_parser::ExpressionParsers,
-    extension::{Extension, ExtensionSet, core::CoreExtension, escaper::EscaperExtension},
+    extension::{
+        Extension, ExtensionSet, core::CoreExtension, escaper::EscaperExtension,
+        optimizer::OptimizerExtension,
+    },
+    file_extension_escaping_strategy,
     lexer::{Lexer, LexerOptions},
     node::Node,
+    node_visitor::{NodeVisitor, optimizer::OptimizerNodeVisitor},
     parser::Parser,
     source::Source,
     token_parser::TokenParser,
@@ -24,10 +30,45 @@ use crate::{
 /// `Environment::VERSION`.
 pub const VERSION: &str = "3.30.0";
 
+/// The `autoescape` option: `EscaperExtension`'s default strategy.
+#[derive(Clone, Debug)]
+pub enum Autoescape {
+    /// `false`: no auto-escaping.
+    Off,
+    /// A strategy name (`'html'`, `'js'`, ...).
+    Strategy(Vec<u8>),
+    /// `'name'`: `FileExtensionEscapingStrategy::guess()`.
+    Name,
+    /// A callable: the strategy for a template name, `None` for `false`.
+    Callback(fn(&[u8]) -> Option<Vec<u8>>),
+}
+
+/// The `Environment` constructor options that change parsing.
+#[derive(Clone, Debug)]
+pub struct EnvironmentOptions {
+    /// `autoescape`, default `'html'`.
+    pub autoescape: Autoescape,
+    /// `optimizations`, default -1 (`OptimizerNodeVisitor::OPTIMIZE_ALL`).
+    pub optimizations: i64,
+    /// `setLexer(new Lexer($env, $options))`.
+    pub lexer: LexerOptions,
+}
+
+impl Default for EnvironmentOptions {
+    fn default() -> Self {
+        Self {
+            autoescape: Autoescape::Strategy(b"html".to_vec()),
+            optimizations: -1,
+            lexer: LexerOptions::default(),
+        }
+    }
+}
+
 /// `Environment`, for parsing.
 pub struct Environment {
     extension_set: ExtensionSet,
     lexer: Lexer,
+    autoescape: Autoescape,
 }
 
 impl Default for Environment {
@@ -37,24 +78,67 @@ impl Default for Environment {
 }
 
 impl Environment {
-    /// `new Environment($loader)`: the core and escaper extensions, then
-    /// these ones (`addExtension()`), with the default lexer options.
+    /// `new Environment($loader)`: the core, escaper and optimizer
+    /// extensions, then these ones (`addExtension()`), with the default
+    /// options.
     pub fn new(extensions: Vec<Rc<dyn Extension>>) -> Self {
-        Self::with_lexer_options(extensions, LexerOptions::default())
+        Self::build(extensions, EnvironmentOptions::default())
     }
 
     /// As [`Environment::new`], with `setLexer(new Lexer($env, $options))`.
     pub fn with_lexer_options(extensions: Vec<Rc<dyn Extension>>, options: LexerOptions) -> Self {
-        let mut all: Vec<Rc<dyn Extension>> =
-            vec![Rc::new(CoreExtension), Rc::new(EscaperExtension)];
+        Self::build(
+            extensions,
+            EnvironmentOptions {
+                lexer: options,
+                ..EnvironmentOptions::default()
+            },
+        )
+    }
+
+    /// `new Environment($loader, $options)`; an invalid `optimizations`
+    /// mode is upstream's `InvalidArgumentException`.
+    pub fn with_options(
+        extensions: Vec<Rc<dyn Extension>>,
+        options: EnvironmentOptions,
+    ) -> Result<Self, Error> {
+        OptimizerNodeVisitor::check_mode(options.optimizations)?;
+        Ok(Self::build(extensions, options))
+    }
+
+    fn build(extensions: Vec<Rc<dyn Extension>>, options: EnvironmentOptions) -> Self {
+        let mut all: Vec<Rc<dyn Extension>> = vec![
+            Rc::new(CoreExtension),
+            Rc::new(EscaperExtension),
+            Rc::new(OptimizerExtension::new(options.optimizations)),
+        ];
         all.extend(extensions);
         let extension_set = ExtensionSet::new(all);
         let operators = extension_set.expression_parsers().operator_tokens();
-        let lexer = Lexer::with_operators(operators.iter().map(Vec::as_slice), options);
+        let lexer = Lexer::with_operators(operators.iter().map(Vec::as_slice), options.lexer);
         Self {
             extension_set,
             lexer,
+            autoescape: options.autoescape,
         }
+    }
+
+    /// `getExtension(EscaperExtension::class)->getDefaultStrategy($name)`:
+    /// the strategy, or `None` for `false`.
+    pub fn default_escaping_strategy(&self, name: &str) -> Option<Vec<u8>> {
+        match &self.autoescape {
+            Autoescape::Off => None,
+            Autoescape::Strategy(s) => Some(s.clone()),
+            Autoescape::Name => {
+                file_extension_escaping_strategy::guess(name.as_bytes()).map(<[u8]>::to_vec)
+            }
+            Autoescape::Callback(f) => f(name.as_bytes()),
+        }
+    }
+
+    /// `getNodeVisitors()`: a new set of visitors.
+    pub fn node_visitors(&self) -> Vec<Box<dyn NodeVisitor>> {
+        self.extension_set.node_visitors()
     }
 
     /// `getExtensionSet()`.

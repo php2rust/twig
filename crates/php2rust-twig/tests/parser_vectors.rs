@@ -270,7 +270,9 @@ fn trees_match_php() {
         let source = case["source"].as_str().unwrap();
         let template = bytes(&case["template"]);
         let (result, deprecations) = symfony_deprecation_contracts::collect(|| {
-            env.parse_source(Source::new(template.clone(), source))
+            let mut parser = Parser::new(&env);
+            parser.set_node_visitors(Vec::new());
+            parser.parse(env.tokenize(Source::new(template.clone(), source))?)
         });
         let deprecations: Vec<String> = deprecations
             .into_iter()
