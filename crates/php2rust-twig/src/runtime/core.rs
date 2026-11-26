@@ -206,7 +206,7 @@ fn key_of(key: &Value) -> R<Key> {
 }
 
 /// `iterator_to_array($value, $preserveKeys)`.
-fn iterator_to_array(value: &Value, preserve_keys: bool) -> R<PhpArray> {
+pub(crate) fn iterator_to_array(value: &Value, preserve_keys: bool) -> R<PhpArray> {
     let mut out = PhpArray::new();
     for (k, v) in traverse(value)? {
         if preserve_keys {
@@ -1490,7 +1490,12 @@ pub fn sort(call: &Call<'_>, args: Vec<Value>) -> R {
         )));
     };
     let arrow = arg(&args, 1);
-    let arrow = if arrow.is_null() { None } else { Some(&arrow) };
+    let arrow = if arrow.is_null() {
+        None
+    } else {
+        check_arrow(call.env, call.source(), &arrow, "sort", "filter")?;
+        Some(&arrow)
+    };
     Ok(Value::Array(sort_pairs(call.env, &array, arrow)?))
 }
 
@@ -1541,7 +1546,7 @@ pub fn batch(_: &Call<'_>, args: Vec<Value>) -> R {
 }
 
 /// The `column` filter (`array_column()`).
-pub fn column(_: &Call<'_>, args: Vec<Value>) -> R {
+pub fn column(call: &Call<'_>, args: Vec<Value>) -> R {
     let array = arg(&args, 0);
     if !is_iterable_value(&array) {
         return Err(runtime(format!(
@@ -1552,6 +1557,18 @@ pub fn column(_: &Call<'_>, args: Vec<Value>) -> R {
     let array = array_of(&array, true)?;
     let name = arg(&args, 1);
     let index = arg(&args, 2);
+    if super::sandbox::is_sandboxed(call.env, call.source()) {
+        // the policy itself: the sandbox state is the call site's
+        let policy = super::sandbox::checker(call.env)?.security_policy();
+        for item in array.values() {
+            if let Value::Object(o) = item {
+                policy.check_property_allowed(&**o, &string_of(&name)?)?;
+                if !index.is_null() {
+                    policy.check_property_allowed(&**o, &string_of(&index)?)?;
+                }
+            }
+        }
+    }
     let read = |row: &Value, key: &Value| -> Option<Value> {
         match row {
             Value::Array(a) => Key::from_value(key).and_then(|k| a.get(&k).cloned()),
@@ -1587,16 +1604,30 @@ pub fn column(_: &Call<'_>, args: Vec<Value>) -> R {
     Ok(Value::Array(out))
 }
 
-fn check_arrow(env: &Environment, arrow: &Value, thing: &str, kind: &str) {
-    let _ = env;
+/// `checkArrow()`: a callable that is not a `\Closure` is refused in a
+/// sandbox, and deprecated elsewhere.
+fn check_arrow(
+    env: &Environment,
+    source: &Arc<Source>,
+    arrow: &Value,
+    thing: &str,
+    kind: &str,
+) -> R<()> {
     let is_closure = matches!(arrow, Value::Object(o) if o.class() == "Closure");
-    if !is_closure {
-        symfony_deprecation_contracts::trigger_deprecation(
-            b"twig/twig",
-            b"3.15",
-            format!("Passing a callable that is not a PHP \\Closure as an argument to the \"{thing}\" {kind} is deprecated.").as_bytes(),
-        );
+    if is_closure {
+        return Ok(());
     }
+    if super::sandbox::is_sandboxed(env, source) {
+        return Err(runtime(format!(
+            "The callable passed to the \"{thing}\" {kind} must be a Closure in sandbox mode."
+        )));
+    }
+    symfony_deprecation_contracts::trigger_deprecation(
+        b"twig/twig",
+        b"3.15",
+        format!("Passing a callable that is not a PHP \\Closure as an argument to the \"{thing}\" {kind} is deprecated.").as_bytes(),
+    );
+    Ok(())
 }
 
 /// The `filter` filter.
@@ -1609,7 +1640,7 @@ pub fn filter(call: &Call<'_>, args: Vec<Value>) -> R {
             array.debug_type()
         )));
     }
-    check_arrow(call.env, &arrow, "filter", "filter");
+    check_arrow(call.env, call.source(), &arrow, "filter", "filter")?;
     let mut out = PhpArray::new();
     for (k, v) in traverse(&array)? {
         if super::call_arrow(call.env, &arrow, &[v.clone(), k.clone()])?.is_truthy() {
@@ -1634,7 +1665,7 @@ pub fn find_filter(call: &Call<'_>, args: Vec<Value>) -> R {
             array.debug_type()
         )));
     }
-    check_arrow(call.env, &arrow, "find", "filter");
+    check_arrow(call.env, call.source(), &arrow, "find", "filter")?;
     for (k, v) in traverse(&array)? {
         if super::call_arrow(call.env, &arrow, &[v.clone(), k])?.is_truthy() {
             return Ok(v);
@@ -1653,7 +1684,7 @@ pub fn map(call: &Call<'_>, args: Vec<Value>) -> R {
             array.debug_type()
         )));
     }
-    check_arrow(call.env, &arrow, "map", "filter");
+    check_arrow(call.env, call.source(), &arrow, "map", "filter")?;
     let mut out = PhpArray::new();
     for (k, v) in traverse(&array)? {
         let mapped = super::call_arrow(call.env, &arrow, &[v, k.clone()])?;
@@ -1672,7 +1703,7 @@ pub fn reduce(call: &Call<'_>, args: Vec<Value>) -> R {
             array.debug_type()
         )));
     }
-    check_arrow(call.env, &arrow, "reduce", "filter");
+    check_arrow(call.env, call.source(), &arrow, "reduce", "filter")?;
     let mut accumulator = arg(&args, 2);
     for (k, v) in traverse(&array)? {
         accumulator = super::call_arrow(call.env, &arrow, &[accumulator, v, k])?;
@@ -1681,14 +1712,19 @@ pub fn reduce(call: &Call<'_>, args: Vec<Value>) -> R {
 }
 
 /// The `has some` operator (`arraySome()`).
-pub fn array_some(env: &Environment, array: &Value, arrow: &Value) -> R<bool> {
+pub fn array_some(
+    env: &Environment,
+    source: &Arc<Source>,
+    array: &Value,
+    arrow: &Value,
+) -> R<bool> {
     if !is_iterable_value(array) {
         return Err(runtime(format!(
             "The \"has some\" test expects a sequence or a mapping, got \"{}\".",
             array.debug_type()
         )));
     }
-    check_arrow(env, arrow, "has some", "operator");
+    check_arrow(env, source, arrow, "has some", "operator")?;
     for (k, v) in traverse(array)? {
         if super::call_arrow(env, arrow, &[v, k])?.is_truthy() {
             return Ok(true);
@@ -1698,14 +1734,19 @@ pub fn array_some(env: &Environment, array: &Value, arrow: &Value) -> R<bool> {
 }
 
 /// The `has every` operator (`arrayEvery()`).
-pub fn array_every(env: &Environment, array: &Value, arrow: &Value) -> R<bool> {
+pub fn array_every(
+    env: &Environment,
+    source: &Arc<Source>,
+    array: &Value,
+    arrow: &Value,
+) -> R<bool> {
     if !is_iterable_value(array) {
         return Err(runtime(format!(
             "The \"has every\" test expects a sequence or a mapping, got \"{}\".",
             array.debug_type()
         )));
     }
-    check_arrow(env, arrow, "has every", "operator");
+    check_arrow(env, source, arrow, "has every", "operator")?;
     for (k, v) in traverse(array)? {
         if !super::call_arrow(env, arrow, &[v, k])?.is_truthy() {
             return Ok(false);
@@ -2358,14 +2399,31 @@ pub fn include(call: &Call<'_>, args: Vec<Value>) -> R {
         };
         symfony_deprecation_contracts::trigger_deprecation(b"twig/twig", b"3.29", message);
     }
-    include_template(
+    // the legacy sandbox state, on for the included template
+    let sandbox = match call.env.sandbox() {
+        Some(s) if arg(&args, 4).is_truthy() => Some(s.checker()),
+        _ => None,
+    };
+    let already_sandboxed = sandbox.is_none_or(|s| s.is_sandboxed(None));
+    if let Some(sandbox) = sandbox
+        && !already_sandboxed
+    {
+        sandbox.set_sandboxed(true);
+    }
+    let result = include_template(
         call.env,
         call.context,
         &arg(&args, 0),
         &arg_or(&args, 1, Value::Array(PhpArray::new())),
         arg_or(&args, 2, Value::Bool(true)).is_truthy(),
         arg(&args, 3).is_truthy(),
-    )
+    );
+    if let Some(sandbox) = sandbox
+        && !already_sandboxed
+    {
+        sandbox.set_sandboxed(false);
+    }
+    result
 }
 
 /// The `include_only` function.
@@ -2474,16 +2532,29 @@ pub fn get_attribute(
     kind: &str,
     is_defined_test: bool,
     ignore_strict_check: bool,
+    sandboxed: bool,
     lineno: i64,
 ) -> R {
     let error = |message: String| Error::runtime(message, lineno, Some(Arc::clone(source)));
     let lenient = ignore_strict_check || !env.is_strict_variables();
+    let checker = if sandboxed {
+        Some(crate::runtime::sandbox::checker(env)?)
+    } else {
+        None
+    };
+    if let (Some(checker), Value::Object(i)) = (checker, item)
+        && crate::sandbox::instance_of(&**i, "Stringable")
+    {
+        checker.ensure_to_string_allowed(item.clone(), lineno, Some(source))?;
+    }
+    // a SecurityNotAllowedPropertyError, kept while the methods are tried
+    let mut property_error: Option<Error> = None;
 
+    let mut array_item = match item {
+        Value::Bool(_) | Value::Float(_) => Value::Int(ops::to_int(item)),
+        other => other.clone(),
+    };
     if kind != METHOD_CALL {
-        let mut array_item = match item {
-            Value::Bool(_) | Value::Float(_) => Value::Int(ops::to_int(item)),
-            other => other.clone(),
-        };
         if let (Value::Object(i), Value::Object(o)) = (&array_item, object)
             && i.is_stringable()
             && (o.instance_of("ArrayObject")
@@ -2492,6 +2563,19 @@ pub fn get_attribute(
         {
             array_item = Value::String(super::to_php_string(&array_item)?);
         }
+        if let (Some(checker), Value::Object(o)) = (checker, object)
+            && crate::sandbox::instance_of(&**o, "ArrayAccess")
+            && !ARRAY_LIKE_CLASSES.contains(&o.class())
+            && let Err(e) =
+                checker.check_property_allowed(&**o, &string_of(&array_item)?, lineno, Some(source))
+        {
+            if e.kind() != ErrorKind::SecurityNotAllowedProperty {
+                return Err(e);
+            }
+            property_error = Some(e);
+        }
+    }
+    if kind != METHOD_CALL && property_error.is_none() {
         let exists = match object {
             Value::Array(a) => {
                 array_item = Value::String(super::to_php_string(&array_item)?);
@@ -2616,7 +2700,17 @@ pub fn get_attribute(
         return Err(error(message));
     };
 
-    if kind != METHOD_CALL {
+    if kind != METHOD_CALL
+        && property_error.is_none()
+        && let Some(checker) = checker
+        && let Err(e) = checker.check_property_allowed(&**o, &item, lineno, Some(source))
+    {
+        if e.kind() != ErrorKind::SecurityNotAllowedProperty {
+            return Err(e);
+        }
+        property_error = Some(e);
+    }
+    if kind != METHOD_CALL && property_error.is_none() {
         if let Some(value) = o.property(&item) {
             if is_defined_test {
                 return Ok(Value::Bool(true));
@@ -2652,6 +2746,9 @@ pub fn get_attribute(
         if is_defined_test {
             return Ok(Value::Bool(false));
         }
+        if let Some(e) = property_error {
+            return Err(e);
+        }
         if lenient {
             return Ok(Value::Null);
         }
@@ -2660,6 +2757,17 @@ pub fn get_attribute(
             o.class()
         )));
     };
+    if let Some(checker) = checker
+        && let Err(e) = checker.check_method_allowed(&**o, method.as_bytes(), lineno, Some(source))
+    {
+        if e.kind() != ErrorKind::SecurityNotAllowedMethod {
+            return Err(e);
+        }
+        if is_defined_test {
+            return Ok(Value::Bool(false));
+        }
+        return Err(property_error.unwrap_or(e));
+    }
     if is_defined_test {
         return Ok(Value::Bool(true));
     }

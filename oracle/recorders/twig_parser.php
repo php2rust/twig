@@ -5,9 +5,11 @@
 // parsed by the real Twig\Parser with the node visitors turned off. With
 // the argument "visitors" (crates/twig/tests/data/parser_visitors.json):
 // the same templates with the environment's node visitors except
-// SandboxNodeVisitor (the sandbox is not ported yet), plus the cases in
+// SandboxNodeVisitor, plus the cases in
 // crates/twig/tests/data/parser_visitors_extra.json, each with its own
-// "autoescape" and "optimizations" options. The
+// "autoescape" and "optimizations" options. With the argument "sandbox"
+// (crates/twig/tests/data/parser_sandbox.json): the same cases with all
+// the node visitors, SandboxNodeVisitor too. The
 // environment has the extensions of Twig\Tests\IntegrationTest (debug,
 // sandbox, string loader and the test extension, rebuilt below without its
 // runtime code; no undefined-callable callbacks). For each template: the
@@ -15,7 +17,8 @@
 // message, line), and the deprecations parsing triggered. Templates,
 // messages and deprecations are base64; a tree is text, or base64 when it
 // is not UTF-8. Output: crates/twig/tests/data/parser.json or
-// parser_visitors.json (scripts/record.sh twig-parser).
+// parser_visitors.json or parser_sandbox.json (scripts/record.sh
+// twig-parser).
 
 if (is_file('/demo/vendor/autoload.php')) {
     require '/demo/vendor/autoload.php';
@@ -41,6 +44,7 @@ use Twig\Extension\StringLoaderExtension;
 use Twig\Loader\ArrayLoader;
 use Twig\NodeVisitor\SandboxNodeVisitor;
 use Twig\Node\Expression\ConstantExpression;
+use Twig\Node\CheckSecurityNode;
 use Twig\Node\Node;
 use Twig\Node\PrintNode;
 use Twig\Parser;
@@ -182,6 +186,12 @@ function dump_node(Node $node, string $key, int $depth, ?string $parentSource, a
             $nested[$name] = $value;
         }
     }
+    // the lists the sandbox visitor gives CheckSecurityNode (private)
+    if ($node instanceof CheckSecurityNode) {
+        foreach (['usedFilters', 'usedTags', 'usedFunctions', 'usedTests'] as $name) {
+            $line .= ' '.$name.'='.export_value((new ReflectionProperty(CheckSecurityNode::class, $name))->getValue($node));
+        }
+    }
     for ($class = new ReflectionClass($node); $class; $class = $class->getParentClass()) {
         if ($class->hasProperty('definedTest') && $class->getProperty('definedTest')->getDeclaringClass()->getName() === $class->getName()) {
             if ($class->getProperty('definedTest')->getValue($node)) {
@@ -221,7 +231,8 @@ foreach ($files as $path) {
         $cases[] = ['name' => $relative.' '.$name, 'source' => $name, 'template' => $code];
     }
 }
-$visitors = 'visitors' === ($argv[1] ?? '');
+$mode = $argv[1] ?? 'plain';
+$visitors = 'visitors' === $mode || 'sandbox' === $mode;
 foreach (json_decode(file_get_contents('/work/crates/twig/tests/data/parser_extra.json'), true) as $name => $code) {
     $cases[] = ['name' => 'extra '.$name, 'source' => 'index.twig', 'template' => $code];
 }
@@ -267,9 +278,11 @@ foreach ($cases as $case) {
         $env = $envs[$key] ??= make_env($case['autoescape'] ?? 'html', $case['optimizations'] ?? -1);
         $stream = $env->tokenize(new Source($case['template'], $case['source']));
         $parser = new Parser($env);
-        $list = $visitors
-            ? array_values(array_filter($env->getNodeVisitors(), fn ($v) => !$v instanceof SandboxNodeVisitor))
-            : [];
+        $list = match ($mode) {
+            'visitors' => array_values(array_filter($env->getNodeVisitors(), fn ($v) => !$v instanceof SandboxNodeVisitor)),
+            'sandbox' => $env->getNodeVisitors(),
+            default => [],
+        };
         (new ReflectionProperty($parser, 'visitors'))->setValue($parser, $list);
         $module = $parser->parse($stream);
         $lines = [];

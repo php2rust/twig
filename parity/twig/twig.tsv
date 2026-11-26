@@ -382,7 +382,7 @@ tests/FactoryRuntimeLoaderTest.php	FactoryRuntimeLoaderTest::testLoad	pending
 tests/FactoryRuntimeLoaderTest.php	FactoryRuntimeLoaderTest::testLoadReturnsNullForUnmappedRuntime	pending	
 tests/FileExtensionEscapingStrategyTest.php	FileExtensionEscapingStrategyTest::testGuess	ported	crates/twig/tests/file_extension_escaping_strategy_test.rs::testGuess
 tests/IntegrationTest.php	IntegrationTest::testIntegration	ported	crates/twig-integration/tests/integration.rs::testIntegration
-tests/IntegrationTest.php	IntegrationTest::testLegacyIntegration	pending	
+tests/IntegrationTest.php	IntegrationTest::testLegacyIntegration	ported	crates/twig-integration/tests/integration.rs::testIntegration
 tests/LexerTest.php	LexerTest::testBigNumbers	ported	crates/twig/tests/lexer_test.rs::testBigNumbers
 tests/LexerTest.php	LexerTest::testBlockTagDelimitersPointAtTheMarkers	ported	crates/twig/tests/lexer_test.rs::testBlockTagDelimitersPointAtTheMarkers
 tests/LexerTest.php	LexerTest::testBracketsNesting	ported	crates/twig/tests/lexer_test.rs::testBracketsNesting
@@ -662,39 +662,39 @@ tests/Runtime/EscaperRuntimeTest.php	EscaperRuntimeTest::testObjectEscaping	pend
 tests/Runtime/EscaperRuntimeTest.php	EscaperRuntimeTest::testUnicodeCodepointConversionToUtf8	pending	
 tests/Runtime/EscaperRuntimeTest.php	EscaperRuntimeTest::testUnknownCustomEscaper	pending	
 tests/Runtime/EscaperRuntimeTest.php	EscaperRuntimeTest::testUrlEscapingConvertsSpecialChars	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testAPolicyFailureWhileResolvingTraitsKeepsItsTwigContext	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testARenderOnAnotherEnvironmentDuringASandboxedRenderIsNotSandboxed	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testAllowedTestIsAccepted	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testAnAlreadyUsedEnvironmentIsRejected	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testAnEnvironmentWithASandboxExtensionIsRejected	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testAutoEscapingRequiresTheEscapeFilterToBeAllowed	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testCreateTemplateCanReferenceLoaderTemplates	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testCreateTemplateIsSandboxed	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testCustomSecurityPolicyImplementationsAreAccepted	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testDisallowedFilterIsRejected	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testDisallowedFunctionIsRejected	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testDisallowedTagIsRejected	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testDisallowedTestIsRejected	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testDisplay	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testDisplayBlock	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testIncludedTemplatesAreSandboxed	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testMarkupValuesCanBePrinted	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testMethodCallsAreGovernedByThePolicy	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testNonStrictSecurityPolicyIsRejected	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testPropertyAccessesAreGovernedByThePolicy	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testRejectsTemplateWrapperFromAnotherEnvironment	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testRenderBlock	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testRenderingDirectlyOnTheSandboxEnvironmentIsSandboxed	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testRendersAllowedConstructs	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testSecurityCheckerAddsTheSourceToPolicyErrors	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testStream	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testStreamBlock	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testTheEnvironmentCanBeConfiguredAfterTheSandboxIsCreated	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testTheExtendsTagMustBeAllowed	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testTheUseTagIsCheckedBeforeTheTraitTemplateIsLoaded	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testTheUseTagIsCheckedWithoutCheckingTheRestOfThePolicy	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testTheUseTagMustBeAllowed	pending	
-tests/Sandbox/SandboxTest.php	SandboxTest::testToStringCoercionIsGovernedByThePolicy	pending	
+tests/Sandbox/SandboxTest.php	SandboxTest::testAPolicyFailureWhileResolvingTraitsKeepsItsTwigContext	ported	crates/twig-integration/tests/sandbox_test.rs::testAPolicyFailureWhileResolvingTraitsKeepsItsTwigContext
+tests/Sandbox/SandboxTest.php	SandboxTest::testARenderOnAnotherEnvironmentDuringASandboxedRenderIsNotSandboxed	ported	crates/twig-integration/tests/sandbox_test.rs::testARenderOnAnotherEnvironmentDuringASandboxedRenderIsNotSandboxed
+tests/Sandbox/SandboxTest.php	SandboxTest::testAllowedTestIsAccepted	ported	crates/twig-integration/tests/sandbox_test.rs::testAllowedTestIsAccepted
+tests/Sandbox/SandboxTest.php	SandboxTest::testAnAlreadyUsedEnvironmentIsRejected	n/a: Sandbox::new builds its own environment from extensions, so a used environment cannot be passed	
+tests/Sandbox/SandboxTest.php	SandboxTest::testAnEnvironmentWithASandboxExtensionIsRejected	ported	crates/twig-integration/tests/sandbox_test.rs::testAnEnvironmentWithASandboxExtensionIsRejected
+tests/Sandbox/SandboxTest.php	SandboxTest::testAutoEscapingRequiresTheEscapeFilterToBeAllowed	ported	crates/twig-integration/tests/sandbox_test.rs::testAutoEscapingRequiresTheEscapeFilterToBeAllowed
+tests/Sandbox/SandboxTest.php	SandboxTest::testCreateTemplateCanReferenceLoaderTemplates	n/a: no createTemplate(); templates are compiled ahead of time	
+tests/Sandbox/SandboxTest.php	SandboxTest::testCreateTemplateIsSandboxed	n/a: no createTemplate(); templates are compiled ahead of time	
+tests/Sandbox/SandboxTest.php	SandboxTest::testCustomSecurityPolicyImplementationsAreAccepted	ported	crates/twig-integration/tests/sandbox_test.rs::testCustomSecurityPolicyImplementationsAreAccepted
+tests/Sandbox/SandboxTest.php	SandboxTest::testDisallowedFilterIsRejected	ported	crates/twig-integration/tests/sandbox_test.rs::testDisallowedFilterIsRejected
+tests/Sandbox/SandboxTest.php	SandboxTest::testDisallowedFunctionIsRejected	ported	crates/twig-integration/tests/sandbox_test.rs::testDisallowedFunctionIsRejected
+tests/Sandbox/SandboxTest.php	SandboxTest::testDisallowedTagIsRejected	ported	crates/twig-integration/tests/sandbox_test.rs::testDisallowedTagIsRejected
+tests/Sandbox/SandboxTest.php	SandboxTest::testDisallowedTestIsRejected	ported	crates/twig-integration/tests/sandbox_test.rs::testDisallowedTestIsRejected
+tests/Sandbox/SandboxTest.php	SandboxTest::testDisplay	ported	crates/twig-integration/tests/sandbox_test.rs::testDisplay
+tests/Sandbox/SandboxTest.php	SandboxTest::testDisplayBlock	ported	crates/twig-integration/tests/sandbox_test.rs::testDisplayBlock
+tests/Sandbox/SandboxTest.php	SandboxTest::testIncludedTemplatesAreSandboxed	ported	crates/twig-integration/tests/sandbox_test.rs::testIncludedTemplatesAreSandboxed
+tests/Sandbox/SandboxTest.php	SandboxTest::testMarkupValuesCanBePrinted	ported	crates/twig-integration/tests/sandbox_test.rs::testMarkupValuesCanBePrinted
+tests/Sandbox/SandboxTest.php	SandboxTest::testMethodCallsAreGovernedByThePolicy	ported	crates/twig-integration/tests/sandbox_test.rs::testMethodCallsAreGovernedByThePolicy
+tests/Sandbox/SandboxTest.php	SandboxTest::testNonStrictSecurityPolicyIsRejected	ported	crates/twig-integration/tests/sandbox_test.rs::testNonStrictSecurityPolicyIsRejected
+tests/Sandbox/SandboxTest.php	SandboxTest::testPropertyAccessesAreGovernedByThePolicy	ported	crates/twig-integration/tests/sandbox_test.rs::testPropertyAccessesAreGovernedByThePolicy
+tests/Sandbox/SandboxTest.php	SandboxTest::testRejectsTemplateWrapperFromAnotherEnvironment	ported	crates/twig-integration/tests/sandbox_test.rs::testRejectsTemplateWrapperFromAnotherEnvironment
+tests/Sandbox/SandboxTest.php	SandboxTest::testRenderBlock	ported	crates/twig-integration/tests/sandbox_test.rs::testRenderBlock
+tests/Sandbox/SandboxTest.php	SandboxTest::testRenderingDirectlyOnTheSandboxEnvironmentIsSandboxed	ported	crates/twig-integration/tests/sandbox_test.rs::testRenderingDirectlyOnTheSandboxEnvironmentIsSandboxed
+tests/Sandbox/SandboxTest.php	SandboxTest::testRendersAllowedConstructs	ported	crates/twig-integration/tests/sandbox_test.rs::testRendersAllowedConstructs
+tests/Sandbox/SandboxTest.php	SandboxTest::testSecurityCheckerAddsTheSourceToPolicyErrors	ported	crates/twig-integration/tests/sandbox_test.rs::testSecurityCheckerAddsTheSourceToPolicyErrors
+tests/Sandbox/SandboxTest.php	SandboxTest::testStream	ported	crates/twig-integration/tests/sandbox_test.rs::testStream
+tests/Sandbox/SandboxTest.php	SandboxTest::testStreamBlock	ported	crates/twig-integration/tests/sandbox_test.rs::testStreamBlock
+tests/Sandbox/SandboxTest.php	SandboxTest::testTheEnvironmentCanBeConfiguredAfterTheSandboxIsCreated	ported	crates/twig-integration/tests/sandbox_test.rs::testTheEnvironmentCanBeConfiguredAfterTheSandboxIsCreated
+tests/Sandbox/SandboxTest.php	SandboxTest::testTheExtendsTagMustBeAllowed	ported	crates/twig-integration/tests/sandbox_test.rs::testTheExtendsTagMustBeAllowed
+tests/Sandbox/SandboxTest.php	SandboxTest::testTheUseTagIsCheckedBeforeTheTraitTemplateIsLoaded	ported	crates/twig-integration/tests/sandbox_test.rs::testTheUseTagIsCheckedBeforeTheTraitTemplateIsLoaded
+tests/Sandbox/SandboxTest.php	SandboxTest::testTheUseTagIsCheckedWithoutCheckingTheRestOfThePolicy	ported	crates/twig-integration/tests/sandbox_test.rs::testTheUseTagIsCheckedWithoutCheckingTheRestOfThePolicy
+tests/Sandbox/SandboxTest.php	SandboxTest::testTheUseTagMustBeAllowed	ported	crates/twig-integration/tests/sandbox_test.rs::testTheUseTagMustBeAllowed
+tests/Sandbox/SandboxTest.php	SandboxTest::testToStringCoercionIsGovernedByThePolicy	ported	crates/twig-integration/tests/sandbox_test.rs::testToStringCoercionIsGovernedByThePolicy
 tests/SourceTest.php	SourceTest::testGetColumn	pending	
 tests/TemplateEscapeStrategyTest.php	TemplateEscapeStrategyTest::testAnAutoescapeTagDoesNotChangeTheStrategyOfTheTemplate	pending	
 tests/TemplateEscapeStrategyTest.php	TemplateEscapeStrategyTest::testCompiledTemplatesExposeTheirStrategy	pending	

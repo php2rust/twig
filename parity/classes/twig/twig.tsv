@@ -55,7 +55,7 @@ src/Extension/OptimizerExtension.php	OptimizerExtension	13	ported	crates/twig/sr
 src/Extension/ProfilerExtension.php	ProfilerExtension	28	pending	
 src/Extension/RuntimeExtensionInterface.php	RuntimeExtensionInterface	4	pending	
 src/Extension/SandboxBridgeExtension.php	SandboxBridgeExtension	20	pending	
-src/Extension/SandboxExtension.php	SandboxExtension	84	pending	
+src/Extension/SandboxExtension.php	SandboxExtension	84	ported	crates/twig/src/extension/sandbox.rs
 src/Extension/StagingExtension.php	StagingExtension	66	pending	
 src/Extension/StringLoaderExtension.php	StringLoaderExtension	17	pending	
 src/Extension/YieldNotReadyExtension.php	YieldNotReadyExtension	13	n/a: only registers YieldNotReadyNodeVisitor (n/a)	
@@ -73,10 +73,10 @@ src/Node/BlockNode.php	BlockNode	29	ported	crates/twig/src/compiler.rs crates/tw
 src/Node/BlockReferenceNode.php	BlockReferenceNode	18	ported	crates/twig/src/node/statement.rs
 src/Node/BodyNode.php	BodyNode	6	ported	crates/twig/src/node/statement.rs
 src/Node/CaptureNode.php	CaptureNode	37	ported	crates/twig/src/compiler.rs crates/twig/src/node/statement.rs
-src/Node/CheckSecurityCallNode.php	CheckSecurityCallNode	13	pending	
-src/Node/CheckSecurityNode.php	CheckSecurityNode	107	pending	
-src/Node/CheckToStringNode.php	CheckToStringNode	24	ported	crates/twig/src/node/statement.rs
-src/Node/CoercesChildrenToStringInterface.php	CoercesChildrenToStringInterface	6	pending	
+src/Node/CheckSecurityCallNode.php	CheckSecurityCallNode	13	ported	crates/twig/src/runtime/sandbox.rs
+src/Node/CheckSecurityNode.php	CheckSecurityNode	107	ported	crates/twig/src/runtime/sandbox.rs
+src/Node/CheckToStringNode.php	CheckToStringNode	24	ported	crates/twig/src/node/statement.rs crates/twig/src/runtime/sandbox.rs
+src/Node/CoercesChildrenToStringInterface.php	CoercesChildrenToStringInterface	6	ported	crates/twig/src/node_visitor/sandbox.rs
 src/Node/ConfigNode.php	ConfigNode	10	ported	crates/twig/src/node/statement.rs
 src/Node/DeprecatedNode.php	DeprecatedNode	60	ported	crates/twig/src/node/statement.rs
 src/Node/DoNode.php	DoNode	21	ported	crates/twig/src/node/statement.rs
@@ -211,7 +211,7 @@ src/NodeVisitor/EscaperNodeVisitor.php	EscaperNodeVisitor	152	ported	crates/twig
 src/NodeVisitor/NodeVisitorInterface.php	NodeVisitorInterface	9	ported	crates/twig/src/node_visitor/mod.rs
 src/NodeVisitor/OptimizerNodeVisitor.php	OptimizerNodeVisitor	136	ported	crates/twig/src/node_visitor/optimizer.rs
 src/NodeVisitor/SafeAnalysisNodeVisitor.php	SafeAnalysisNodeVisitor	120	ported	crates/twig/src/node_visitor/safe_analysis.rs
-src/NodeVisitor/SandboxNodeVisitor.php	SandboxNodeVisitor	208	pending	
+src/NodeVisitor/SandboxNodeVisitor.php	SandboxNodeVisitor	208	ported	crates/twig/src/node_visitor/sandbox.rs
 src/NodeVisitor/YieldNotReadyNodeVisitor.php	YieldNotReadyNodeVisitor	35	n/a: reports node classes without #[YieldReady]; every node class of the port is ready and there are no user node classes	
 src/OperatorPrecedenceChange.php	OperatorPrecedenceChange	13	pending	
 src/Parser.php	Parser	490	ported	crates/twig/src/parser.rs
@@ -232,19 +232,19 @@ src/Runtime/SandboxBridgeRuntime.php	SandboxBridgeRuntime	14	pending
 src/RuntimeLoader/ContainerRuntimeLoader.php	ContainerRuntimeLoader	13	pending	
 src/RuntimeLoader/FactoryRuntimeLoader.php	FactoryRuntimeLoader	16	pending	
 src/RuntimeLoader/RuntimeLoaderInterface.php	RuntimeLoaderInterface	5	pending	
-src/Sandbox/Sandbox.php	Sandbox	48	pending	
-src/Sandbox/SandboxInterface.php	SandboxInterface	12	pending	
-src/Sandbox/SecurityChecker.php	SecurityChecker	150	pending	
-src/Sandbox/SecurityError.php	SecurityError	5	pending	
-src/Sandbox/SecurityNotAllowedFilterError.php	SecurityNotAllowedFilterError	14	pending	
-src/Sandbox/SecurityNotAllowedFunctionError.php	SecurityNotAllowedFunctionError	14	pending	
-src/Sandbox/SecurityNotAllowedMethodError.php	SecurityNotAllowedMethodError	20	pending	
-src/Sandbox/SecurityNotAllowedPropertyError.php	SecurityNotAllowedPropertyError	20	pending	
-src/Sandbox/SecurityNotAllowedTagError.php	SecurityNotAllowedTagError	14	pending	
-src/Sandbox/SecurityNotAllowedTestError.php	SecurityNotAllowedTestError	14	pending	
-src/Sandbox/SecurityPolicy.php	SecurityPolicy	133	pending	
-src/Sandbox/SecurityPolicyInterface.php	SecurityPolicyInterface	7	pending	
-src/Sandbox/SourcePolicyInterface.php	SourcePolicyInterface	6	pending	
+src/Sandbox/Sandbox.php	Sandbox	48	ported	crates/twig/src/sandbox/sandbox.rs
+src/Sandbox/SandboxInterface.php	SandboxInterface	12	ported	crates/twig/src/sandbox/sandbox.rs
+src/Sandbox/SecurityChecker.php	SecurityChecker	150	ported	crates/twig/src/sandbox/security_checker.rs
+src/Sandbox/SecurityError.php	SecurityError	5	ported	crates/twig/src/error.rs
+src/Sandbox/SecurityNotAllowedFilterError.php	SecurityNotAllowedFilterError	14	ported	crates/twig/src/error.rs
+src/Sandbox/SecurityNotAllowedFunctionError.php	SecurityNotAllowedFunctionError	14	ported	crates/twig/src/error.rs
+src/Sandbox/SecurityNotAllowedMethodError.php	SecurityNotAllowedMethodError	20	ported	crates/twig/src/error.rs
+src/Sandbox/SecurityNotAllowedPropertyError.php	SecurityNotAllowedPropertyError	20	ported	crates/twig/src/error.rs
+src/Sandbox/SecurityNotAllowedTagError.php	SecurityNotAllowedTagError	14	ported	crates/twig/src/error.rs
+src/Sandbox/SecurityNotAllowedTestError.php	SecurityNotAllowedTestError	14	ported	crates/twig/src/error.rs
+src/Sandbox/SecurityPolicy.php	SecurityPolicy	133	ported	crates/twig/src/sandbox/security_policy.rs
+src/Sandbox/SecurityPolicyInterface.php	SecurityPolicyInterface	7	ported	crates/twig/src/sandbox/mod.rs
+src/Sandbox/SourcePolicyInterface.php	SourcePolicyInterface	6	ported	crates/twig/src/sandbox/mod.rs
 src/Source.php	Source	31	ported	crates/twig/src/source.rs
 src/Template.php	Template	332	ported	crates/twig/src/template.rs
 src/TemplateWrapper.php	TemplateWrapper	70	ported	crates/twig/src/template.rs
@@ -280,7 +280,7 @@ src/TwigFunction.php	TwigFunction	34	ported	crates/twig/src/callable.rs
 src/TwigMacro.php	TwigMacro	111	ported	crates/twig/src/twig_macro.rs
 src/TwigTest.php	TwigTest	37	ported	crates/twig/src/callable.rs
 src/Util/CallableArgumentsExtractor.php	CallableArgumentsExtractor	157	ported	crates/twig/src/util/callable_arguments.rs
-src/Util/CallableParameters.php	CallableParameters	88	pending	
+src/Util/CallableParameters.php	CallableParameters	88	ported	crates/twig/src/util/callable_parameters.rs
 src/Util/DeprecationCollector.php	DeprecationCollector	38	pending	
 src/Util/ReflectionCallable.php	ReflectionCallable	86	ported	crates/twig/src/util/callable_arguments.rs
 src/Util/TemplateDirIterator.php	TemplateDirIterator	14	pending	

@@ -6,7 +6,8 @@
 //! recorder) must match, or the error's class, message and line, and the
 //! deprecations. `data/parser_visitors.json` has the same templates and
 //! the cases of `data/parser_visitors_extra.json` parsed with the node
-//! visitors on (all but the sandbox's), each with its options.
+//! visitors on (all but the sandbox's), each with its options;
+//! `data/parser_sandbox.json` the same with the sandbox visitor too.
 //!
 //! Upstream: none
 #![allow(clippy::unwrap_used, clippy::expect_used)]
@@ -19,9 +20,10 @@ use twig::{
     Autoescape, Environment, EnvironmentOptions, Source, TwigCallable,
     callable::DeprecatedCallableInfo,
     error::Error,
-    extension::Extension,
+    extension::{Extension, sandbox::SandboxExtension},
     node::{Attr, Key, Node, expression, statement},
     parser::Parser,
+    sandbox::SecurityPolicy,
     token::{Token, TokenType},
     token_parser::{TokenParser, sandbox::SandboxTokenParser},
 };
@@ -266,7 +268,7 @@ fn trees_match_php() {
     let data: Vec<Json> =
         serde_json::from_str(include_str!("data/parser.json")).expect("parser.json");
     assert!(data.len() > 600, "{} cases", data.len());
-    check_cases(&data, false);
+    check_cases(&data, Mode::Plain);
 }
 
 #[test]
@@ -274,7 +276,22 @@ fn visited_trees_match_php() {
     let data: Vec<Json> = serde_json::from_str(include_str!("data/parser_visitors.json"))
         .expect("parser_visitors.json");
     assert!(data.len() > 900, "{} cases", data.len());
-    check_cases(&data, true);
+    check_cases(&data, Mode::Visitors);
+}
+
+#[test]
+fn sandboxed_trees_match_php() {
+    let data: Vec<Json> = serde_json::from_str(include_str!("data/parser_sandbox.json"))
+        .expect("parser_sandbox.json");
+    assert!(data.len() > 900, "{} cases", data.len());
+    check_cases(&data, Mode::Sandbox);
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Mode {
+    Plain,
+    Visitors,
+    Sandbox,
 }
 
 /// The recorder's `make_env()`, one for each option set as the recorder
@@ -282,6 +299,7 @@ fn visited_trees_match_php() {
 fn env_for(
     envs: &mut HashMap<String, Result<Rc<Environment>, Error>>,
     case: &Json,
+    mode: Mode,
 ) -> Result<Rc<Environment>, Error> {
     let autoescape = case
         .get("autoescape")
@@ -300,8 +318,18 @@ fn env_for(
                 Json::String(s) => Autoescape::Strategy(s.as_bytes().to_vec()),
                 other => panic!("autoescape {other}"),
             };
+            // the recorder's policy: SecurityPolicy([], [], [], [], ['dump'])
+            let mut extensions: Vec<Rc<dyn Extension>> = Vec::new();
+            if mode == Mode::Sandbox {
+                extensions.push(Rc::new(SandboxExtension::new(
+                    Rc::new(SecurityPolicy::new(&[], &[], &[], &[], &["dump"], &[])),
+                    false,
+                    None,
+                )));
+            }
+            extensions.push(Rc::new(FixtureExtension));
             Environment::with_options(
-                vec![Rc::new(FixtureExtension)],
+                extensions,
                 EnvironmentOptions {
                     autoescape,
                     optimizations,
@@ -313,7 +341,7 @@ fn env_for(
         .clone()
 }
 
-fn check_cases(data: &[Json], visitors: bool) {
+fn check_cases(data: &[Json], mode: Mode) {
     let mut envs = HashMap::new();
     let mut failures = Vec::new();
     for case in data {
@@ -321,9 +349,9 @@ fn check_cases(data: &[Json], visitors: bool) {
         let source = case["source"].as_str().unwrap();
         let template = bytes(&case["template"]);
         let (result, deprecations) = symfony_deprecation_contracts::collect(|| {
-            let env = env_for(&mut envs, case)?;
+            let env = env_for(&mut envs, case, mode)?;
             let mut parser = Parser::new(&env);
-            if !visitors {
+            if mode == Mode::Plain {
                 parser.set_node_visitors(Vec::new());
             }
             parser.parse(env.tokenize(Source::new(template.clone(), source))?)

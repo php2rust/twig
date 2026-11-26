@@ -29,6 +29,7 @@ PHP.
 | `Compiler`: Rust code generation, one module per template (and per embedded template) with a `CompiledTemplate` impl; the `compile()` of every node class but the sandbox nodes; PHP's line guess (`__line`) and unary-before-`**` precedence kept; `compile_set()` for a build script | `Compiler.php`, `Node/**/*.php` (`compile()`) | integration fixtures |
 | Dates: the `date` and `date_modify` filters and the `date` function (`formatDate()`, `modifyDate()`, `convertDate()`): `DateTime`, `DateTimeImmutable`, timestamps and date texts, the zone argument (a name, a `DateTimeZone`, `false`), `DateInterval`, the extension's date formats and zone; on php2rust-date | `Extension/CoreExtension.php` | integration fixtures `filters/date*.test`, `functions/date*.test` |
 | Enums: the `enum` and `enum_cases` functions (`EnumFunction`, `EnumCasesFunction`): a constant name checked at compile time, a dynamic one at run time, with upstream's messages; the application's enums are registered in `CoreOptions::enums` (php2rust-value's `Registry`) | `Node/Expression/FunctionNode/Enum*.php`, `Extension/CoreExtension.php` | integration fixtures `functions/enum*/*.test` |
+| Sandbox: `SecurityPolicy` (strict mode and its deprecations), `SecurityPolicyInterface`, `SecurityChecker` (source policies, to-string and spread checks), `SandboxExtension`, the `Sandbox` class (a strict policy and a dedicated environment); the sandbox node visitor (used tags, filters, functions and tests; `CheckToStringNode` from the callables' parameter specs) and nodes; the runtime checks (tags, filters, functions and tests before a template displays, traits, methods, properties, `__toString()`, arrow callables, `column`, `include(sandboxed)`, the `sandbox` tag) with PHP's line guesses; `TemplateWrapper` refused by another environment | `Sandbox/*.php`, `Extension/SandboxExtension.php`, `NodeVisitor/SandboxNodeVisitor.php`, `Node/{CheckSecurity,CheckSecurityCall,CheckToString,Sandbox}Node.php`, `TemplateWrapper.php` | SandboxTest (30; 3 n/a); sandbox parser vectors; integration fixtures `tags/sandbox/*.test`, legacy fixtures |
 | Runtime: `Template` (blocks, parents, traits, macros, `load()`, `display()`, `render()`, error line guess), `TemplateWrapper`, `Markup`, `MacroNamespace`, `TwigMacro`, the compiled-template loader, `EscaperRuntime` (all built-in strategies, custom escapers, safe classes), the `CoreExtension` runtime methods (filters, functions, tests, `getAttribute()`, `include`, `source`, arrow functions) and the multibyte string functions they call | `Template.php`, `TemplateWrapper.php`, `Markup.php`, `MacroNamespace.php`, `TwigMacro.php`, `Loader/*.php`, `Runtime/EscaperRuntime.php`, `Extension/CoreExtension.php` | integration fixtures |
 
 Parser vectors: 806 templates (all upstream fixture templates and 145 edge
@@ -41,25 +42,31 @@ more cases (`tests/data/parser_visitors_extra.json`, each with its
 on, except the sandbox visitor.
 
 Integration fixtures: `crates/twig-integration` compiles every case of
-upstream's `tests/Fixtures/**/*.test` to Rust in its build script and runs
-it against what real Twig did (`IntegrationTest::testIntegration`): 423 of
-457 cases pass, 1 is pending (listed with the reason in
-`tests/data/integration_pending.txt`), 33 are skipped (data with objects of
-classes the port does not have, such as `TemplateWrapper` and closures;
-`dump`, `template_from_string`, `convert_encoding`, the spread operator; a
-false `--CONDITION--`).
+upstream's `tests/Fixtures/**/*.test` (with the `.legacy.test` cases) to
+Rust in its build script and runs it against what real Twig did
+(`IntegrationTest::testIntegration` and `testLegacyIntegration`, with
+`IntegrationTest`'s sandbox extension): 455 of 490 cases pass, 1 is
+pending (listed with the reason in `tests/data/integration_pending.txt`),
+34 are skipped (data with objects of classes the port does not have, such
+as closures; `dump`, `template_from_string`, `convert_encoding`, the
+spread operator; a false `--CONDITION--`). `tests/sandbox_test.rs` ports
+`tests/Sandbox/SandboxTest.php`, with the templates of each test in
+`tests/data/sandbox_templates.json`, compiled by the build script.
 
-Not yet ported: the sandbox, the
-debug and string loader extensions, the filesystem loader and the cache,
-the undefined-callable callbacks (GuardTokenParserTest pending), the
-`path()`/`app.request` hooks (after the HTTP path merges), and the legacy
-fixtures.
+Not yet ported: the legacy sandbox tests (`tests/Extension/SandboxTest.php`),
+the debug and string loader extensions, the filesystem loader and the
+cache, the undefined-callable callbacks (GuardTokenParserTest pending),
+the `path()`/`app.request` hooks (after the HTTP path merges).
 
 Vectors: `scripts/record.sh twig-lexer` runs
 `oracle/recorders/twig_lexer.php` and writes `tests/data/lexer.json`;
 `scripts/record.sh twig-parser` runs `oracle/recorders/twig_parser.php` and
 writes `tests/data/parser.json` (visitors off) and
-`tests/data/parser_visitors.json` (visitors on).
+`tests/data/parser_visitors.json` (visitors on) and
+`tests/data/parser_sandbox.json` (with the sandbox visitor);
+`scripts/record.sh twig-callable-parameters` writes
+`tests/data/callable_parameters.json` (the parameters of the core
+callables, for the sandbox's to-string checks).
 
 Dependencies: `php-pcre` (workspace) checks the `matches` regex as PHP's
 `preg_match()` does; `symfony-deprecation-contracts` (workspace) for

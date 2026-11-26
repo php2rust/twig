@@ -1,7 +1,7 @@
 <?php
-// Twig integration vectors (crates/twig-fixtures/tests/integration.rs):
-// every case of twig/twig's tests/Fixtures/**/*.test (not the .legacy.test
-// files), run as Twig\Test\IntegrationTestCase::doIntegrationTest() runs
+// Twig integration vectors (crates/twig-integration/tests/integration.rs):
+// every case of twig/twig's tests/Fixtures/**/*.test (the .legacy.test
+// files too, as testLegacyIntegration() runs them), run as Twig\Test\IntegrationTestCase::doIntegrationTest() runs
 // it, with the extensions, callbacks and test classes of
 // Twig\Tests\IntegrationTest (rebuilt below). For each case (one per
 // --DATA-- section): the template sources (with the case's spaces), the
@@ -10,7 +10,7 @@
 // loading or rendering threw, and the deprecations of each step (Twig
 // triggers the deprecations of the compiler while loading). Strings are
 // base64.
-// Output: crates/twig-fixtures/tests/data/integration.json
+// Output: crates/twig-integration/tests/data/integration.json
 // (scripts/record.sh twig-integration).
 
 namespace {
@@ -524,7 +524,7 @@ $fixtures = '/work/upstream/twig/twig/tests/Fixtures';
 $files = [];
 foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($fixtures, FilesystemIterator::SKIP_DOTS)) as $file) {
     $path = $file->getPathname();
-    if (str_ends_with($path, '.test') && !str_contains($path, '.legacy.test')) {
+    if (str_ends_with($path, '.test')) {
         $files[] = $path;
     }
 }

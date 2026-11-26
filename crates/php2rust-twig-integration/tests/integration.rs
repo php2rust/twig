@@ -24,7 +24,7 @@ use php_value::{
 };
 use serde_json::Value as Json;
 use twig::{Autoescape, Environment, EnvironmentOptions, loader::CompiledArrayLoader};
-use twig_integration::extension::FixtureExtension;
+use twig_integration::extension::extensions;
 
 mod generated {
     include!(concat!(env!("OUT_DIR"), "/cases.rs"));
@@ -259,11 +259,9 @@ fn run(record: &Json, compiled: &generated::Compiled) -> Outcome {
             };
         }
     };
-    let env = Environment::with_options(
-        vec![Rc::new(FixtureExtension)],
-        options(record["config"].as_object().unwrap()),
-    )
-    .unwrap();
+    let env =
+        Environment::with_options(extensions(), options(record["config"].as_object().unwrap()))
+            .unwrap();
     twig_integration::extension::register_enums(&env);
     env.add_global("global", Value::String(PhpString::from(b"global".to_vec())));
     // TwigTestFoo::BAR_NAME

@@ -11,6 +11,7 @@
 pub mod core;
 pub mod escaper;
 pub mod optimizer;
+pub mod sandbox;
 
 use std::{collections::HashMap, rc::Rc};
 
@@ -54,6 +55,12 @@ pub trait Extension {
     /// `GlobalsInterface::getGlobals()`.
     fn globals(&self) -> php_value::PhpArray {
         php_value::PhpArray::new()
+    }
+
+    /// The extension as a [`sandbox::SandboxExtension`]
+    /// (`getExtension(SandboxExtension::class)`).
+    fn sandbox(&self) -> Option<&sandbox::SandboxExtension> {
+        None
     }
 }
 
@@ -188,6 +195,11 @@ impl ExtensionSet {
     /// `hasExtension()`, by class name.
     pub fn has_extension(&self, name: &str) -> bool {
         self.extensions.iter().any(|e| e.name() == name)
+    }
+
+    /// `getExtension(SandboxExtension::class)`, when there is one.
+    pub fn sandbox(&self) -> Option<&sandbox::SandboxExtension> {
+        self.extensions.iter().find_map(|e| e.sandbox())
     }
 
     pub fn filter(&self, name: &[u8]) -> Option<Rc<TwigCallable>> {

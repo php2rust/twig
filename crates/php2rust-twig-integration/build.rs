@@ -5,6 +5,11 @@
 //! the deprecations the compiler triggered. A case that does not compile
 //! keeps its error ("Class: message").
 //!
+//! It also compiles the template sets of `tests/data/sandbox_templates.json`
+//! (the templates of tests/Sandbox/SandboxTest.php, run by
+//! `tests/sandbox_test.rs`) into `sandbox_sets.rs`: a set marked `sandbox`
+//! with the sandbox extension, as the environment of a `Sandbox` has it.
+//!
 //! Upstream: none
 
 #![allow(clippy::unwrap_used, clippy::expect_used)]
@@ -16,6 +21,8 @@ use twig::{Autoescape, Environment, EnvironmentOptions};
 
 #[path = "src/extension.rs"]
 mod extension;
+#[path = "src/sandbox_extension.rs"]
+mod sandbox_extension;
 
 fn decode(json: &Json) -> Vec<u8> {
     php_value::base64::decode(json.as_str().expect("base64").as_bytes())
@@ -90,14 +97,13 @@ fn main() {
                 continue;
             }
         };
-        let env =
-            match Environment::with_options(vec![Rc::new(extension::FixtureExtension)], options) {
-                Ok(env) => env,
-                Err(e) => {
-                    entries.push(format!("Err({})", byte_lit(&error_text(&e))));
-                    continue;
-                }
-            };
+        let env = match Environment::with_options(extension::extensions(), options) {
+            Ok(env) => env,
+            Err(e) => {
+                entries.push(format!("Err({})", byte_lit(&error_text(&e))));
+                continue;
+            }
+        };
         extension::register_enums(&env);
         let templates: Vec<(Vec<u8>, Vec<u8>)> = record["templates"]
             .as_array()
@@ -130,6 +136,68 @@ fn main() {
         entries.join(",\n    ")
     );
     let out = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("cases.rs");
+    std::fs::write(out, code).unwrap();
+    sandbox_sets();
+}
+
+/// The template sets of `tests/data/sandbox_templates.json`.
+fn sandbox_sets() {
+    let data = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/data/sandbox_templates.json"
+    );
+    println!("cargo:rerun-if-changed={data}");
+    println!("cargo:rerun-if-changed=src/sandbox_extension.rs");
+    let sets: Vec<Json> = serde_json::from_str(&std::fs::read_to_string(data).unwrap()).unwrap();
+    let mut code = String::from(
+        "/// A set's compiled templates, or why the set did not compile.\npub type Set = Result<&'static [::twig::loader::CompiledEntry], &'static [u8]>;\n\n/// The compiled template sets, by name.\npub static SANDBOX_SETS: &[(&str, Set)] = &[\n",
+    );
+    let mut modules = String::new();
+    for (i, set) in sets.iter().enumerate() {
+        let name = set["name"].as_str().unwrap();
+        let mut extensions: Vec<Rc<dyn twig::extension::Extension>> =
+            vec![Rc::new(sandbox_extension::SandboxTestExtension)];
+        if set["sandbox"].as_bool().unwrap() {
+            extensions.push(Rc::new(twig::extension::sandbox::SandboxExtension::new(
+                Rc::new(twig::sandbox::SecurityPolicy::default()),
+                false,
+                None,
+            )));
+        }
+        let mut options = EnvironmentOptions::default();
+        if let Some(strategy) = set["autoescape"].as_str() {
+            options.autoescape = Autoescape::Strategy(strategy.as_bytes().to_vec());
+        } else {
+            options.autoescape = Autoescape::Off;
+        }
+        let env = Environment::with_options(extensions, options).unwrap();
+        let templates: Vec<(Vec<u8>, Vec<u8>)> = set["templates"]
+            .as_object()
+            .unwrap()
+            .iter()
+            .map(|(n, t)| {
+                (
+                    n.as_bytes().to_vec(),
+                    t.as_str().unwrap().as_bytes().to_vec(),
+                )
+            })
+            .collect();
+        match twig::compiler::compile_set(&env, &templates) {
+            Ok(module) => {
+                let _ = writeln!(
+                    modules,
+                    "#[allow(warnings, clippy::all, clippy::pedantic, clippy::nursery, clippy::restriction)]\npub mod s{i} {{\n{module}\n}}"
+                );
+                let _ = writeln!(code, "    ({name:?}, Ok(s{i}::TEMPLATES)),");
+            }
+            Err(e) => {
+                let _ = writeln!(code, "    ({name:?}, Err({})),", byte_lit(&error_text(&e)));
+            }
+        }
+    }
+    code.push_str("];\n");
+    code.push_str(&modules);
+    let out = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("sandbox_sets.rs");
     std::fs::write(out, code).unwrap();
 }
 

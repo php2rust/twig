@@ -1,0 +1,362 @@
+[
+ {
+  "name": "testRendersAllowedConstructs",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{% if greet %}Hello {{ name|upper }}{% endif %}"
+  }
+ },
+ {
+  "name": "testAnAlreadyUsedEnvironmentIsRejected",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "plain content"
+  }
+ },
+ {
+  "name": "testRenderingDirectlyOnTheSandboxEnvironmentIsSandboxed",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ \"a\"|upper }}"
+  }
+ },
+ {
+  "name": "testTheEnvironmentCanBeConfiguredAfterTheSandboxIsCreated",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ shout(\"hi\") }}"
+  }
+ },
+ {
+  "name": "testCustomSecurityPolicyImplementationsAreAccepted",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "static": "static text",
+   "filtered": "{{ \"a\"|upper }}"
+  }
+ },
+ {
+  "name": "testDisallowedTagIsRejected",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{% if 1 %}x{% endif %}"
+  }
+ },
+ {
+  "name": "testDisallowedFilterIsRejected",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ \"a\"|upper }}"
+  }
+ },
+ {
+  "name": "testDisallowedFunctionIsRejected",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ max(1, 2) }}"
+  }
+ },
+ {
+  "name": "testDisallowedTestIsRejected",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ 1 is funky ? \"y\" : \"n\" }}"
+  }
+ },
+ {
+  "name": "testAllowedTestIsAccepted",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ 1 is funky ? \"y\" : \"n\" }}"
+  }
+ },
+ {
+  "name": "testMethodCallsAreGovernedByThePolicy",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ obj.getName() }}"
+  }
+ },
+ {
+  "name": "testPropertyAccessesAreGovernedByThePolicy",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ obj.name }}"
+  }
+ },
+ {
+  "name": "testToStringCoercionIsGovernedByThePolicy",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ obj }}"
+  }
+ },
+ {
+  "name": "testMarkupValuesCanBePrinted",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ m }}"
+  }
+ },
+ {
+  "name": "testIncludedTemplatesAreSandboxed",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ include(\"partial\") }}",
+   "partial": "{{ \"a\"|upper }}"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment include tag",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{% include foreign %}"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment include tag foreign",
+  "sandbox": false,
+  "autoescape": false,
+  "templates": {
+   "foreign": "foreign content"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment include function",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ include(foreign) }}"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment include function foreign",
+  "sandbox": false,
+  "autoescape": false,
+  "templates": {
+   "foreign": "foreign content"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment include function fallback",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ include([\"missing\", foreign]) }}"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment include function fallback foreign",
+  "sandbox": false,
+  "autoescape": false,
+  "templates": {
+   "foreign": "foreign content"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment include_only function",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ include_only(foreign) }}"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment include_only function foreign",
+  "sandbox": false,
+  "autoescape": false,
+  "templates": {
+   "foreign": "foreign content"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment extends tag",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{% extends foreign %}"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment extends tag foreign",
+  "sandbox": false,
+  "autoescape": false,
+  "templates": {
+   "foreign": "foreign content"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment embed tag",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{% embed foreign %}{% endembed %}"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment embed tag foreign",
+  "sandbox": false,
+  "autoescape": false,
+  "templates": {
+   "foreign": "foreign content"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment import tag",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{% import foreign as macros %}{{ macros.foo() }}"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment import tag foreign",
+  "sandbox": false,
+  "autoescape": false,
+  "templates": {
+   "foreign": "{% macro foo() %}foreign content{% endmacro %}"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment from tag",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{% from foreign import foo %}{{ foo() }}"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment from tag foreign",
+  "sandbox": false,
+  "autoescape": false,
+  "templates": {
+   "foreign": "{% macro foo() %}foreign content{% endmacro %}"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment block function",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ block(\"content\", foreign) }}"
+  }
+ },
+ {
+  "name": "testRejectsTemplateWrapperFromAnotherEnvironment block function foreign",
+  "sandbox": false,
+  "autoescape": false,
+  "templates": {
+   "foreign": "{% block content %}foreign content{% endblock %}"
+  }
+ },
+ {
+  "name": "testTheExtendsTagMustBeAllowed",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{% extends \"layout\" %}",
+   "layout": "layout content"
+  }
+ },
+ {
+  "name": "testTheUseTagMustBeAllowed",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{% use \"blocks\" with content as base_content %}{{ block(\"base_content\") }}",
+   "blocks": "{% block content %}trait content{% endblock %}"
+  }
+ },
+ {
+  "name": "testTheUseTagMustBeAllowed denying",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{% use \"missing\" with content as base_content %}"
+  }
+ },
+ {
+  "name": "testTheUseTagIsCheckedWithoutCheckingTheRestOfThePolicy",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{% use \"middle\" %}{% block content %}SAFE{% endblock %}",
+   "middle": "{% use \"leaf\" %}{% block content %}{{ \"bad\"|upper }}{% endblock %}",
+   "leaf": ""
+  }
+ },
+ {
+  "name": "testTheUseTagIsCheckedBeforeTheTraitTemplateIsLoaded",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ block(\"b\", \"receiver\") is defined ? \"YES\" : \"NO\" }}",
+   "receiver": "{% use \"missing\" %}"
+  }
+ },
+ {
+  "name": "testAPolicyFailureWhileResolvingTraitsKeepsItsTwigContext",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{% use \"empty\" %}\n{{ 'a'|upper }}",
+   "empty": ""
+  }
+ },
+ {
+  "name": "testARenderOnAnotherEnvironmentDuringASandboxedRenderIsNotSandboxed",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "{{ render_trusted() }}"
+  }
+ },
+ {
+  "name": "testARenderOnAnotherEnvironmentDuringASandboxedRenderIsNotSandboxed app",
+  "sandbox": false,
+  "autoescape": false,
+  "templates": {
+   "trusted": "{{ value|upper }}"
+  }
+ },
+ {
+  "name": "testAutoEscapingRequiresTheEscapeFilterToBeAllowed",
+  "sandbox": true,
+  "autoescape": "html",
+  "templates": {
+   "index": "{{ v }}"
+  }
+ },
+ {
+  "name": "testDisplay",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "index": "Hello {{ name|upper }}"
+  }
+ },
+ {
+  "name": "testRenderBlock",
+  "sandbox": true,
+  "autoescape": false,
+  "templates": {
+   "blocks": "{% block greeting %}Hello {{ name|upper }}{% endblock %} not part of the block"
+  }
+ }
+]

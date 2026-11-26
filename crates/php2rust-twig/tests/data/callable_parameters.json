@@ -1,0 +1,1069 @@
+[
+    {
+        "type": "filter",
+        "name": "date",
+        "callable": "Twig\\Extension\\CoreExtension::formatDate",
+        "parameters": [
+            [
+                "date",
+                false,
+                false
+            ],
+            [
+                "format",
+                false,
+                false
+            ],
+            [
+                "timezone",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "date_modify",
+        "callable": "Twig\\Extension\\CoreExtension::modifyDate",
+        "parameters": [
+            [
+                "date",
+                false,
+                false
+            ],
+            [
+                "modifier",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "format",
+        "callable": "Twig\\Extension\\CoreExtension::sprintf",
+        "parameters": [
+            [
+                "format",
+                false,
+                false
+            ],
+            [
+                "values",
+                true,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "replace",
+        "callable": "Twig\\Extension\\CoreExtension::replace",
+        "parameters": [
+            [
+                "str",
+                false,
+                false
+            ],
+            [
+                "from",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "number_format",
+        "callable": "Twig\\Extension\\CoreExtension::formatNumber",
+        "parameters": [
+            [
+                "number",
+                false,
+                false
+            ],
+            [
+                "decimal",
+                false,
+                false
+            ],
+            [
+                "decimalPoint",
+                false,
+                false
+            ],
+            [
+                "thousandSep",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "abs",
+        "callable": "abs",
+        "parameters": [
+            [
+                "num",
+                false,
+                true
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "round",
+        "callable": "Twig\\Extension\\CoreExtension::round",
+        "parameters": [
+            [
+                "value",
+                false,
+                false
+            ],
+            [
+                "precision",
+                false,
+                false
+            ],
+            [
+                "method",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "url_encode",
+        "callable": "Twig\\Extension\\CoreExtension::urlencode",
+        "parameters": [
+            [
+                "url",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "json_encode",
+        "callable": "json_encode",
+        "parameters": [
+            [
+                "value",
+                false,
+                false
+            ],
+            [
+                "flags",
+                false,
+                true
+            ],
+            [
+                "depth",
+                false,
+                true
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "convert_encoding",
+        "callable": "Twig\\Extension\\CoreExtension::convertEncoding",
+        "parameters": [
+            [
+                "string",
+                false,
+                false
+            ],
+            [
+                "to",
+                false,
+                false
+            ],
+            [
+                "from",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "title",
+        "callable": "Twig\\Extension\\CoreExtension::titleCase",
+        "parameters": [
+            [
+                "string",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "capitalize",
+        "callable": "Twig\\Extension\\CoreExtension::capitalize",
+        "parameters": [
+            [
+                "string",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "upper",
+        "callable": "Twig\\Extension\\CoreExtension::upper",
+        "parameters": [
+            [
+                "string",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "lower",
+        "callable": "Twig\\Extension\\CoreExtension::lower",
+        "parameters": [
+            [
+                "string",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "striptags",
+        "callable": "Twig\\Extension\\CoreExtension::striptags",
+        "parameters": [
+            [
+                "string",
+                false,
+                false
+            ],
+            [
+                "allowable_tags",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "trim",
+        "callable": "Twig\\Extension\\CoreExtension::trim",
+        "parameters": [
+            [
+                "string",
+                false,
+                false
+            ],
+            [
+                "characterMask",
+                false,
+                false
+            ],
+            [
+                "side",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "nl2br",
+        "callable": "Twig\\Extension\\CoreExtension::nl2br",
+        "parameters": [
+            [
+                "string",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "spaceless",
+        "callable": "Twig\\Extension\\CoreExtension::spaceless",
+        "parameters": [
+            [
+                "content",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "join",
+        "callable": "Twig\\Extension\\CoreExtension::join",
+        "parameters": [
+            [
+                "value",
+                false,
+                false
+            ],
+            [
+                "glue",
+                false,
+                false
+            ],
+            [
+                "and",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "split",
+        "callable": "Twig\\Extension\\CoreExtension::split",
+        "parameters": [
+            [
+                "value",
+                false,
+                false
+            ],
+            [
+                "delimiter",
+                false,
+                false
+            ],
+            [
+                "limit",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "sort",
+        "callable": "Twig\\Extension\\CoreExtension::sort",
+        "parameters": [
+            [
+                "array",
+                false,
+                false
+            ],
+            [
+                "arrow",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "merge",
+        "callable": "Twig\\Extension\\CoreExtension::merge",
+        "parameters": [
+            [
+                "arrays",
+                true,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "batch",
+        "callable": "Twig\\Extension\\CoreExtension::batch",
+        "parameters": [
+            [
+                "items",
+                false,
+                false
+            ],
+            [
+                "size",
+                false,
+                false
+            ],
+            [
+                "fill",
+                false,
+                false
+            ],
+            [
+                "preserveKeys",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "column",
+        "callable": "Twig\\Extension\\CoreExtension::column",
+        "parameters": [
+            [
+                "array",
+                false,
+                false
+            ],
+            [
+                "name",
+                false,
+                false
+            ],
+            [
+                "index",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "filter",
+        "callable": "Twig\\Extension\\CoreExtension::filter",
+        "parameters": [
+            [
+                "array",
+                false,
+                false
+            ],
+            [
+                "arrow",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "map",
+        "callable": "Twig\\Extension\\CoreExtension::map",
+        "parameters": [
+            [
+                "array",
+                false,
+                false
+            ],
+            [
+                "arrow",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "reduce",
+        "callable": "Twig\\Extension\\CoreExtension::reduce",
+        "parameters": [
+            [
+                "array",
+                false,
+                false
+            ],
+            [
+                "arrow",
+                false,
+                false
+            ],
+            [
+                "initial",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "find",
+        "callable": "Twig\\Extension\\CoreExtension::find",
+        "parameters": [
+            [
+                "array",
+                false,
+                false
+            ],
+            [
+                "arrow",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "reverse",
+        "callable": "Twig\\Extension\\CoreExtension::reverse",
+        "parameters": [
+            [
+                "item",
+                false,
+                false
+            ],
+            [
+                "preserveKeys",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "shuffle",
+        "callable": "Twig\\Extension\\CoreExtension::shuffle",
+        "parameters": [
+            [
+                "item",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "length",
+        "callable": "Twig\\Extension\\CoreExtension::length",
+        "parameters": [
+            [
+                "thing",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "slice",
+        "callable": "Twig\\Extension\\CoreExtension::slice",
+        "parameters": [
+            [
+                "item",
+                false,
+                false
+            ],
+            [
+                "start",
+                false,
+                false
+            ],
+            [
+                "length",
+                false,
+                false
+            ],
+            [
+                "preserveKeys",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "first",
+        "callable": "Twig\\Extension\\CoreExtension::first",
+        "parameters": [
+            [
+                "item",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "last",
+        "callable": "Twig\\Extension\\CoreExtension::last",
+        "parameters": [
+            [
+                "item",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "default",
+        "callable": "Twig\\Extension\\CoreExtension::default",
+        "parameters": [
+            [
+                "value",
+                false,
+                false
+            ],
+            [
+                "default",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "keys",
+        "callable": "Twig\\Extension\\CoreExtension::keys",
+        "parameters": [
+            [
+                "array",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "invoke",
+        "callable": "Twig\\Extension\\CoreExtension::invoke",
+        "parameters": [
+            [
+                "arrow",
+                false,
+                true
+            ],
+            [
+                "arguments",
+                true,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "escape",
+        "callable": "Twig\\Runtime\\EscaperRuntime::escape",
+        "parameters": [
+            [
+                "string",
+                false,
+                false
+            ],
+            [
+                "strategy",
+                false,
+                false
+            ],
+            [
+                "charset",
+                false,
+                false
+            ],
+            [
+                "autoescape",
+                false,
+                true
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "e",
+        "callable": "Twig\\Runtime\\EscaperRuntime::escape",
+        "parameters": [
+            [
+                "string",
+                false,
+                false
+            ],
+            [
+                "strategy",
+                false,
+                false
+            ],
+            [
+                "charset",
+                false,
+                false
+            ],
+            [
+                "autoescape",
+                false,
+                true
+            ]
+        ]
+    },
+    {
+        "type": "filter",
+        "name": "raw",
+        "callable": null,
+        "parameters": null
+    },
+    {
+        "type": "function",
+        "name": "parent",
+        "callable": null,
+        "parameters": null
+    },
+    {
+        "type": "function",
+        "name": "block",
+        "callable": null,
+        "parameters": null
+    },
+    {
+        "type": "function",
+        "name": "attribute",
+        "callable": null,
+        "parameters": null
+    },
+    {
+        "type": "function",
+        "name": "max",
+        "callable": "max",
+        "parameters": [
+            [
+                "value",
+                false,
+                false
+            ],
+            [
+                "values",
+                true,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "function",
+        "name": "min",
+        "callable": "min",
+        "parameters": [
+            [
+                "value",
+                false,
+                false
+            ],
+            [
+                "values",
+                true,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "function",
+        "name": "range",
+        "callable": "range",
+        "parameters": [
+            [
+                "start",
+                false,
+                false
+            ],
+            [
+                "end",
+                false,
+                false
+            ],
+            [
+                "step",
+                false,
+                true
+            ]
+        ]
+    },
+    {
+        "type": "function",
+        "name": "constant",
+        "callable": "Twig\\Extension\\CoreExtension::constant",
+        "parameters": [
+            [
+                "constant",
+                false,
+                false
+            ],
+            [
+                "object",
+                false,
+                false
+            ],
+            [
+                "checkDefined",
+                false,
+                true
+            ]
+        ]
+    },
+    {
+        "type": "function",
+        "name": "cycle",
+        "callable": "Twig\\Extension\\CoreExtension::cycle",
+        "parameters": [
+            [
+                "values",
+                false,
+                false
+            ],
+            [
+                "position",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "function",
+        "name": "random",
+        "callable": "Twig\\Extension\\CoreExtension::random",
+        "parameters": [
+            [
+                "values",
+                false,
+                false
+            ],
+            [
+                "max",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "function",
+        "name": "date",
+        "callable": "Twig\\Extension\\CoreExtension::convertDate",
+        "parameters": [
+            [
+                "date",
+                false,
+                false
+            ],
+            [
+                "timezone",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "function",
+        "name": "include",
+        "callable": "Twig\\Extension\\CoreExtension::include",
+        "parameters": [
+            [
+                "template",
+                false,
+                false
+            ],
+            [
+                "variables",
+                false,
+                false
+            ],
+            [
+                "withContext",
+                false,
+                false
+            ],
+            [
+                "ignoreMissing",
+                false,
+                false
+            ],
+            [
+                "sandboxed",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "function",
+        "name": "include_only",
+        "callable": "Twig\\Extension\\CoreExtension::includeOnly",
+        "parameters": [
+            [
+                "template",
+                false,
+                false
+            ],
+            [
+                "variables",
+                false,
+                false
+            ],
+            [
+                "ignoreMissing",
+                false,
+                true
+            ]
+        ]
+    },
+    {
+        "type": "function",
+        "name": "source",
+        "callable": "Twig\\Extension\\CoreExtension::source",
+        "parameters": [
+            [
+                "name",
+                false,
+                false
+            ],
+            [
+                "ignoreMissing",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "function",
+        "name": "enum_cases",
+        "callable": "Twig\\Extension\\CoreExtension::enumCases",
+        "parameters": [
+            [
+                "enum",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "function",
+        "name": "enum",
+        "callable": "Twig\\Extension\\CoreExtension::enum",
+        "parameters": [
+            [
+                "enum",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "function",
+        "name": "dump",
+        "callable": "Twig\\Extension\\DebugExtension::dump",
+        "parameters": [
+            [
+                "vars",
+                true,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "function",
+        "name": "template_from_string",
+        "callable": "Twig\\Extension\\StringLoaderExtension::templateFromString",
+        "parameters": [
+            [
+                "template",
+                false,
+                false
+            ],
+            [
+                "name",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "test",
+        "name": "even",
+        "callable": null,
+        "parameters": null
+    },
+    {
+        "type": "test",
+        "name": "odd",
+        "callable": null,
+        "parameters": null
+    },
+    {
+        "type": "test",
+        "name": "defined",
+        "callable": null,
+        "parameters": null
+    },
+    {
+        "type": "test",
+        "name": "same as",
+        "callable": null,
+        "parameters": null
+    },
+    {
+        "type": "test",
+        "name": "none",
+        "callable": null,
+        "parameters": null
+    },
+    {
+        "type": "test",
+        "name": "null",
+        "callable": null,
+        "parameters": null
+    },
+    {
+        "type": "test",
+        "name": "divisible by",
+        "callable": null,
+        "parameters": null
+    },
+    {
+        "type": "test",
+        "name": "constant",
+        "callable": null,
+        "parameters": null
+    },
+    {
+        "type": "test",
+        "name": "empty",
+        "callable": "Twig\\Extension\\CoreExtension::testEmpty",
+        "parameters": [
+            [
+                "value",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "test",
+        "name": "iterable",
+        "callable": "is_iterable",
+        "parameters": [
+            [
+                "value",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "test",
+        "name": "sequence",
+        "callable": "Twig\\Extension\\CoreExtension::testSequence",
+        "parameters": [
+            [
+                "value",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "test",
+        "name": "mapping",
+        "callable": "Twig\\Extension\\CoreExtension::testMapping",
+        "parameters": [
+            [
+                "value",
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "type": "test",
+        "name": "true",
+        "callable": null,
+        "parameters": null
+    }
+]

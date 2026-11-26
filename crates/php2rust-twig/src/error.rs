@@ -13,7 +13,11 @@
 //! PHP method or operator threw, `ErrorKind::Exception` with its class)
 //! use the same type; their message is not decorated.
 //!
-//! Upstream: twig/twig src/Error/Error.php src/Error/SyntaxError.php src/Error/LoaderError.php src/Error/RuntimeError.php
+//! The sandbox's `Twig\Sandbox\SecurityError` and its `SecurityNotAllowed*`
+//! subclasses are kinds too; the name (and class) they carry is
+//! [`Error::security_name`] (and [`Error::security_class_name`]).
+//!
+//! Upstream: twig/twig src/Error/Error.php src/Error/SyntaxError.php src/Error/LoaderError.php src/Error/RuntimeError.php src/Sandbox/SecurityError.php src/Sandbox/SecurityNotAllowedTagError.php src/Sandbox/SecurityNotAllowedFilterError.php src/Sandbox/SecurityNotAllowedFunctionError.php src/Sandbox/SecurityNotAllowedTestError.php src/Sandbox/SecurityNotAllowedMethodError.php src/Sandbox/SecurityNotAllowedPropertyError.php
 
 use std::{fmt, sync::Arc};
 
@@ -30,6 +34,20 @@ pub enum ErrorKind {
     Loader,
     /// `Twig\Error\RuntimeError`: rendering failed.
     Runtime,
+    /// `Twig\Sandbox\SecurityError`.
+    Security,
+    /// `Twig\Sandbox\SecurityNotAllowedTagError`.
+    SecurityNotAllowedTag,
+    /// `Twig\Sandbox\SecurityNotAllowedFilterError`.
+    SecurityNotAllowedFilter,
+    /// `Twig\Sandbox\SecurityNotAllowedFunctionError`.
+    SecurityNotAllowedFunction,
+    /// `Twig\Sandbox\SecurityNotAllowedTestError`.
+    SecurityNotAllowedTest,
+    /// `Twig\Sandbox\SecurityNotAllowedMethodError`.
+    SecurityNotAllowedMethod,
+    /// `Twig\Sandbox\SecurityNotAllowedPropertyError`.
+    SecurityNotAllowedProperty,
     /// PHP's `\LogicException`: a misuse of the API (upstream throws it
     /// for states a template cannot reach).
     Logic,
@@ -49,6 +67,13 @@ impl ErrorKind {
             Self::Syntax => "Twig\\Error\\SyntaxError",
             Self::Loader => "Twig\\Error\\LoaderError",
             Self::Runtime => "Twig\\Error\\RuntimeError",
+            Self::Security => "Twig\\Sandbox\\SecurityError",
+            Self::SecurityNotAllowedTag => "Twig\\Sandbox\\SecurityNotAllowedTagError",
+            Self::SecurityNotAllowedFilter => "Twig\\Sandbox\\SecurityNotAllowedFilterError",
+            Self::SecurityNotAllowedFunction => "Twig\\Sandbox\\SecurityNotAllowedFunctionError",
+            Self::SecurityNotAllowedTest => "Twig\\Sandbox\\SecurityNotAllowedTestError",
+            Self::SecurityNotAllowedMethod => "Twig\\Sandbox\\SecurityNotAllowedMethodError",
+            Self::SecurityNotAllowedProperty => "Twig\\Sandbox\\SecurityNotAllowedPropertyError",
             Self::Logic => "LogicException",
             Self::InvalidArgument => "InvalidArgumentException",
             Self::Exception => "Exception",
@@ -61,6 +86,21 @@ impl ErrorKind {
         matches!(
             self,
             Self::Error | Self::Syntax | Self::Loader | Self::Runtime
+        ) || self.is_security_error()
+    }
+
+    /// Whether the class is `Twig\Sandbox\SecurityError` or a subclass.
+    #[must_use]
+    pub fn is_security_error(self) -> bool {
+        matches!(
+            self,
+            Self::Security
+                | Self::SecurityNotAllowedTag
+                | Self::SecurityNotAllowedFilter
+                | Self::SecurityNotAllowedFunction
+                | Self::SecurityNotAllowedTest
+                | Self::SecurityNotAllowedMethod
+                | Self::SecurityNotAllowedProperty
         )
     }
 }
@@ -76,6 +116,17 @@ pub struct Error {
     columnno: Option<usize>,
     source: Option<Arc<Source>>,
     message: Vec<u8>,
+    /// What a `SecurityNotAllowed*Error` refused.
+    security: Option<Box<Refused>>,
+}
+
+/// The name (`getTagName()`, `getFilterName()`, ..., `getMethodName()`,
+/// `getPropertyName()`) and class (`getClassName()`) of a
+/// `SecurityNotAllowed*Error`.
+#[derive(Debug, Clone, PartialEq)]
+struct Refused {
+    name: Vec<u8>,
+    class_name: Option<String>,
 }
 
 impl Error {
@@ -94,6 +145,7 @@ impl Error {
             columnno: None,
             source,
             message: Vec::new(),
+            security: None,
         };
         error.update_repr();
         error
@@ -129,6 +181,48 @@ impl Error {
         let mut error = Self::new(ErrorKind::Exception, message, -1, None);
         error.class = Some(class.into());
         error
+    }
+
+    /// `new SecurityNotAllowed<Kind>Error($message, $name)` for a tag,
+    /// filter, function or test kind.
+    pub fn security_not_allowed(kind: ErrorKind, message: impl Into<Vec<u8>>, name: &[u8]) -> Self {
+        let mut error = Self::new(kind, message, -1, None);
+        error.security = Some(Box::new(Refused {
+            name: name.to_vec(),
+            class_name: None,
+        }));
+        error
+    }
+
+    /// `new SecurityNotAllowedMethodError($message, $className, $methodName)`
+    /// or the property error (`kind`).
+    pub fn security_not_allowed_member(
+        kind: ErrorKind,
+        message: impl Into<Vec<u8>>,
+        class_name: &str,
+        name: &[u8],
+    ) -> Self {
+        let mut error = Self::new(kind, message, -1, None);
+        error.security = Some(Box::new(Refused {
+            name: name.to_vec(),
+            class_name: Some(class_name.to_owned()),
+        }));
+        error
+    }
+
+    /// The name a `SecurityNotAllowed*Error` carries (`getTagName()`,
+    /// `getFilterName()`, `getFunctionName()`, `getTestName()`,
+    /// `getMethodName()`, `getPropertyName()`).
+    #[must_use]
+    pub fn security_name(&self) -> Option<&[u8]> {
+        self.security.as_ref().map(|r| r.name.as_slice())
+    }
+
+    /// `getClassName()` of a `SecurityNotAllowedMethodError` or
+    /// `SecurityNotAllowedPropertyError`.
+    #[must_use]
+    pub fn security_class_name(&self) -> Option<&str> {
+        self.security.as_ref().and_then(|r| r.class_name.as_deref())
     }
 
     /// The PHP class (`$e::class`).

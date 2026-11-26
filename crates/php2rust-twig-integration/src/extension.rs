@@ -4,10 +4,11 @@
 //! [`crate::callables`] by path. The build script includes this file too,
 //! to compile the fixtures with the same definitions.
 //!
-//! `DebugExtension` (`dump`), `StringLoaderExtension`
-//! (`template_from_string`) and `SandboxExtension` are not ported: their
-//! callables have no Rust function, so a fixture that calls them does not
-//! compile.
+//! [`extensions`] are the ones `IntegrationTest::getExtensions()` gives:
+//! the sandbox extension (off, with the test's policy) and this one.
+//! `DebugExtension` (`dump`) and `StringLoaderExtension`
+//! (`template_from_string`) are not ported: their callables have no Rust
+//! function, so a fixture that calls them does not compile.
 //!
 //! Upstream: twig/twig tests/IntegrationTest.php
 
@@ -18,11 +19,13 @@ use twig::{
     callable::DeprecatedCallableInfo,
     error::Error,
     extension::Extension,
+    extension::sandbox::SandboxExtension,
     node::{Node, expression, statement},
     parser::Parser,
+    sandbox::SecurityPolicy,
     token::Token,
     token::TokenType,
-    token_parser::{TokenParser, sandbox::SandboxTokenParser},
+    token_parser::TokenParser,
     util::callable_arguments::Parameter as P,
 };
 
@@ -47,9 +50,23 @@ impl TokenParser for FixtureTokenParser {
     }
 }
 
-/// `TwigTestExtension`, with the tags of the `sandbox` extension so that
-/// the fixtures parse as in PHP.
+/// `TwigTestExtension`.
 pub struct FixtureExtension;
+
+/// `IntegrationTest::getExtensions()`: `new SandboxExtension(new
+/// SecurityPolicy([], [], [], [], ['dump']), false)` and
+/// `TwigTestExtension`.
+#[must_use]
+pub fn extensions() -> Vec<Rc<dyn Extension>> {
+    vec![
+        Rc::new(SandboxExtension::new(
+            Rc::new(SecurityPolicy::new(&[], &[], &[], &[], &["dump"], &[])),
+            false,
+            None,
+        )),
+        Rc::new(FixtureExtension),
+    ]
+}
 
 fn filter(name: &str, rust: &str, parameters: Vec<P>) -> TwigCallable {
     TwigCallable::filter(name, CLOSURE).rust(&path(rust), parameters)
@@ -77,7 +94,7 @@ impl Extension for FixtureExtension {
     }
 
     fn token_parsers(&self) -> Vec<Rc<dyn TokenParser>> {
-        vec![Rc::new(SandboxTokenParser), Rc::new(FixtureTokenParser)]
+        vec![Rc::new(FixtureTokenParser)]
     }
 
     fn filters(&self) -> Vec<TwigCallable> {

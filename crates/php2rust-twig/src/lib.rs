@@ -24,6 +24,7 @@ pub mod node;
 pub mod node_visitor;
 pub mod parser;
 pub mod runtime;
+pub mod sandbox;
 pub mod source;
 pub mod template;
 pub mod token;

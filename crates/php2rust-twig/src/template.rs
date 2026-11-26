@@ -11,8 +11,7 @@
 //! debug info they passed instead ([`Error::guess_line`]).
 //!
 //! Not ported: `use_yield` (output is always collected), `loadTemplate()`
-//! (deprecated), the sandbox hooks (`ensureSecurityChecked()`,
-//! `checkTraitsAllowed()`: the sandbox is not ported yet).
+//! (deprecated).
 //!
 //! Upstream: twig/twig src/Template.php src/TemplateWrapper.php
 
@@ -173,11 +172,27 @@ pub trait CompiledTemplate: Sync {
     fn load_declared_macros(&self) -> Vec<TwigMacro> {
         Vec::new()
     }
+
+    /// `ensureSecurityChecked()`: the sandbox check of what the template
+    /// uses (generated for a template compiled with the sandbox
+    /// extension).
+    fn ensure_security_checked(&self, this: &Rc<Template>, env: &Environment) -> Result<(), Error> {
+        let _ = (this, env);
+        Ok(())
+    }
+
+    /// `checkTraitsAllowed()`: the sandbox check of the `use` tag.
+    fn check_traits_allowed(&self, this: &Rc<Template>, env: &Environment) -> Result<(), Error> {
+        let _ = (this, env);
+        Ok(())
+    }
 }
 
 /// An instance of a compiled template (`Twig\Template`).
 pub struct Template {
     compiled: &'static dyn CompiledTemplate,
+    /// [`Environment::id`] of the environment that loaded it.
+    env_id: usize,
     source: Arc<Source>,
     this: Weak<Template>,
     /// `$this->parent`: `None` is null (not resolved yet), `Some(None)`
@@ -208,6 +223,7 @@ impl Template {
     ) -> Result<Rc<Self>, Error> {
         let template = Rc::new_cyclic(|this| Self {
             compiled,
+            env_id: env.id(),
             source: Arc::new(compiled.source_context()),
             this: this.clone(),
             parent: RefCell::new(None),
@@ -311,6 +327,9 @@ impl Template {
         if let Some(parent) = self.parent.borrow().clone() {
             return Ok(parent);
         }
+        // a dynamic parent name runs template code: check the sandbox
+        // policy first
+        self.ensure_security_checked(env)?;
         let parent = self
             .compiled
             .do_get_parent(&self.rc(), env, context)
@@ -326,6 +345,19 @@ impl Template {
             parents.push((name, Rc::clone(&parent)));
         }
         Ok(Some(parent))
+    }
+
+    /// `ensureSecurityChecked()`.
+    pub fn ensure_security_checked(&self, env: &Environment) -> Result<(), Error> {
+        self.compiled.ensure_security_checked(&self.rc(), env)
+    }
+
+    /// `ensureTraitsAllowed()`: called by the constructor before it loads
+    /// the traits.
+    pub fn ensure_traits_allowed(&self, env: &Environment) -> Result<(), Error> {
+        self.compiled
+            .check_traits_allowed(&self.rc(), env)
+            .map_err(|e| self.handle_exception(e, -1))
     }
 
     /// `handleException()` for errors that leave a method without a line
@@ -431,7 +463,8 @@ impl Template {
         let blocks = self.blocks.borrow().merge(blocks);
         let this = self.rc();
         self.compiled
-            .do_display(&this, env, context, &blocks, out)
+            .ensure_security_checked(&this, env)
+            .and_then(|()| self.compiled.do_display(&this, env, context, &blocks, out))
             .map_err(|e| self.handle_exception(e, -1))
     }
 
@@ -460,7 +493,12 @@ impl Template {
             let template = &block.template;
             return template
                 .compiled
-                .call_block(&block.name, template, env, context, &blocks, out)
+                .ensure_security_checked(template, env)
+                .and_then(|()| {
+                    template
+                        .compiled
+                        .call_block(&block.name, template, env, context, &blocks, out)
+                })
                 .map_err(|e| template.handle_exception(e, -1));
         }
         if let Some(parent) = self.get_parent(env, &context)? {
@@ -591,21 +629,31 @@ impl Template {
 pub struct TemplateWrapper {
     name: Vec<u8>,
     index: Option<i64>,
+    /// [`Environment::id`] of the environment that made it.
+    env_id: usize,
 }
 
 impl TemplateWrapper {
     pub const CLASS: &'static str = "Twig\\TemplateWrapper";
 
-    pub fn new(name: impl Into<Vec<u8>>, index: Option<i64>) -> Self {
+    /// The wrapper of the template `name` of the environment `env_id`.
+    pub fn new(name: impl Into<Vec<u8>>, index: Option<i64>, env_id: usize) -> Self {
         Self {
             name: name.into(),
             index,
+            env_id,
         }
     }
 
     /// The wrapper of a template.
     pub fn of(template: &Template) -> Self {
-        Self::new(template.name(), None)
+        Self::new(template.name(), None, template.env_id)
+    }
+
+    /// `isOwnedBy($env)`.
+    #[must_use]
+    pub fn is_owned_by(&self, env: &Environment) -> bool {
+        self.env_id == env.id()
     }
 
     /// The wrapper as a value.
@@ -620,8 +668,15 @@ impl TemplateWrapper {
         &self.name
     }
 
-    /// `unwrap($env)`.
+    /// `unwrap($env)`: only for the environment that made the wrapper.
     pub fn unwrap_template(&self, env: &Environment) -> Result<Rc<Template>, Error> {
+        if !self.is_owned_by(env) {
+            return Err(Error::runtime(
+                "A \"Twig\\TemplateWrapper\" can only be used with the \"Twig\\Environment\" that created it.",
+                -1,
+                None,
+            ));
+        }
         env.load_template(&self.name, self.index)
     }
 

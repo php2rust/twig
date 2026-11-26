@@ -10,6 +10,7 @@
 
 pub mod core;
 pub mod escaper;
+pub mod sandbox;
 pub mod string;
 
 use std::sync::Arc;

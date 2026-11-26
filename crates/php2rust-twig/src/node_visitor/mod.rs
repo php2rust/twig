@@ -9,7 +9,7 @@
 //! Not ported: `AbstractNodeVisitor` (deprecated since 3.9) and
 //! `YieldNotReadyNodeVisitor`, which only reports node classes without the
 //! `#[YieldReady]` attribute; every node class of the port is ready.
-//! `SandboxNodeVisitor` comes with the sandbox.
+//! `SandboxNodeVisitor` is in [`sandbox`].
 //!
 //! Upstream: twig/twig src/NodeVisitor/NodeVisitorInterface.php src/NodeTraverser.php
 
@@ -17,6 +17,7 @@ pub mod correctness;
 pub mod escaper;
 pub mod optimizer;
 pub mod safe_analysis;
+pub mod sandbox;
 
 use crate::{environment::Environment, error::Error, node::Node};
 
