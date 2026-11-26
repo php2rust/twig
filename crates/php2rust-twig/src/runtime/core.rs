@@ -2470,7 +2470,15 @@ pub fn get_attribute(
     if is_defined_test {
         return Ok(Value::Bool(true));
     }
-    let arguments: Vec<Value> = arguments.values().cloned().collect();
+    // `$object->$method(...$arguments)`: named arguments bind by the
+    // method's parameters when the object gives them
+    let named = arguments.iter().any(|(k, _)| matches!(k, Key::Str(_)));
+    let arguments: Vec<Value> = match o.method_parameters(&method) {
+        Some(parameters) if named => {
+            php_value::args::bind(&format!("{}::{method}", o.class()), &parameters, arguments)?
+        }
+        _ => arguments.values().cloned().collect(),
+    };
     match o.call_method(&method, &arguments) {
         Some(Ok(value)) => Ok(value),
         Some(Err(thrown)) => {

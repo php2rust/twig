@@ -11,6 +11,7 @@ use std::sync::Arc;
 
 use php_value::{
     Key, PhpArray, PhpString,
+    args::Parameter,
     value::{PhpObject, Thrown, Value},
 };
 
@@ -136,6 +137,19 @@ impl PhpObject for TwigTestFoo {
             _ => return None,
         };
         Some(result)
+    }
+
+    fn method_parameters(&self, name: &str) -> Option<Vec<Parameter>> {
+        Some(match name.to_ascii_lowercase().as_str() {
+            "bar" => vec![
+                Parameter::optional("param1", Value::Null),
+                Parameter::optional("param2", Value::Null),
+            ],
+            "strtolower" => vec![Parameter::required("value")],
+            "getfoo" | "getempty" | "getnull" | "getself" | "is" | "in" | "not" | "rewind"
+            | "current" | "key" | "next" | "valid" => Vec::new(),
+            _ => return None,
+        })
     }
 
     /// `foreach`: `rewind()`, then `current()` under the key `'a'` while
