@@ -7,11 +7,11 @@ publish = false
 description = "Twig's integration fixtures, compiled to Rust at build time and run against recorded PHP results"
 
 [dependencies]
-php-value = { path = "../php-value" }
+php-value = { workspace = true }
 twig = { path = "../twig" }
 
 [build-dependencies]
-php-value = { path = "../php-value" }
+php-value = { workspace = true }
 serde_json = "1.0.154"
 symfony-deprecation-contracts = { path = "../deprecation-contracts" }
 twig = { path = "../twig" }
