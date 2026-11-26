@@ -9,8 +9,9 @@
 //! functions the core extension maps to (`abs`, `json_encode`, `max`,
 //! `min`, `range`, `is_iterable`) are here too.
 //!
-//! Not ported yet: the date filters and functions (`date`,
-//! `date_modify`), `convert_encoding` (iconv), `enum` and `enum_cases`,
+//! Dates (`date`, `date_modify`, the `date` function) use php2rust-date.
+//!
+//! Not ported yet: `convert_encoding` (iconv),
 //! and the sandbox checks (the sandbox extension is not ported).
 //!
 //! Upstream: twig/twig src/Extension/CoreExtension.php
@@ -45,6 +46,9 @@ pub struct CoreOptions {
     /// `constant()` and `getAttribute()` read after PHP's built-in ones:
     /// Rust has no PHP class constants to look up.
     pub constants: Vec<(Vec<u8>, Value)>,
+    /// The application's enums, for `enum()`, `enum_cases()` and their
+    /// `Class::CASE` constants.
+    pub enums: php_value::constants::Registry,
 }
 
 impl Default for CoreOptions {
@@ -54,6 +58,7 @@ impl Default for CoreOptions {
             number_format: (0, b".".to_vec(), b",".to_vec()),
             timezone: None,
             constants: Vec::new(),
+            enums: php_value::constants::Registry::empty(),
         }
     }
 }
@@ -608,6 +613,146 @@ pub fn format_number(call: &Call<'_>, args: Vec<Value>) -> R {
     Ok(Value::String(PhpString::from(number_format(
         number, decimals, &point, &separator,
     ))))
+}
+
+/// A date error as the exception PHP throws.
+fn date_error(e: &php_date::DateError) -> Error {
+    Error::exception(e.class(), e.message().as_bytes().to_vec())
+}
+
+/// `getTimezone()`: the zone set with `setTimezone()`, else PHP's
+/// default zone.
+fn extension_timezone(call: &Call<'_>) -> R<php_date::DateTimeZone> {
+    match &call.env.core_options().timezone {
+        Some(name) => php_date::DateTimeZone::new(name).map_err(|e| date_error(&e)),
+        None => Ok(php_date::date_default_timezone_get()),
+    }
+}
+
+/// The `$timezone` argument of `convertDate()`: `None` for `false` (leave
+/// the zone as it is), the extension's zone for null, a `DateTimeZone`
+/// object, or `new \DateTimeZone($timezone)`.
+fn timezone_argument(call: &Call<'_>, timezone: &Value) -> R<Option<php_date::DateTimeZone>> {
+    match timezone {
+        Value::Bool(false) => Ok(None),
+        Value::Null => extension_timezone(call).map(Some),
+        other => match php_date::object::zone_of(other) {
+            Some(zone) => Ok(Some(zone)),
+            None => php_date::DateTimeZone::new(&text(&string_of(other)?))
+                .map(Some)
+                .map_err(|e| date_error(&e)),
+        },
+    }
+}
+
+/// `new \DateTime($text, $zone)`.
+fn new_datetime(
+    text: &str,
+    zone: Option<&php_date::DateTimeZone>,
+) -> R<php_date::DateTimeImmutable> {
+    php_date::DateTimeImmutable::new(text, zone).map_err(|e| date_error(&e))
+}
+
+/// `convertDate()`, as a date and whether PHP gives a `DateTime` (a new
+/// object, or for `modify()` the clone to change) or the
+/// `DateTimeImmutable` itself.
+fn converted(call: &Call<'_>, date: &Value, timezone: &Value) -> R<Value> {
+    use php_date::object::DateTime;
+    let zone = timezone_argument(call, timezone)?;
+    if let Value::Object(o) = date {
+        if let Some(immutable) = o.downcast_ref::<php_date::DateTimeImmutable>() {
+            return Ok(match &zone {
+                Some(zone) => Value::Object(Arc::new(immutable.set_timezone(zone))),
+                None => date.clone(),
+            });
+        }
+        if let Some(mutable) = o.downcast_ref::<DateTime>() {
+            let copy = mutable.deep_clone();
+            if let Some(zone) = &zone {
+                copy.set_timezone(zone);
+            }
+            return Ok(Value::Object(Arc::new(copy)));
+        }
+    }
+    let now = match date {
+        Value::Null => true,
+        Value::String(s) => s.as_bytes() == b"now",
+        _ => false,
+    };
+    if now {
+        let zone = match zone {
+            Some(zone) => zone,
+            None => extension_timezone(call)?,
+        };
+        return Ok(DateTime::object(new_datetime("now", Some(&zone))?));
+    }
+    let as_string = text(&string_of(date)?);
+    let digits = |s: &str| !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit());
+    let timestamp = digits(&as_string) || as_string.strip_prefix('-').is_some_and(digits);
+    let parsed = if timestamp {
+        new_datetime(&format!("@{as_string}"), None)?
+    } else {
+        new_datetime(&as_string, None)?
+    };
+    let parsed = match &zone {
+        Some(zone) => parsed.set_timezone(zone),
+        None => parsed,
+    };
+    Ok(DateTime::object(parsed))
+}
+
+/// The `date` function (`convertDate($date = null, $timezone = null)`):
+/// a `DateTime` or `DateTimeImmutable` for a date, a timestamp, a date
+/// text or null (now), in `$timezone` (null: the extension's zone; false:
+/// the date's own).
+pub fn convert_date(call: &Call<'_>, args: Vec<Value>) -> R {
+    converted(call, &arg(&args, 0), &arg(&args, 1))
+}
+
+/// The `date` filter (`formatDate($date, $format = null, $timezone =
+/// null)`). A `DateInterval` is formatted as it is (no zone).
+pub fn format_date(call: &Call<'_>, args: Vec<Value>) -> R {
+    let date = arg(&args, 0);
+    let interval = match &date {
+        Value::Object(o) => o.downcast_ref::<php_value::date_interval::DateInterval>(),
+        _ => None,
+    };
+    let format = match arg(&args, 1) {
+        Value::Null => {
+            call.env.core_options().date_formats[usize::from(interval.is_some())].clone()
+        }
+        v => string_of(&v)?,
+    };
+    let format = text(&format);
+    if let Some(interval) = interval {
+        return Ok(Value::String(PhpString::from(interval.format(&format))));
+    }
+    let converted = converted(call, &date, &arg(&args, 2))?;
+    let formatted = php_date::object::date_of(&converted)
+        .map(|d| d.format(&format))
+        .unwrap_or_default();
+    Ok(Value::String(PhpString::from(formatted)))
+}
+
+/// The `date_modify` filter (`modifyDate($date, $modifier)`): the date
+/// converted without a zone change, then `modify()`: a new
+/// `DateTimeImmutable`, or the converted `DateTime` changed in place.
+pub fn modify_date(call: &Call<'_>, args: Vec<Value>) -> R {
+    let converted = converted(call, &arg(&args, 0), &Value::Bool(false))?;
+    let modifier = text(&string_of(&arg(&args, 1))?);
+    let Value::Object(o) = &converted else {
+        return Ok(converted);
+    };
+    if let Some(mutable) = o.downcast_ref::<php_date::object::DateTime>() {
+        mutable.modify(&modifier).map_err(|e| date_error(&e))?;
+        return Ok(converted);
+    }
+    match o.call_method("modify", &[Value::String(PhpString::from(modifier))]) {
+        Some(result) => {
+            result.map_err(|t| Error::exception(t.class, t.message.as_bytes().to_vec()))
+        }
+        None => Ok(converted),
+    }
 }
 
 /// The `url_encode` filter.
@@ -2033,11 +2178,59 @@ pub fn php_constant(env: &Environment, name: &[u8]) -> Option<Value> {
         return Some(value);
     }
     let name = name.strip_prefix(b"\\").unwrap_or(name);
-    env.core_options()
+    let options = env.core_options();
+    options
         .constants
         .iter()
         .find(|(n, _)| n.as_slice() == name)
         .map(|(_, v)| v.clone())
+        .or_else(|| {
+            options
+                .enums
+                .constant(&String::from_utf8_lossy(name))
+                .cloned()
+        })
+}
+
+/// `Class::CASE` for an enum case the compiler checked.
+pub fn enum_constant(env: &Environment, name: &[u8]) -> R {
+    php_constant(env, name).ok_or_else(|| {
+        Error::exception(
+            "Error",
+            format!("Undefined constant {}", text(name)).into_bytes(),
+        )
+    })
+}
+
+/// `Class::cases()` for an enum the compiler checked.
+pub fn enum_cases_of(env: &Environment, class: &[u8]) -> R {
+    let options = env.core_options();
+    let cases = options.enums.cases(&text(class)).unwrap_or_default();
+    Ok(Value::Array(PhpArray::list(
+        cases.iter().cloned().map(Value::Object),
+    )))
+}
+
+/// The `enum_cases` function (`enumCases($enum)`).
+pub fn enum_cases(call: &Call<'_>, args: Vec<Value>) -> R {
+    let class = text(&string_of(&arg(&args, 0))?);
+    if !call.env.core_options().enums.enum_exists(&class) {
+        return Err(runtime(format!("Enum \"{class}\" does not exist.")));
+    }
+    enum_cases_of(call.env, class.as_bytes())
+}
+
+/// The `enum` function (`enum($enum)`): the enum's first case.
+pub fn enum_first(call: &Call<'_>, args: Vec<Value>) -> R {
+    let class = text(&string_of(&arg(&args, 0))?);
+    let options = call.env.core_options();
+    let Some(cases) = options.enums.cases(&class) else {
+        return Err(runtime(format!("\"{class}\" is not an enum.")));
+    };
+    match cases.first() {
+        Some(case) => Ok(Value::Object(case.clone())),
+        None => Err(runtime(format!("\"{class}\" is an empty enum."))),
+    }
 }
 
 /// The PHP constants the port knows.

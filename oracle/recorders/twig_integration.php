@@ -32,6 +32,10 @@ require_once '/work/upstream/twig/twig/src/Resources/core.php';
 require_once '/work/upstream/twig/twig/src/Resources/debug.php';
 require_once '/work/upstream/twig/twig/src/Resources/escaper.php';
 require_once '/work/upstream/twig/twig/src/Resources/string_loader.php';
+// the enums the enum fixtures name (IntegrationTest loads them through
+// Composer's autoload-dev)
+require_once '/work/upstream/twig/twig/tests/DummyBackedEnum.php';
+require_once '/work/upstream/twig/twig/tests/DummyUnitEnum.php';
 }
 
 namespace Twig\Tests {
@@ -441,6 +445,13 @@ function typed($value, int $depth = 0)
     if ($depth >= 4) {
         return ['o', get_class($value)];
     }
+    // dates: the instant ('Y-m-d H:i:s.u') and the zone name
+    if ($value instanceof \DateTimeInterface) {
+        return ['o', get_class($value), typed(['date' => $value->format('Y-m-d H:i:s.u'), 'timezone' => $value->getTimezone()->getName()], $depth + 1)];
+    }
+    if ($value instanceof \DateTimeZone) {
+        return ['o', 'DateTimeZone', typed(['timezone' => $value->getName()], $depth + 1)];
+    }
     if ($value instanceof \ArrayObject || $value instanceof \ArrayIterator) {
         return ['o', get_class($value), typed($value->getArrayCopy(), $depth + 1)];
     }
@@ -581,6 +592,15 @@ foreach ($files as $path) {
             $deprecations = [];
             $data = eval($case[1].';');
             $record['data'] = typed($data);
+            // what --DATA-- may have changed: PHP's default zone and the
+            // core extension's date, zone and number settings
+            $core = $twig->getExtension(\Twig\Extension\CoreExtension::class);
+            $record['env'] = typed([
+                'default_timezone' => date_default_timezone_get(),
+                'date_format' => $core->getDateFormat(),
+                'timezone' => $core->getTimezone()->getName(),
+                'number_format' => $core->getNumberFormat(),
+            ]);
             try {
                 $record['output'] = base64_encode(trim($loaded['index.twig']->render($data), "\n "));
             } catch (\Exception $e) {

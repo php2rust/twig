@@ -16,10 +16,10 @@
 //! escaper extensions, [`core_callable`].
 //!
 //! Not ported: the sandbox nodes (`SandboxNode`, `CheckSecurityNode`,
-//! `CheckToStringNode`), `enum` and `enum_cases` with a constant
-//! argument, and the callables of the date filters.
+//! `CheckToStringNode`).
 //!
 //! Upstream: twig/twig src/Compiler.php src/Node/ModuleNode.php src/Node/BlockNode.php src/Node/MacroNode.php src/Node/ForNode.php src/Node/IfNode.php src/Node/SetNode.php src/Node/IncludeNode.php src/Node/EmbedNode.php src/Node/WithNode.php src/Node/ImportNode.php src/Node/PrintNode.php src/Node/TextNode.php src/Node/CaptureNode.php src/Node/Expression/CallExpression.php src/Node/Expression/GetAttrExpression.php src/Node/Expression/NameExpression.php
+//! Upstream: twig/twig src/Node/Expression/FunctionNode/EnumFunction.php src/Node/Expression/FunctionNode/EnumCasesFunction.php
 //! Upstream: twig/twig src/Node/Expression/Binary/AddBinary.php
 //! Upstream: twig/twig src/Node/Expression/Binary/AndBinary.php
 //! Upstream: twig/twig src/Node/Expression/Binary/BitwiseAndBinary.php
@@ -206,6 +206,18 @@ pub fn core_callable(php: &str) -> Option<(&'static str, Vec<Parameter>)> {
                 null("thousandSep"),
             ],
         ),
+        "Twig\\Extension\\CoreExtension::formatDate" => (
+            path("rt::core::format_date"),
+            vec![req("date"), null("format"), null("timezone")],
+        ),
+        "Twig\\Extension\\CoreExtension::modifyDate" => (
+            path("rt::core::modify_date"),
+            vec![req("date"), req("modifier")],
+        ),
+        "Twig\\Extension\\CoreExtension::convertDate" => (
+            path("rt::core::convert_date"),
+            vec![null("date"), null("timezone")],
+        ),
         "abs" => (path("rt::core::abs"), vec![req("num")]),
         "Twig\\Extension\\CoreExtension::round" => (
             path("rt::core::round"),
@@ -355,6 +367,10 @@ pub fn core_callable(php: &str) -> Option<(&'static str, Vec<Parameter>)> {
             path("rt::core::range"),
             vec![req("start"), req("end"), def("step", Attr::Int(1))],
         ),
+        "Twig\\Extension\\CoreExtension::enum" => (path("rt::core::enum_first"), vec![req("enum")]),
+        "Twig\\Extension\\CoreExtension::enumCases" => {
+            (path("rt::core::enum_cases"), vec![req("enum")])
+        }
         "Twig\\Extension\\CoreExtension::constant" => (
             path("rt::core::constant"),
             vec![
@@ -1671,9 +1687,7 @@ impl<'a> Compiler<'a> {
             C::FilterExpression | C::FunctionExpression | C::TestExpression | C::EscapeFilter => {
                 self.call_expr(node)?
             }
-            C::EnumCasesFunction | C::EnumFunction => {
-                return Err(unsupported(node, "The enum functions"));
-            }
+            C::EnumCasesFunction | C::EnumFunction => self.enum_function(node)?,
             C::RenderSandboxedFunction => return Err(unsupported(node, "The sandbox")),
             C::ArrowFunctionExpression => self.arrow(node)?,
             C::MacroReferenceExpression => self.macro_reference(node)?,
@@ -1927,6 +1941,54 @@ impl<'a> Compiler<'a> {
                 "{{ let __n = rt::bytes(&{name})?; rt::Value::String(rt::PhpString::from(this.render_block(env, &__n, context.clone(), blocks, true)?)) }}"
             ),
         })
+    }
+
+    /// `EnumFunction::compile()` and `EnumCasesFunction::compile()`: a
+    /// constant enum name is checked at compile time (the application's
+    /// enums are in `CoreOptions::enums`) and compiled to its first case or
+    /// its cases; any other argument is a call checked at run time.
+    fn enum_function(&mut self, node: &Node) -> Result<String, Error> {
+        let cases = node.is(NodeClass::EnumCasesFunction);
+        let function = if cases { "enum_cases" } else { "enum" };
+        let arguments = node.get_node("arguments")?;
+        let first = arguments.node("enum").or_else(|| arguments.node(0i64));
+        let Some(first) =
+            first.filter(|f| f.is(NodeClass::ConstantExpression) && arguments.count() == 1)
+        else {
+            return self.call_expr(node);
+        };
+        let syntax = |message: String| Error::syntax(message, node.line(), node.source_context());
+        let Some(Attr::Str(class)) = first.attr("value") else {
+            return Err(syntax(format!(
+                "The first argument of the \"{function}\" function must be a string."
+            )));
+        };
+        let options = self.env.core_options();
+        let name = String::from_utf8_lossy(&class).into_owned();
+        let Some(objects) = options.enums.cases(&name) else {
+            return Err(syntax(format!(
+                "The first argument of the \"{function}\" function must be the name of an enum, \"{name}\" given."
+            )));
+        };
+        if cases {
+            return Ok(format!(
+                "rt::core::enum_cases_of(env, {})?",
+                byte_lit(&class)
+            ));
+        }
+        let Some(case) = objects
+            .first()
+            .and_then(|o| o.downcast_ref::<php_value::object::EnumCase>())
+        else {
+            return Err(syntax(format!(
+                "The first argument of the \"enum\" function must be a non-empty enum, \"{name}\" given."
+            )));
+        };
+        let constant = format!("{name}::{}", case.name());
+        Ok(format!(
+            "rt::core::enum_constant(env, {})?",
+            byte_lit(constant.as_bytes())
+        ))
     }
 
     fn arrow(&mut self, node: &Node) -> R {
