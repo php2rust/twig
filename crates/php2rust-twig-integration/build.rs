@@ -72,7 +72,22 @@ pub fn options(config: &serde_json::Map<String, Json>) -> Result<EnvironmentOpti
     Ok(options)
 }
 
+/// The stack of the build thread. The parser and the compiler recurse
+/// once for each level of a node tree, and Windows gives the main thread
+/// only 1 MB (8 MB on Linux), which some fixtures need more than.
+const STACK_SIZE: usize = 64 * 1024 * 1024;
+
 fn main() {
+    std::thread::Builder::new()
+        .name("twig-integration-build".to_owned())
+        .stack_size(STACK_SIZE)
+        .spawn(build)
+        .unwrap()
+        .join()
+        .unwrap();
+}
+
+fn build() {
     let data = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/data/integration.json");
     println!("cargo:rerun-if-changed={data}");
     println!("cargo:rerun-if-changed=src/extension.rs");
