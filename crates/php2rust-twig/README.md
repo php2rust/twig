@@ -26,6 +26,8 @@ PHP.
 | Node visitors and the traverser: correctness checks (content outside blocks, `extends` placement, `block` under a tag, macro calls without parentheses), optimizer (constant prints to text, direct block/parent output, `for` without `loop`), safe analysis, auto-escaping (`autoescape` option, `'name'` strategy, `autoescape` tag, `pre_escape`); one visitor set for each environment, as in PHP | `NodeTraverser.php`, `NodeVisitor/*.php`, `FileExtensionEscapingStrategy.php`, `Extension/OptimizerExtension.php` | CorrectnessTest (3), OptimizerTest (5), SafeAnalysisTest (1), FileExtensionEscapingStrategyTest (1); EscaperTest pending on the runtime; visitor vectors |
 | Token parsers: every core tag (`apply`, `autoescape`, `block`, `deprecated`, `do`, `embed`, `extends`, `flush`, `for`, `from`, `guard`, `if`, `import`, `include`, `macro`, `sandbox`, `set`, `types`, `use`, `with`) | `TokenParser/*.php` | BlockTokenParserTest (5; 2 pending on the runtime), TypesTokenParserTest (2); parser vectors |
 | `Environment`: options `autoescape` and `optimizations`, extension registry, lexer from the registered operators, node visitors, `tokenize()`, `parse()` | `Environment.php` (parse side) | all of the above |
+| `Compiler`: Rust code generation, one module per template (and per embedded template) with a `CompiledTemplate` impl; the `compile()` of every node class but the sandbox nodes, `enum`/`enum_cases` and the date callables; PHP's line guess (`__line`) and unary-before-`**` precedence kept; `compile_set()` for a build script | `Compiler.php`, `Node/**/*.php` (`compile()`) | integration fixtures |
+| Runtime: `Template` (blocks, parents, traits, macros, `load()`, `display()`, `render()`, error line guess), `TemplateWrapper`, `Markup`, `MacroNamespace`, `TwigMacro`, the compiled-template loader, `EscaperRuntime` (all built-in strategies, custom escapers, safe classes), the `CoreExtension` runtime methods (filters, functions, tests, `getAttribute()`, `include`, `source`, arrow functions) and the multibyte string functions they call | `Template.php`, `TemplateWrapper.php`, `Markup.php`, `MacroNamespace.php`, `TwigMacro.php`, `Loader/*.php`, `Runtime/EscaperRuntime.php`, `Extension/CoreExtension.php` | integration fixtures |
 
 Parser vectors: 806 templates (all upstream fixture templates and 145 edge
 cases) parsed by real Twig with the node visitors off and the extensions of
@@ -36,10 +38,19 @@ more cases (`tests/data/parser_visitors_extra.json`, each with its
 `autoescape` and `optimizations` options) parsed with the node visitors
 on, except the sandbox visitor.
 
-Not yet ported: the sandbox (its node visitor), the Rust emitter, the runtime, loaders, the
-undefined-callable callbacks (GuardTokenParserTest pending), the
-`path()`/`app.request` hooks (after the HTTP path merges), and the
-integration fixtures.
+Integration fixtures: `crates/twig-integration` compiles every case of
+upstream's `tests/Fixtures/**/*.test` to Rust in its build script and runs
+it against what real Twig did (`IntegrationTest::testIntegration`): 361 of
+457 cases pass, 2 are pending (listed with the reason in
+`tests/data/integration_pending.txt`), 94 are skipped (data with objects,
+which need the test classes; the sandbox, `date`, enums, `dump`,
+`template_from_string`; a false `--CONDITION--`).
+
+Not yet ported: the sandbox, the date filters, `enum`/`enum_cases`, the
+debug and string loader extensions, the filesystem loader and the cache,
+the undefined-callable callbacks (GuardTokenParserTest pending), the
+`path()`/`app.request` hooks (after the HTTP path merges), the PHP test
+classes of the integration fixtures, and the legacy fixtures.
 
 Vectors: `scripts/record.sh twig-lexer` runs
 `oracle/recorders/twig_lexer.php` and writes `tests/data/lexer.json`;

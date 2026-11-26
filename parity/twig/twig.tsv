@@ -381,7 +381,7 @@ tests/Extension/StringLoaderExtensionTest.php	StringLoaderExtensionTest::testInc
 tests/FactoryRuntimeLoaderTest.php	FactoryRuntimeLoaderTest::testLoad	pending	
 tests/FactoryRuntimeLoaderTest.php	FactoryRuntimeLoaderTest::testLoadReturnsNullForUnmappedRuntime	pending	
 tests/FileExtensionEscapingStrategyTest.php	FileExtensionEscapingStrategyTest::testGuess	ported	crates/twig/tests/file_extension_escaping_strategy_test.rs::testGuess
-tests/IntegrationTest.php	IntegrationTest::testIntegration	pending	
+tests/IntegrationTest.php	IntegrationTest::testIntegration	ported	crates/twig-integration/tests/integration.rs::testIntegration
 tests/IntegrationTest.php	IntegrationTest::testLegacyIntegration	pending	
 tests/LexerTest.php	LexerTest::testBigNumbers	ported	crates/twig/tests/lexer_test.rs::testBigNumbers
 tests/LexerTest.php	LexerTest::testBlockTagDelimitersPointAtTheMarkers	ported	crates/twig/tests/lexer_test.rs::testBlockTagDelimitersPointAtTheMarkers

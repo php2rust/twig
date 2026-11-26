@@ -11,8 +11,8 @@
 //! objects (the test classes are not ported yet). The cases listed in
 //! `data/integration_pending.txt` must still fail: the list stays exact.
 //!
-//! Upstream: twig/twig tests/IntegrationTest.php
-#![allow(clippy::unwrap_used, clippy::expect_used)]
+//! Upstream: twig/twig tests/IntegrationTest.php src/Test/IntegrationTestCase.php
+#![allow(non_snake_case, clippy::unwrap_used, clippy::expect_used)]
 
 use std::{collections::BTreeSet, rc::Rc};
 
@@ -226,7 +226,7 @@ fn render(record: &Json, env: &Environment) -> Outcome {
 
 /// `IntegrationTest::testIntegration()`.
 #[test]
-fn test_integration() {
+fn testIntegration() {
     let records: Vec<Json> = serde_json::from_str(include_str!("data/integration.json")).unwrap();
     assert_eq!(records.len(), generated::COMPILED.len());
     let pending: BTreeSet<String> = include_str!("data/integration_pending.txt")

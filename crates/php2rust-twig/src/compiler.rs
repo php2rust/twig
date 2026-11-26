@@ -20,6 +20,54 @@
 //! argument, and the callables of the date filters.
 //!
 //! Upstream: twig/twig src/Compiler.php src/Node/ModuleNode.php src/Node/BlockNode.php src/Node/MacroNode.php src/Node/ForNode.php src/Node/IfNode.php src/Node/SetNode.php src/Node/IncludeNode.php src/Node/EmbedNode.php src/Node/WithNode.php src/Node/ImportNode.php src/Node/PrintNode.php src/Node/TextNode.php src/Node/CaptureNode.php src/Node/Expression/CallExpression.php src/Node/Expression/GetAttrExpression.php src/Node/Expression/NameExpression.php
+//! Upstream: twig/twig src/Node/Expression/Binary/AddBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/AndBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/BitwiseAndBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/BitwiseOrBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/BitwiseXorBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/ConcatBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/DivBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/EndsWithBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/EqualBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/FloorDivBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/GreaterBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/GreaterEqualBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/HasEveryBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/HasSomeBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/InBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/LessBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/LessEqualBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/MatchesBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/ModBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/MulBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/NotEqualBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/NotInBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/NotSameAsBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/OrBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/PowerBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/RangeBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/SameAsBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/SpaceshipBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/StartsWithBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/SubBinary.php
+//! Upstream: twig/twig src/Node/Expression/Binary/XorBinary.php
+//! Upstream: twig/twig src/Node/Expression/Test/ConstantTest.php
+//! Upstream: twig/twig src/Node/Expression/Test/DivisiblebyTest.php
+//! Upstream: twig/twig src/Node/Expression/Test/EvenTest.php src/Node/Expression/Test/NullTest.php
+//! Upstream: twig/twig src/Node/Expression/Test/OddTest.php src/Node/Expression/Test/SameasTest.php
+//! Upstream: twig/twig src/Node/Expression/Unary/NegUnary.php
+//! Upstream: twig/twig src/Node/Expression/Unary/NotUnary.php
+//! Upstream: twig/twig src/Node/Expression/Unary/PosUnary.php
+//! Upstream: twig/twig src/Node/Expression/Unary/SpreadUnary.php
+//! Upstream: twig/twig src/Node/Expression/Unary/StringCastUnary.php
+//! Upstream: twig/twig src/Node/Expression/Variable/AssignContextVariable.php
+//! Upstream: twig/twig src/Node/Expression/Variable/ContextVariable.php
+//! Upstream: twig/twig src/Node/Expression/Variable/LocalVariable.php
+//! Upstream: twig/twig src/Node/Expression/ConditionalExpression.php
+//! Upstream: twig/twig src/Node/Expression/InlinePrint.php
+//! Upstream: twig/twig src/Node/Expression/MethodCallExpression.php
+//! Upstream: twig/twig src/Node/Expression/NullCoalesceExpression.php
+//! Upstream: twig/twig src/Node/Expression/VariadicExpression.php
 
 use std::fmt::Write as _;
 

@@ -4,6 +4,8 @@
 //! Twig cache would hold them: one module per case, with its templates and
 //! the deprecations the compiler triggered. A case that does not compile
 //! keeps its error ("Class: message").
+//!
+//! Upstream: none
 
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
