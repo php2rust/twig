@@ -10,13 +10,15 @@ of upstream's `tests/Fixtures/**/*.test` to Rust with `twig::compiler`, and
 endorsed by Twig or Symfony.
 
 `src/extension.rs` and `src/callables.rs` port `TwigTestExtension`: its
-filters, functions, tests and the `§` tag. The cases that do not pass yet
+filters, functions, tests and the `§` tag. `src/classes.rs` ports the
+classes the `--DATA--` sections create (`TwigTestFoo` and the stubs). The cases that do not pass yet
 are in `tests/data/integration_pending.txt`, with the reason; the test
 fails when one of them passes, so the list stays exact.
 
 Vectors: `scripts/record.sh twig-integration` runs
 `oracle/recorders/twig_integration.php` and writes
 `tests/data/integration.json`. Each case has the template sources, the
-`--CONFIG--` options, the `--DATA--` context as a typed tree, and the
+`--CONFIG--` options, the `--DATA--` context as a typed tree (objects with
+their state), and the
 trimmed output or the exception (`Class: message`) with the deprecations of
 loading and of rendering.

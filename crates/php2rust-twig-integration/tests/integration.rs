@@ -7,16 +7,21 @@
 //!
 //! A case is skipped when its `--CONDITION--` is false in PHP, when the
 //! Rust compiler does not support a part of it yet (the sandbox, `date`,
-//! enums, `dump`, `template_from_string`), or when its `--DATA--` holds
-//! objects (the test classes are not ported yet). The cases listed in
+//! enums, `dump`, `template_from_string`), or when its `--DATA--` holds an
+//! object of a class the port does not have (`src/classes.rs` has the
+//! test classes). The cases listed in
 //! `data/integration_pending.txt` must still fail: the list stays exact.
 //!
 //! Upstream: twig/twig tests/IntegrationTest.php src/Test/IntegrationTestCase.php
 #![allow(non_snake_case, clippy::unwrap_used, clippy::expect_used)]
 
-use std::{collections::BTreeSet, rc::Rc};
+use std::{collections::BTreeSet, rc::Rc, sync::Arc};
 
-use php_value::{Key, PhpArray, PhpString, Value, base64::decode};
+use php_value::{
+    Key, PhpArray, PhpString,
+    base64::decode,
+    value::{PhpObject, Value},
+};
 use serde_json::Value as Json;
 use twig::{Autoescape, Environment, EnvironmentOptions, loader::CompiledArrayLoader};
 use twig_integration::extension::FixtureExtension;
@@ -29,7 +34,8 @@ fn bytes(json: &Json) -> Vec<u8> {
     decode(json.as_str().expect("base64").as_bytes())
 }
 
-/// The recorder's `typed()` tree as a value, or `None` for an object.
+/// The recorder's `typed()` tree as a value, or `None` for an object of
+/// a class the port does not have.
 fn value(json: &Json) -> Option<Value> {
     let tag = json[0].as_str().unwrap();
     Some(match tag {
@@ -49,8 +55,62 @@ fn value(json: &Json) -> Option<Value> {
             }
             Value::Array(array)
         }
+        "o" => object(json)?,
         _ => return None,
     })
+}
+
+/// An object of a class the port has, from its recorded state.
+fn object(json: &Json) -> Option<Value> {
+    use php_value::object::{ArrayIterator, ArrayObject, StdClass};
+    use twig_integration::classes as c;
+    let class = json[1].as_str()?;
+    let Value::Array(state) = value(json.get(2)?)? else {
+        return None;
+    };
+    let get = |name: &str| state.get(&Key::from_bytes(name.as_bytes())).cloned();
+    let array = |name: &str| match get(name) {
+        Some(Value::Array(a)) => a,
+        _ => PhpArray::new(),
+    };
+    let string = |name: &str| match get(name) {
+        Some(Value::String(s)) => s,
+        _ => PhpString::default(),
+    };
+    let object: Arc<dyn PhpObject> = match class {
+        "stdClass" => Arc::new(StdClass::from_array(state.clone())),
+        "ArrayObject" => Arc::new(ArrayObject::new(state.clone())),
+        "ArrayIterator" => Arc::new(ArrayIterator::new(state.clone())),
+        "Twig\\Markup" => {
+            return Some(twig::markup::Markup::value(
+                string("content"),
+                string("charset"),
+            ));
+        }
+        "Twig\\Tests\\TwigTestFoo" => Arc::new(c::TwigTestFoo {
+            position: match get("position") {
+                Some(Value::Int(i)) => i,
+                _ => 0,
+            },
+            array: array("array"),
+        }),
+        "Twig\\Tests\\ToStringStub" => Arc::new(c::ToStringStub {
+            string: string("string"),
+        }),
+        "Twig\\Tests\\CountableStub" => Arc::new(c::CountableStub {
+            count: match get("count") {
+                Some(Value::Int(i)) => i,
+                _ => 0,
+            },
+        }),
+        "Twig\\Tests\\IteratorAggregateStub" => Arc::new(c::IteratorAggregateStub {
+            data: array("data"),
+        }),
+        "Twig\\Tests\\SimpleIteratorForTesting" => Arc::new(c::SimpleIteratorForTesting),
+        "Twig\\Tests\\MagicCallStub" => Arc::new(c::MagicCallStub),
+        _ => return None,
+    };
+    Some(Value::Object(object))
 }
 
 fn options(config: &serde_json::Map<String, Json>) -> EnvironmentOptions {
@@ -132,6 +192,11 @@ fn run(record: &Json, compiled: &generated::Compiled) -> Outcome {
     )
     .unwrap();
     env.add_global("global", Value::String(PhpString::from(b"global".to_vec())));
+    // TwigTestFoo::BAR_NAME
+    env.core_options_mut().constants.push((
+        b"Twig\\Tests\\TwigTestFoo::BAR_NAME".to_vec(),
+        Value::String(PhpString::from(b"bar".to_vec())),
+    ));
     env.set_loader(Rc::new(CompiledArrayLoader { templates }));
     let names: Vec<Vec<u8>> = record["templates"]
         .as_array()

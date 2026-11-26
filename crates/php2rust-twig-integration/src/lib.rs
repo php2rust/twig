@@ -5,4 +5,5 @@
 //! Upstream: twig/twig tests/IntegrationTest.php
 
 pub mod callables;
+pub mod classes;
 pub mod extension;
