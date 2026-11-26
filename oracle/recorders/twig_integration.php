@@ -452,6 +452,10 @@ function typed($value, int $depth = 0)
     if ($value instanceof \DateTimeZone) {
         return ['o', 'DateTimeZone', typed(['timezone' => $value->getName()], $depth + 1)];
     }
+    // a template of the case's environment ($twig->load()): its name
+    if ($value instanceof \Twig\TemplateWrapper) {
+        return ['o', 'Twig\\TemplateWrapper', typed(['name' => $value->getTemplateName()], $depth + 1)];
+    }
     if ($value instanceof \ArrayObject || $value instanceof \ArrayIterator) {
         return ['o', get_class($value), typed($value->getArrayCopy(), $depth + 1)];
     }

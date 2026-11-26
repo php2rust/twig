@@ -9,6 +9,8 @@ description = "Port of twig/twig: lexer, parser and runtime for a build-time Twi
 [dependencies]
 php-pcre = { workspace = true }
 php-date = { workspace = true }
+php-iconv = { workspace = true }
+twox-hash = { version = "2.1.5", default-features = false, features = ["xxhash3_128"] }
 php-value = { workspace = true }
 symfony-deprecation-contracts = { path = "../deprecation-contracts" }
 

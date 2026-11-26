@@ -250,6 +250,10 @@ pub fn core_callable(php: &str) -> Option<(&'static str, Vec<Parameter>)> {
         "Twig\\Extension\\CoreExtension::lower" => {
             (path("rt::core::lower"), vec![charset(), req("string")])
         }
+        "Twig\\Extension\\CoreExtension::convertEncoding" => (
+            path("rt::core::convert_encoding"),
+            vec![req("string"), req("to"), req("from")],
+        ),
         "Twig\\Extension\\CoreExtension::striptags" => (
             path("rt::core::striptags"),
             vec![req("string"), null("allowable_tags")],
@@ -411,6 +415,14 @@ pub fn core_callable(php: &str) -> Option<(&'static str, Vec<Parameter>)> {
                 P::array_default("variables"),
                 def("ignoreMissing", Attr::Bool(false)).coercion_safe(),
             ],
+        ),
+        "Twig\\Extension\\DebugExtension::dump" => (
+            path("rt::debug::dump"),
+            vec![env(), req("context"), P::variadic("vars")],
+        ),
+        "Twig\\Extension\\StringLoaderExtension::templateFromString" => (
+            path("rt::string_loader::template_from_string"),
+            vec![env(), req("template"), null("name")],
         ),
         "Twig\\Extension\\CoreExtension::source" => (
             path("rt::core::source"),
@@ -2168,6 +2180,10 @@ impl<'a> Compiler<'a> {
                             pushes.push(format!("__a.push({code});"));
                         }
                     }
+                } else if argument.is(NodeClass::SpreadUnary) {
+                    // `...$expr` in the PHP call
+                    let code = self.expr(&argument.get_node("node")?)?;
+                    pushes.push(format!("__a.extend(rt::spread_values(&{code})?);"));
                 } else {
                     let code = self.expr(&argument)?;
                     pushes.push(format!("__a.push({code});"));
@@ -2256,38 +2272,176 @@ fn embedded_modules(module: &Node) -> Vec<Node> {
     out
 }
 
+/// The strings a template passes to `template_from_string()` that are
+/// known when it is compiled, with the `name` argument: a string literal,
+/// or a variable that a `{% set %}` of the template sets to a literal.
+fn string_templates(module: &Node) -> Vec<(Vec<u8>, Option<Vec<u8>>)> {
+    fn literal(node: &Node) -> Option<Vec<u8>> {
+        match node.attr("value") {
+            Some(Attr::Str(s)) if node.is(NodeClass::ConstantExpression) => Some(s),
+            _ => None,
+        }
+    }
+    fn walk(
+        node: &Node,
+        sets: &mut Vec<(Vec<u8>, Vec<u8>)>,
+        calls: &mut Vec<(Node, Option<Node>)>,
+    ) {
+        if node.is(NodeClass::SetNode)
+            && !node.attr_true("capture")
+            && let (Some(names), Some(values)) = (node.node("names"), node.node("values"))
+        {
+            let list = |n: Node| {
+                if n.class() == NodeClass::Nodes || n.class() == NodeClass::Node {
+                    n.child_nodes()
+                } else {
+                    vec![n]
+                }
+            };
+            let (names, values) = (list(names), list(values));
+            if let ([name], [value]) = (names.as_slice(), values.as_slice())
+                && let Some(s) = literal(value)
+            {
+                sets.push((name_of(name), s));
+            }
+        }
+        if node.is(NodeClass::FunctionExpression)
+            && let Some(Attr::Callable(callable)) = node.attr("twig_callable")
+            && callable.callable() == Some(crate::runtime::string_loader::CALLABLE)
+            && let Some(arguments) = node.node("arguments")
+        {
+            let mut template = None;
+            let mut name = None;
+            for (key, argument) in arguments.children() {
+                // the sandbox visitor wraps the argument
+                let argument = if argument.is(NodeClass::CheckToStringNode) {
+                    argument.node("expr").unwrap_or(argument)
+                } else {
+                    argument
+                };
+                match key {
+                    Key::Int(0) => template = Some(argument),
+                    Key::Int(1) => name = Some(argument),
+                    Key::Str(ref k) if k.as_slice() == b"template" => template = Some(argument),
+                    Key::Str(ref k) if k.as_slice() == b"name" => name = Some(argument),
+                    _ => {}
+                }
+            }
+            if let Some(template) = template {
+                calls.push((template, name));
+            }
+        }
+        for child in node.child_nodes() {
+            walk(&child, sets, calls);
+        }
+    }
+    let mut sets = Vec::new();
+    let mut calls = Vec::new();
+    walk(module, &mut sets, &mut calls);
+    let mut out = Vec::new();
+    for (template, name) in calls {
+        let name = match name {
+            None => None,
+            Some(n)
+                if n.is(NodeClass::ConstantExpression)
+                    && matches!(n.attr("value"), Some(Attr::Null)) =>
+            {
+                None
+            }
+            Some(n) => match literal(&n) {
+                Some(s) => Some(s),
+                None => continue,
+            },
+        };
+        if let Some(s) = literal(&template) {
+            out.push((s, name));
+        } else if template.is(NodeClass::NameExpression) || template.is(NodeClass::ContextVariable)
+        {
+            let variable = name_of(&template);
+            for (set_name, s) in &sets {
+                if *set_name == variable {
+                    out.push((s.clone(), name.clone()));
+                }
+            }
+        }
+    }
+    out
+}
+
 /// Compiles a set of templates: their modules, and a static list for a
 /// [`crate::loader::CompiledArrayLoader`] named `TEMPLATES`.
 pub fn compile_set(env: &Environment, templates: &[(Vec<u8>, Vec<u8>)]) -> R {
     let mut code = String::new();
     let mut entries = Vec::new();
-    for (name, source) in templates {
+    // the set's templates, then the string templates they pass to
+    // `template_from_string()` (runtime/string_loader.rs)
+    let mut queue: std::collections::VecDeque<(Vec<u8>, Vec<u8>, bool)> = templates
+        .iter()
+        .map(|(n, s)| (n.clone(), s.clone(), false))
+        .collect();
+    let mut seen: std::collections::HashSet<Vec<u8>> =
+        templates.iter().map(|(n, _)| n.clone()).collect();
+    while let Some((name, source, from_string)) = queue.pop_front() {
         let src =
-            crate::source::Source::new(source.clone(), String::from_utf8_lossy(name).into_owned());
+            crate::source::Source::new(source.clone(), String::from_utf8_lossy(&name).into_owned());
         let arc = std::sync::Arc::new(src.clone());
         // as `compileSource()`: errors get the source
-        let compiled = env
-            .parse_source(src)
-            .and_then(|module| Ok((Compiler::new(env).compile(&module)?, module)));
-        let (module_code, module) = compiled.map_err(|mut e| {
-            e.set_source_context(Some(arc));
-            e
-        })?;
+        let mut strings = Vec::new();
+        let compiled = env.parse_source(src).and_then(|module| {
+            // before compiling: the compiler rewrites call arguments
+            strings = string_templates(&module);
+            Ok((Compiler::new(env).compile(&module)?, module))
+        });
+        let (module_code, module) = match compiled {
+            Ok(compiled) => compiled,
+            Err(mut e) if from_string => {
+                // thrown when the function loads it
+                e.set_source_context(Some(arc));
+                let module = module_name(&name, None);
+                let _ = writeln!(
+                    code,
+                    "pub static {module}: ::twig::runtime::string_loader::FailedTemplate = ::twig::runtime::string_loader::FailedTemplate {{ name: {}, code: {}, kind: ::twig::error::ErrorKind::{:?}, message: {}, line: {}, column: {:?} }};\n",
+                    byte_lit(&name),
+                    byte_lit(&source),
+                    e.kind(),
+                    byte_lit(e.raw_message()),
+                    e.template_line(),
+                    e.template_column()
+                );
+                entries.push(format!(
+                    "({}, None, &{module}, {})",
+                    byte_lit(&name),
+                    byte_lit(&source)
+                ));
+                continue;
+            }
+            Err(mut e) => {
+                e.set_source_context(Some(arc));
+                return Err(e);
+            }
+        };
         code.push_str(&module_code);
         entries.push(format!(
             "({}, None, &{}::TEMPLATE, {})",
-            byte_lit(name),
-            module_name(name, None),
-            byte_lit(source)
+            byte_lit(&name),
+            module_name(&name, None),
+            byte_lit(&source)
         ));
         for template in embedded_modules(&module) {
             let index = template.attr("index").and_then(|a| a.as_int());
             entries.push(format!(
                 "({}, {}, &{}::TEMPLATE, b\"\")",
-                byte_lit(name),
+                byte_lit(&name),
                 index.map_or_else(|| "None".to_owned(), |i| format!("Some({i})")),
-                module_name(name, index)
+                module_name(&name, index)
             ));
+        }
+        for (string, string_name) in strings {
+            let full =
+                crate::runtime::string_loader::template_name(&string, string_name.as_deref());
+            if seen.insert(full.clone()) {
+                queue.push_back((full, string, true));
+            }
         }
     }
     let _ = writeln!(

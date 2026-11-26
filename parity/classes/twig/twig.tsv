@@ -14,7 +14,7 @@ src/Cache/ReadOnlyFilesystemCache.php	ReadOnlyFilesystemCache	7	pending
 src/Cache/RemovableCacheInterface.php	RemovableCacheInterface	5	pending	
 src/Compiler.php	Compiler	160	ported	crates/twig/src/compiler.rs
 src/DeprecatedCallableInfo.php	DeprecatedCallableInfo	44	ported	crates/twig/src/callable.rs
-src/Environment.php	Environment	489	ported	crates/twig/src/environment.rs
+src/Environment.php	Environment	489	ported	crates/twig/src/environment.rs crates/twig/src/runtime/string_loader.rs
 src/Error/Error.php	Error	131	ported	crates/twig/src/error.rs
 src/Error/LoaderError.php	LoaderError	4	ported	crates/twig/src/error.rs
 src/Error/RuntimeError.php	RuntimeError	4	ported	crates/twig/src/error.rs
@@ -46,7 +46,7 @@ src/ExpressionParser/PrefixExpressionParserInterface.php	PrefixExpressionParserI
 src/Extension/AbstractExtension.php	AbstractExtension	44	ported	crates/twig/src/extension/mod.rs
 src/Extension/AttributeExtension.php	AttributeExtension	122	pending	
 src/Extension/CoreExtension.php	CoreExtension	1352	ported	crates/twig/src/extension/core.rs crates/twig/src/runtime/core.rs
-src/Extension/DebugExtension.php	DebugExtension	38	pending	
+src/Extension/DebugExtension.php	DebugExtension	38	ported	crates/twig/src/extension/debug.rs crates/twig/src/runtime/debug.rs
 src/Extension/EscaperExtension.php	EscaperExtension	118	ported	crates/twig/src/extension/escaper.rs
 src/Extension/ExtensionInterface.php	ExtensionInterface	20	ported	crates/twig/src/extension/mod.rs
 src/Extension/GlobalsInterface.php	GlobalsInterface	5	pending	
@@ -57,7 +57,7 @@ src/Extension/RuntimeExtensionInterface.php	RuntimeExtensionInterface	4	pending
 src/Extension/SandboxBridgeExtension.php	SandboxBridgeExtension	20	pending	
 src/Extension/SandboxExtension.php	SandboxExtension	84	ported	crates/twig/src/extension/sandbox.rs
 src/Extension/StagingExtension.php	StagingExtension	66	pending	
-src/Extension/StringLoaderExtension.php	StringLoaderExtension	17	pending	
+src/Extension/StringLoaderExtension.php	StringLoaderExtension	17	ported	crates/twig/src/extension/string_loader.rs crates/twig/src/runtime/string_loader.rs
 src/Extension/YieldNotReadyExtension.php	YieldNotReadyExtension	13	n/a: only registers YieldNotReadyNodeVisitor (n/a)	
 src/ExtensionSet.php	ExtensionSet	400	ported	crates/twig/src/extension/mod.rs
 src/FileExtensionEscapingStrategy.php	FileExtensionEscapingStrategy	25	ported	crates/twig/src/file_extension_escaping_strategy.rs

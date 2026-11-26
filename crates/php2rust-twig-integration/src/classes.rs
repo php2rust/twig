@@ -1,7 +1,8 @@
 //! Port of the test classes of tests/IntegrationTest.php that the
 //! fixtures' `--DATA--` sections create: `TwigTestFoo`, `ToStringStub`,
 //! `CountableStub`, `IteratorAggregateStub`, `SimpleIteratorForTesting`
-//! and `MagicCallStub`, as `php_value` objects. An object is immutable
+//! and `MagicCallStub`, and the classes that some fixtures declare in
+//! their own `--DATA--`, as `php_value` objects. An object is immutable
 //! here, so an iterator's position is not kept between two loops (each
 //! loop rewinds, as PHP's `foreach` does).
 //!
@@ -337,5 +338,249 @@ impl PhpObject for MagicCallStub {
             PhpString::from(b"__call shall not be called.".to_vec()),
             0,
         )))
+    }
+}
+
+/// `TestClassForMagicCallAttributes` (`expressions/magic_call.test`):
+/// `getBar()`, and `__call()` that answers `foo` (else `false`).
+#[derive(Debug, Clone, Default)]
+pub struct TestClassForMagicCallAttributes;
+
+impl PhpObject for TestClassForMagicCallAttributes {
+    fn class(&self) -> &'static str {
+        "TestClassForMagicCallAttributes"
+    }
+
+    fn properties(&self) -> PhpArray {
+        PhpArray::new()
+    }
+
+    fn methods(&self) -> Vec<String> {
+        vec!["getBar".to_owned(), "__call".to_owned()]
+    }
+
+    fn call_method(&self, name: &str, _arguments: &[Value]) -> Option<Result<Value, Thrown>> {
+        Some(Ok(match name {
+            _ if name.eq_ignore_ascii_case("getBar") => s("bar_from_getbar"),
+            "foo" => s("foo_from_call"),
+            _ => Value::Bool(false),
+        }))
+    }
+}
+
+/// A class of a fixture's `--DATA--` with only `__toString()`:
+/// `MyObj` (`regression/block-inheritance-issue.test`).
+#[derive(Debug, Clone)]
+pub struct StringOnly {
+    pub class: &'static str,
+    pub string: &'static str,
+}
+
+impl PhpObject for StringOnly {
+    fn class(&self) -> &'static str {
+        self.class
+    }
+
+    fn properties(&self) -> PhpArray {
+        PhpArray::new()
+    }
+
+    fn instance_of(&self, class: &str) -> bool {
+        class.trim_start_matches('\\') == "Stringable"
+    }
+
+    fn methods(&self) -> Vec<String> {
+        vec!["__toString".to_owned()]
+    }
+
+    fn call_method(&self, name: &str, _arguments: &[Value]) -> Option<Result<Value, Thrown>> {
+        name.eq_ignore_ascii_case("__toString")
+            .then(|| Ok(s(self.string)))
+    }
+
+    fn to_php_string(&self) -> Option<PhpString> {
+        Some(PhpString::from(self.string.as_bytes().to_vec()))
+    }
+}
+
+/// `UserForAutoEscapeTest` (`tags/autoescape/objects.test`): `getName()`
+/// and `__toString()` give `Fabien<br />`.
+#[derive(Debug, Clone, Default)]
+pub struct UserForAutoEscapeTest;
+
+impl PhpObject for UserForAutoEscapeTest {
+    fn class(&self) -> &'static str {
+        "UserForAutoEscapeTest"
+    }
+
+    fn properties(&self) -> PhpArray {
+        PhpArray::new()
+    }
+
+    fn instance_of(&self, class: &str) -> bool {
+        class.trim_start_matches('\\') == "Stringable"
+    }
+
+    fn methods(&self) -> Vec<String> {
+        vec!["getName".to_owned(), "__toString".to_owned()]
+    }
+
+    fn call_method(&self, name: &str, _arguments: &[Value]) -> Option<Result<Value, Thrown>> {
+        (name.eq_ignore_ascii_case("getName") || name.eq_ignore_ascii_case("__toString"))
+            .then(|| Ok(s("Fabien<br />")))
+    }
+
+    fn to_php_string(&self) -> Option<PhpString> {
+        Some(PhpString::from(b"Fabien<br />".to_vec()))
+    }
+}
+
+/// `ItemsIterator` and `ItemsIteratorCountable` (`tags/for/objects*.test`):
+/// an `Iterator` over `['foo' => 'bar', 'bar' => 'foo']`, `Countable` or
+/// not.
+#[derive(Debug, Clone)]
+pub struct ItemsIterator {
+    pub countable: bool,
+}
+
+impl ItemsIterator {
+    fn values() -> PhpArray {
+        let mut values = PhpArray::new();
+        values.insert(Key::from_bytes(b"foo"), s("bar"));
+        values.insert(Key::from_bytes(b"bar"), s("foo"));
+        values
+    }
+}
+
+impl PhpObject for ItemsIterator {
+    fn class(&self) -> &'static str {
+        if self.countable {
+            "ItemsIteratorCountable"
+        } else {
+            "ItemsIterator"
+        }
+    }
+
+    fn properties(&self) -> PhpArray {
+        PhpArray::new()
+    }
+
+    fn instance_of(&self, class: &str) -> bool {
+        match class.trim_start_matches('\\') {
+            "Iterator" | "Traversable" => true,
+            "Countable" => self.countable,
+            _ => false,
+        }
+    }
+
+    fn methods(&self) -> Vec<String> {
+        let mut methods: Vec<String> = ["current", "key", "next", "rewind", "valid"]
+            .into_iter()
+            .map(str::to_owned)
+            .collect();
+        if self.countable {
+            methods.push("count".to_owned());
+        }
+        methods
+    }
+
+    fn php_count(&self) -> Option<Result<i64, Thrown>> {
+        self.countable.then_some(Ok(2))
+    }
+
+    fn traverse(&self) -> Option<Result<Vec<(Value, Value)>, Thrown>> {
+        Some(Ok(pairs(&Self::values())))
+    }
+}
+
+/// `TwigTestStringy` (`expressions/array_dynamic_keys.test`): a
+/// `Stringable` with a private `$v`.
+#[derive(Debug, Clone)]
+pub struct TwigTestStringy {
+    pub v: PhpString,
+}
+
+impl PhpObject for TwigTestStringy {
+    fn class(&self) -> &'static str {
+        "TwigTestStringy"
+    }
+
+    fn properties(&self) -> PhpArray {
+        PhpArray::new()
+    }
+
+    fn instance_of(&self, class: &str) -> bool {
+        class.trim_start_matches('\\') == "Stringable"
+    }
+
+    fn methods(&self) -> Vec<String> {
+        vec!["__construct".to_owned(), "__toString".to_owned()]
+    }
+
+    fn call_method(&self, name: &str, _arguments: &[Value]) -> Option<Result<Value, Thrown>> {
+        name.eq_ignore_ascii_case("__toString")
+            .then(|| Ok(Value::String(self.v.clone())))
+    }
+
+    fn to_php_string(&self) -> Option<PhpString> {
+        Some(self.v.clone())
+    }
+}
+
+/// `TwigTestHolder` (`expressions/array_dynamic_keys.test`): `$name =
+/// 'attr'`, `$stringable` (`attr_obj`), `getStringable()` (`method_obj`).
+#[derive(Debug, Clone, Default)]
+pub struct TwigTestHolder;
+
+impl PhpObject for TwigTestHolder {
+    fn class(&self) -> &'static str {
+        "TwigTestHolder"
+    }
+
+    fn properties(&self) -> PhpArray {
+        let mut out = PhpArray::new();
+        out.insert(Key::from_bytes(b"name"), s("attr"));
+        out.insert(
+            Key::from_bytes(b"stringable"),
+            Value::Object(Arc::new(TwigTestStringy {
+                v: PhpString::from(b"attr_obj".to_vec()),
+            })),
+        );
+        out
+    }
+
+    fn methods(&self) -> Vec<String> {
+        vec!["__construct".to_owned(), "getStringable".to_owned()]
+    }
+
+    fn call_method(&self, name: &str, _arguments: &[Value]) -> Option<Result<Value, Thrown>> {
+        name.eq_ignore_ascii_case("getStringable").then(|| {
+            Ok(Value::Object(Arc::new(TwigTestStringy {
+                v: PhpString::from(b"method_obj".to_vec()),
+            })))
+        })
+    }
+}
+
+/// The anonymous class of `expressions/set.test` with `getName()`.
+#[derive(Debug, Clone, Default)]
+pub struct AnonymousNamed;
+
+impl PhpObject for AnonymousNamed {
+    fn class(&self) -> &'static str {
+        "class@anonymous"
+    }
+
+    fn properties(&self) -> PhpArray {
+        PhpArray::new()
+    }
+
+    fn methods(&self) -> Vec<String> {
+        vec!["getName".to_owned()]
+    }
+
+    fn call_method(&self, name: &str, _arguments: &[Value]) -> Option<Result<Value, Thrown>> {
+        name.eq_ignore_ascii_case("getName")
+            .then(|| Ok(s("Fabien")))
     }
 }

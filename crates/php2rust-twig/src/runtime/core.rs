@@ -899,6 +899,31 @@ fn find(haystack: &[u8], needle: &[u8]) -> Option<usize> {
 }
 
 /// The `striptags` filter.
+/// `convert_encoding`: `iconv($from, $to, $string ?? '')` (php2rust-iconv,
+/// as glibc converts); PHP's `false` from `iconv()` is the `TypeError` of
+/// the `string` return type. A charset php2rust-iconv does not convert is
+/// refused (a logic error).
+pub fn convert_encoding(_: &Call<'_>, args: Vec<Value>) -> R {
+    let string = string_or_empty(&arg(&args, 0))?;
+    let to = string_of(&arg(&args, 1))?;
+    let from = string_of(&arg(&args, 2))?;
+    match php_iconv::iconv(
+        &String::from_utf8_lossy(&from),
+        &String::from_utf8_lossy(&to),
+        &string,
+    ) {
+        Ok(out) => Ok(Value::String(PhpString::from(out))),
+        Err(php_iconv::Error::Unsupported(_)) => Err(Error::logic(format!(
+            "The \"convert_encoding\" filter from \"{}\" to \"{}\" is not supported.",
+            String::from_utf8_lossy(&from),
+            String::from_utf8_lossy(&to)
+        ))),
+        Err(_) => Err(type_error(
+            "Twig\\Extension\\CoreExtension::convertEncoding(): Return value must be of type string, false returned",
+        )),
+    }
+}
+
 pub fn striptags(_: &Call<'_>, args: Vec<Value>) -> R {
     let s = string_or_empty(&arg(&args, 0))?;
     let allowed: Vec<Vec<u8>> = match arg(&args, 1) {
