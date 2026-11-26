@@ -24,7 +24,7 @@
 use std::fmt::Write as _;
 
 use crate::{
-    callable::{CallableType, TwigCallable},
+    callable::TwigCallable,
     environment::Environment,
     error::Error,
     node::{
@@ -513,11 +513,9 @@ impl<'a> Compiler<'a> {
     /// templates.
     pub fn compile(&mut self, module: &Node) -> R {
         let mut code = self.compile_module(module)?;
-        if let Some(Attr::Node(embedded)) = module.attr("embedded_templates") {
-            for template in embedded.child_nodes() {
-                let mut compiler = Compiler::new(self.env);
-                code.push_str(&compiler.compile_module(&template)?);
-            }
+        for template in embedded_modules(module) {
+            let mut compiler = Compiler::new(self.env);
+            code.push_str(&compiler.compile_module(&template)?);
         }
         Ok(code)
     }
@@ -777,6 +775,12 @@ impl<'a> Compiler<'a> {
     }
 
     fn compile_block(&mut self, name: &[u8], block: &Node) -> R {
+        // the parser wraps each block in a `BodyNode`
+        let block = &if block.is(NodeClass::BodyNode) {
+            block.node(0i64).unwrap_or_else(|| block.clone())
+        } else {
+            block.clone()
+        };
         let body = self.method(|c| {
             c.add_debug_info(block);
             c.compile_statement(&block.get_node("body")?)?;
@@ -995,6 +999,15 @@ impl<'a> Compiler<'a> {
             self.line("}");
             return Ok(());
         }
+        // `subcompile()` of a list compiles its one expression
+        let values = if !capture
+            && (values.class() == NodeClass::Nodes || values.class() == NodeClass::Node)
+            && values.count() == 1
+        {
+            values.child_nodes().remove(0)
+        } else {
+            values
+        };
         let value = if capture {
             self.capture_expr(&values, false)?
         } else if safe {
@@ -1185,7 +1198,13 @@ impl<'a> Compiler<'a> {
         };
         let variables = self.template_arguments(node)?;
         if ignore_missing {
-            let load = format!("rt::load_optional(this, env, &{template}, {line}, {index})?");
+            let load = if node.is(NodeClass::EmbedNode) {
+                format!(
+                    "rt::load_embed_optional(this, env, &{template}, {line}, {index}, &context)?"
+                )
+            } else {
+                format!("rt::load_optional(this, env, &{template}, {line}, {index})?")
+            };
             self.line(&format!("if let Some(__t) = {load} {{"));
             self.line(&format!(
                 "    __t.display(env, {variables}, &rt::Blocks::new(), out)?;"
@@ -1426,6 +1445,30 @@ impl<'a> Compiler<'a> {
                 let left = self.cond(&node.get_node("left")?)?;
                 let right = self.cond(&node.get_node("right")?)?;
                 format!("rt::Value::Bool({left} ^ {right})")
+            }
+            // PHP compiles a unary operator without explicit parentheses
+            // as ` -x`, so `(-x ** y)` is `-(x ** y)` in PHP
+            C::PowerBinary
+                if node.get_node("left")?.class().is_a(C::AbstractUnary)
+                    && !node.get_node("left")?.has_explicit_parentheses() =>
+            {
+                let unary = node.get_node("left")?;
+                let power = Node::new(
+                    C::PowerBinary,
+                    vec![
+                        ("left".into(), unary.get_node("node")?),
+                        ("right".into(), node.get_node("right")?),
+                    ],
+                    Vec::new(),
+                    node.line(),
+                );
+                let inner = self.expr(&power)?;
+                match unary.class() {
+                    C::NegUnary => format!("rt::ops::neg(&{inner})?"),
+                    C::PosUnary => format!("rt::ops::pos(&{inner})?"),
+                    C::NotUnary => format!("rt::Value::Bool(!rt::truthy(&{inner}))"),
+                    other => return Err(unsupported(node, other.php_class())),
+                }
             }
             C::AddBinary
             | C::SubBinary
@@ -1907,7 +1950,6 @@ impl<'a> Compiler<'a> {
                 }
             }
         }
-        let _ = CallableType::Filter;
         Ok(format!(
             "{{ let mut __a: Vec<rt::Value> = Vec::new(); {} {path}(&rt::Call::new(env, this, &context, {}), __a)? }}",
             pushes.join(" "),
@@ -1976,6 +2018,20 @@ fn is_traitable(module: &Node) -> R<bool> {
     Ok(nodes.iter().all(|n| n.count() == 0))
 }
 
+/// The embedded templates of a module, and theirs (`subcompile()` of an
+/// embedded `ModuleNode` compiles its own embedded templates).
+fn embedded_modules(module: &Node) -> Vec<Node> {
+    let mut out = Vec::new();
+    if let Some(Attr::Node(embedded)) = module.attr("embedded_templates") {
+        for template in embedded.child_nodes() {
+            let nested = embedded_modules(&template);
+            out.push(template);
+            out.extend(nested);
+        }
+    }
+    out
+}
+
 /// Compiles a set of templates: their modules, and a static list for a
 /// [`crate::loader::CompiledArrayLoader`] named `TEMPLATES`.
 pub fn compile_set(env: &Environment, templates: &[(Vec<u8>, Vec<u8>)]) -> R {
@@ -1984,25 +2040,30 @@ pub fn compile_set(env: &Environment, templates: &[(Vec<u8>, Vec<u8>)]) -> R {
     for (name, source) in templates {
         let src =
             crate::source::Source::new(source.clone(), String::from_utf8_lossy(name).into_owned());
-        let module = env.parse_source(src.clone())?;
-        let _ = src;
-        code.push_str(&Compiler::new(env).compile(&module)?);
+        let arc = std::sync::Arc::new(src.clone());
+        // as `compileSource()`: errors get the source
+        let compiled = env
+            .parse_source(src)
+            .and_then(|module| Ok((Compiler::new(env).compile(&module)?, module)));
+        let (module_code, module) = compiled.map_err(|mut e| {
+            e.set_source_context(Some(arc));
+            e
+        })?;
+        code.push_str(&module_code);
         entries.push(format!(
             "({}, None, &{}::TEMPLATE, {})",
             byte_lit(name),
             module_name(name, None),
             byte_lit(source)
         ));
-        if let Some(Attr::Node(embedded)) = module.attr("embedded_templates") {
-            for template in embedded.child_nodes() {
-                let index = template.attr("index").and_then(|a| a.as_int());
-                entries.push(format!(
-                    "({}, {}, &{}::TEMPLATE, b\"\")",
-                    byte_lit(name),
-                    index.map_or_else(|| "None".to_owned(), |i| format!("Some({i})")),
-                    module_name(name, index)
-                ));
-            }
+        for template in embedded_modules(&module) {
+            let index = template.attr("index").and_then(|a| a.as_int());
+            entries.push(format!(
+                "({}, {}, &{}::TEMPLATE, b\"\")",
+                byte_lit(name),
+                index.map_or_else(|| "None".to_owned(), |i| format!("Some({i})")),
+                module_name(name, index)
+            ));
         }
     }
     let _ = writeln!(

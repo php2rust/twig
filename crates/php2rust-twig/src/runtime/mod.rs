@@ -579,3 +579,23 @@ pub fn with_context(vars: PhpArray, context: &Context, env: &Environment) -> Con
     out.union(&env.globals());
     out
 }
+
+/// `EmbedNode` with `ignore missing`: `$this->load($name, $line, $index)`
+/// then `->getParent($context)`, `None` on a `LoaderError` of either.
+pub fn load_embed_optional(
+    template: &Template,
+    env: &Environment,
+    name: &Value,
+    line: i64,
+    index: Option<i64>,
+    context: &Context,
+) -> R<Option<Rc<Template>>> {
+    let loaded = template
+        .load(env, name, line, index)
+        .and_then(|t| t.get_parent(env, context).map(|_| t));
+    match loaded {
+        Ok(t) => Ok(Some(t)),
+        Err(e) if e.kind() == ErrorKind::Loader => Ok(None),
+        Err(e) => Err(e),
+    }
+}
