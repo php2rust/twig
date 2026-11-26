@@ -1548,7 +1548,7 @@ fn testSelfMacroReferenceWithStringLiteralDoesNotInjectPhp() {
     assert!(!compiled.contains("trigger_error(\"BAD-MACRO-REF\")"));
     assert!(!compiled.contains("->macro_foo + 1;"));
     let (_, deprecations) = collect(|| render(&twig, "self", PhpArray::new()));
-    assert!(deprecations.is_empty());
+    assert_eq!(deprecations, Vec::new());
 }
 
 #[test]
@@ -1563,7 +1563,7 @@ fn testImportedTemplateMacroReferenceWithBadIdentifierDoesNotInjectPhp() {
     let compiled = compiled_source(&twig, "imported");
     assert!(!compiled.contains("trigger_error(\"BAD-IMPORT-REF\")"));
     let (_, deprecations) = collect(|| render(&twig, "imported", PhpArray::new()));
-    assert!(deprecations.is_empty());
+    assert_eq!(deprecations, Vec::new());
 }
 
 #[test]
