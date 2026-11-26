@@ -480,7 +480,38 @@ pub fn call_arrow(env: &Environment, arrow: &Value, arguments: &[Value]) -> R {
             format!("Object of type {} is not callable", o.class()).into_bytes(),
         ));
     }
+    if let Value::String(name) = arrow
+        && let Some(result) = call_php_function(name.as_bytes(), arguments)
+    {
+        return result;
+    }
     Err(Error::exception("Error", "Value not callable"))
+}
+
+/// A PHP function called by its name (a callable string, deprecated in
+/// Twig's arrow filters since 3.15). Only a few functions are known;
+/// `None` for the others.
+fn call_php_function(name: &[u8], arguments: &[Value]) -> Option<R> {
+    let arg = |i: usize| arguments.get(i).cloned().unwrap_or(Value::Null);
+    let text = |i: usize| bytes(&arg(i));
+    let order = |o: std::cmp::Ordering| Value::Int(o as i64);
+    let result = match name.to_ascii_lowercase().as_slice() {
+        b"strnatcmp" => (|| Ok(order(php_value::string::strnatcmp(&text(0)?, &text(1)?))))(),
+        b"strnatcasecmp" => (|| {
+            Ok(order(php_value::string::strnatcasecmp(
+                &text(0)?,
+                &text(1)?,
+            )))
+        })(),
+        b"strtoupper" => text(0).map(|t| s(&t.to_ascii_uppercase())),
+        b"strtolower" => text(0).map(|t| s(&t.to_ascii_lowercase())),
+        b"trim" => text(0).map(|t| s(php_value::string::trim(&t))),
+        b"intval" => Ok(Value::Int(php_value::ops::to_int(&arg(0)))),
+        b"is_string" => Ok(Value::Bool(matches!(arg(0), Value::String(_)))),
+        b"is_int" => Ok(Value::Bool(matches!(arg(0), Value::Int(_)))),
+        _ => return None,
+    };
+    Some(result)
 }
 
 /// Ends a generated method: the line of the last debug info the method

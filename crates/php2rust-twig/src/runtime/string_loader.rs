@@ -55,19 +55,18 @@ pub fn template_from_string(call: &Call<'_>, args: Vec<Value>) -> R {
         None | Some(Value::Null) => None,
         Some(value) => Some(super::bytes(value)?),
     };
-    let full = template_name(&template, name.as_deref());
-    let known = call
-        .env
-        .loader()
-        .is_some_and(|loader| loader.compiled(&full, None).is_ok());
-    if !known {
-        return Err(Error::runtime(
-            "The \"template_from_string\" function can only load a string that was known when the templates were compiled (a literal, or a variable set to a literal); this string was not.",
-            -1,
-            None,
-        ));
-    }
-    Ok(Value::Object(std::sync::Arc::new(call.env.load(&full)?)))
+    let wrapper = call.env.create_template(&template, name.as_deref())?;
+    Ok(Value::Object(std::sync::Arc::new(wrapper)))
+}
+
+/// The error for a string template that was not compiled ahead of time.
+#[must_use]
+pub fn unknown_string() -> Error {
+    Error::runtime(
+        "The \"template_from_string\" function and \"createTemplate()\" can only load a string that was known when the templates were compiled (a literal, or a variable set to a literal); this string was not.",
+        -1,
+        None,
+    )
 }
 
 fn argument_error(value: &Value) -> Error {

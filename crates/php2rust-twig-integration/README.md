@@ -15,6 +15,13 @@ classes the `--DATA--` sections create (`TwigTestFoo` and the stubs). The cases 
 are in `tests/data/integration_pending.txt`, with the reason; the test
 fails when one of them passes, so the list stays exact.
 
+The sandbox tests use template sets that the build script compiles too:
+`tests/sandbox_test.rs` (`tests/Sandbox/SandboxTest.php`, sets in
+`tests/data/sandbox_templates.json`, callables in `src/sandbox*.rs`) and
+`tests/legacy_sandbox_test.rs` (`tests/Extension/SandboxTest.php`, sets in
+`tests/data/legacy_sandbox_templates.json`, classes and callables in
+`src/legacy_sandbox*.rs`).
+
 Vectors: `scripts/record.sh twig-integration` runs
 `oracle/recorders/twig_integration.php` and writes
 `tests/data/integration.json`. Each case has the template sources, the

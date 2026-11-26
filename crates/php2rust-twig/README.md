@@ -29,7 +29,7 @@ PHP.
 | `Compiler`: Rust code generation, one module per template (and per embedded template) with a `CompiledTemplate` impl; the `compile()` of every node class but the sandbox nodes; PHP's line guess (`__line`) and unary-before-`**` precedence kept; `compile_set()` for a build script | `Compiler.php`, `Node/**/*.php` (`compile()`) | integration fixtures |
 | Dates: the `date` and `date_modify` filters and the `date` function (`formatDate()`, `modifyDate()`, `convertDate()`): `DateTime`, `DateTimeImmutable`, timestamps and date texts, the zone argument (a name, a `DateTimeZone`, `false`), `DateInterval`, the extension's date formats and zone; on php2rust-date | `Extension/CoreExtension.php` | integration fixtures `filters/date*.test`, `functions/date*.test` |
 | Enums: the `enum` and `enum_cases` functions (`EnumFunction`, `EnumCasesFunction`): a constant name checked at compile time, a dynamic one at run time, with upstream's messages; the application's enums are registered in `CoreOptions::enums` (php2rust-value's `Registry`) | `Node/Expression/FunctionNode/Enum*.php`, `Extension/CoreExtension.php` | integration fixtures `functions/enum*/*.test` |
-| Sandbox: `SecurityPolicy` (strict mode and its deprecations), `SecurityPolicyInterface`, `SecurityChecker` (source policies, to-string and spread checks), `SandboxExtension`, the `Sandbox` class (a strict policy and a dedicated environment); the sandbox node visitor (used tags, filters, functions and tests; `CheckToStringNode` from the callables' parameter specs) and nodes; the runtime checks (tags, filters, functions and tests before a template displays, traits, methods, properties, `__toString()`, arrow callables, `column`, `include(sandboxed)`, the `sandbox` tag) with PHP's line guesses; `TemplateWrapper` refused by another environment | `Sandbox/*.php`, `Extension/SandboxExtension.php`, `NodeVisitor/SandboxNodeVisitor.php`, `Node/{CheckSecurity,CheckSecurityCall,CheckToString,Sandbox}Node.php`, `TemplateWrapper.php` | SandboxTest (30; 3 n/a); sandbox parser vectors; integration fixtures `tags/sandbox/*.test`, legacy fixtures |
+| Sandbox: `SecurityPolicy` (strict mode and its deprecations), `SecurityPolicyInterface`, `SecurityChecker` (source policies, to-string and spread checks), `SandboxExtension`, the `Sandbox` class (a strict policy and a dedicated environment); the sandbox node visitor (used tags, filters, functions and tests; `CheckToStringNode` from the callables' parameter specs) and nodes; the runtime checks (tags, filters, functions and tests before a template displays, traits, methods, properties, `__toString()`, arrow callables, `column`, `include(sandboxed)`, the `sandbox` tag) with PHP's line guesses; `TemplateWrapper` refused by another environment | `Sandbox/*.php`, `Extension/SandboxExtension.php`, `NodeVisitor/SandboxNodeVisitor.php`, `Node/{CheckSecurity,CheckSecurityCall,CheckToString,Sandbox}Node.php`, `TemplateWrapper.php` | SandboxTest (30; 3 n/a); legacy `Extension/SandboxTest` (127; 6 n/a, 3 pending on the undefined-callable callbacks); sandbox parser vectors; integration fixtures `tags/sandbox/*.test`, legacy fixtures |
 | `DebugExtension` (`dump`, on php2rust-value's `var_dump()`), `StringLoaderExtension` (`template_from_string`: the strings known at build time are compiled by `compile_set()` under `createTemplate()`'s names, `xxh128`; a string template that does not parse gives its error when loaded), `convert_encoding` (php2rust-iconv) | `Extension/DebugExtension.php`, `Extension/StringLoaderExtension.php`, `Environment.php` (`createTemplate()`), `Extension/CoreExtension.php` | integration fixtures `functions/dump*.test`, `functions/*template_from_string*.test`, `tags/macro/import_from_string_template.test`, `filters/convert_encoding.test` |
 | Runtime: `Template` (blocks, parents, traits, macros, `load()`, `display()`, `render()`, error line guess), `TemplateWrapper`, `Markup`, `MacroNamespace`, `TwigMacro`, the compiled-template loader, `EscaperRuntime` (all built-in strategies, custom escapers, safe classes), the `CoreExtension` runtime methods (filters, functions, tests, `getAttribute()`, `include`, `source`, arrow functions) and the multibyte string functions they call | `Template.php`, `TemplateWrapper.php`, `Markup.php`, `MacroNamespace.php`, `TwigMacro.php`, `Loader/*.php`, `Runtime/EscaperRuntime.php`, `Extension/CoreExtension.php` | integration fixtures |
 
@@ -56,9 +56,14 @@ a generator read lazily), the `use_yield` option, and false
 `src/classes.rs`. `tests/sandbox_test.rs` ports
 `tests/Sandbox/SandboxTest.php`, with the templates of each test in
 `tests/data/sandbox_templates.json`, compiled by the build script.
+`tests/legacy_sandbox_test.rs` ports the legacy
+`tests/Extension/SandboxTest.php` the same way
+(`tests/data/legacy_sandbox_templates.json`, with the callables, classes
+and tags of the test in `src/legacy_sandbox*.rs`); `createTemplate()`
+(`Environment::create_template()`) loads a string that the set compiled
+with `compile_set_with()`.
 
-Not yet ported: the legacy sandbox tests (`tests/Extension/SandboxTest.php`),
-the filesystem loader and the
+Not yet ported: the filesystem loader and the
 cache, the undefined-callable callbacks (GuardTokenParserTest pending),
 the `path()`/`app.request` hooks (after the HTTP path merges).
 
@@ -73,6 +78,8 @@ a gap in the PHP behaviour crates.
 | `dump()` (DebugExtension) | `var_dump()` of any value | Objects are refused (a logic error) | php2rust-value's `var_dump()` has no object handles (`#3`) or property visibility |
 | `convert_encoding` | glibc's `iconv()`, any charset | UTF-8, UTF-16/32, UCS-2, ASCII, Latin-1, Latin-9, Windows-1252, ISO-2022-JP (php2rust-iconv); other charsets are a logic error | Only these charsets are checked against glibc's answers |
 | Errors | A `RuntimeError` keeps the exception it wraps (`getPrevious()`) | The wrapped exception's message only | `Error` has no `previous` field yet |
+| `createTemplate()` | Compiles any string at run time | Loads a string compiled at build time (`compile_set_with()`); any other string gives a runtime error | As `template_from_string()` |
+| Callable strings (`sort("strnatcasecmp")` and the other arrow filters, deprecated since Twig 3.15) | Any PHP function | `strnatcmp`, `strnatcasecmp`, `strtoupper`, `strtolower`, `trim`, `intval`, `is_string`, `is_int`; others are not callable | There is no PHP function table; php2rust-value could hold one later |
 | Traversables | A generator is read only as far as needed (destructuring stops early) | `PhpObject::traverse()` reads all items | php2rust-value's objects give their items as one list |
 
 Vectors: `scripts/record.sh twig-lexer` runs

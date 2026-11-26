@@ -75,7 +75,8 @@ pub fn core_token_parsers() -> Vec<Rc<dyn TokenParser>> {
     ]
 }
 
-pub(crate) fn line_of(token: &Token) -> i64 {
+/// `$token->getLine()`.
+pub fn line_of(token: &Token) -> i64 {
     to_line(token.line())
 }
 

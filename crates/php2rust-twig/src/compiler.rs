@@ -2371,16 +2371,42 @@ fn string_templates(module: &Node) -> Vec<(Vec<u8>, Option<Vec<u8>>)> {
 /// Compiles a set of templates: their modules, and a static list for a
 /// [`crate::loader::CompiledArrayLoader`] named `TEMPLATES`.
 pub fn compile_set(env: &Environment, templates: &[(Vec<u8>, Vec<u8>)]) -> R {
+    compile_set_with(env, templates, &[], false)
+}
+
+/// [`compile_set`] with more templates:
+///
+/// - `strings` are the `(name, template)` pairs of
+///   `createTemplate($template, $name)` calls (`None`: no name), compiled
+///   under the names `createTemplate()` gives them, for
+///   [`Environment::create_template`];
+/// - with `keep_failures`, a template of the set that does not compile
+///   is kept as a template that gives the error when it is loaded, as
+///   PHP's loader compiles a template only when it is loaded.
+///
+/// String templates that do not compile are always kept that way.
+pub fn compile_set_with(
+    env: &Environment,
+    templates: &[(Vec<u8>, Vec<u8>)],
+    strings: &[(Option<Vec<u8>>, Vec<u8>)],
+    keep_failures: bool,
+) -> R {
     let mut code = String::new();
     let mut entries = Vec::new();
     // the set's templates, then the string templates they pass to
     // `template_from_string()` (runtime/string_loader.rs)
     let mut queue: std::collections::VecDeque<(Vec<u8>, Vec<u8>, bool)> = templates
         .iter()
-        .map(|(n, s)| (n.clone(), s.clone(), false))
+        .map(|(n, s)| (n.clone(), s.clone(), keep_failures))
         .collect();
     let mut seen: std::collections::HashSet<Vec<u8>> =
         templates.iter().map(|(n, _)| n.clone()).collect();
+    for (name, string) in strings {
+        let full = crate::runtime::string_loader::template_name(string, name.as_deref());
+        if seen.insert(full.clone()) {
+            queue.push_back((full, string.clone(), true));
+        }
+    }
     while let Some((name, source, from_string)) = queue.pop_front() {
         let src =
             crate::source::Source::new(source.clone(), String::from_utf8_lossy(&name).into_owned());

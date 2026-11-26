@@ -298,6 +298,27 @@ impl Environment {
         Ok(TemplateWrapper::of(&template))
     }
 
+    /// `createTemplate($template, $name)`: the template compiled from this
+    /// string. Templates are compiled ahead of time, so the string must be
+    /// in the loader under the name `createTemplate()` gives it (see
+    /// [`crate::runtime::string_loader`] and
+    /// [`crate::compiler::compile_set_with`]); any other string is a
+    /// runtime error.
+    pub fn create_template(
+        &self,
+        template: &[u8],
+        name: Option<&[u8]>,
+    ) -> Result<TemplateWrapper, Error> {
+        let full = crate::runtime::string_loader::template_name(template, name);
+        if self
+            .loader()
+            .is_none_or(|loader| loader.compiled(&full, None).is_err())
+        {
+            return Err(crate::runtime::string_loader::unknown_string());
+        }
+        self.load(&full)
+    }
+
     /// `render($name, $context)`.
     pub fn render(&self, name: &[u8], context: Context) -> Result<Vec<u8>, Error> {
         self.load_template(name, None)?.render(self, context)

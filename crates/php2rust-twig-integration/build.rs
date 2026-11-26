@@ -9,6 +9,9 @@
 //! (the templates of tests/Sandbox/SandboxTest.php, run by
 //! `tests/sandbox_test.rs`) into `sandbox_sets.rs`: a set marked `sandbox`
 //! with the sandbox extension, as the environment of a `Sandbox` has it.
+//! The sets of `tests/data/legacy_sandbox_templates.json` (the templates
+//! of tests/Extension/SandboxTest.php, run by
+//! `tests/legacy_sandbox_test.rs`) go into `legacy_sandbox_sets.rs`.
 //!
 //! Upstream: none
 
@@ -21,6 +24,8 @@ use twig::{Autoescape, Environment, EnvironmentOptions};
 
 #[path = "src/extension.rs"]
 mod extension;
+#[path = "src/legacy_sandbox_extension.rs"]
+mod legacy_sandbox_extension;
 #[path = "src/sandbox_extension.rs"]
 mod sandbox_extension;
 
@@ -153,26 +158,53 @@ fn build() {
     let out = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("cases.rs");
     std::fs::write(out, code).unwrap();
     sandbox_sets();
+    legacy_sandbox_sets();
 }
 
 /// The template sets of `tests/data/sandbox_templates.json`.
 fn sandbox_sets() {
-    let data = concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/tests/data/sandbox_templates.json"
+    template_sets("sandbox_templates", "sandbox_sets", "SANDBOX_SETS", false);
+}
+
+/// The template sets of `tests/data/legacy_sandbox_templates.json`: the
+/// templates of tests/Extension/SandboxTest.php, run by
+/// `tests/legacy_sandbox_test.rs`.
+fn legacy_sandbox_sets() {
+    println!("cargo:rerun-if-changed=src/legacy_sandbox_extension.rs");
+    template_sets(
+        "legacy_sandbox_templates",
+        "legacy_sandbox_sets",
+        "LEGACY_SANDBOX_SETS",
+        true,
     );
+}
+
+/// Compiles the sets of `tests/data/<data>.json` into `<out>.rs`, as the
+/// static `<name>`. A legacy set is compiled with the extensions of
+/// tests/Extension/SandboxTest.php; it keeps its templates that do not
+/// compile, and compiles its `strings` as `createTemplate()` would.
+fn template_sets(data: &str, out: &str, name: &str, legacy: bool) {
+    let data = format!("{}/tests/data/{data}.json", env!("CARGO_MANIFEST_DIR"));
     println!("cargo:rerun-if-changed={data}");
     println!("cargo:rerun-if-changed=src/sandbox_extension.rs");
     let sets: Vec<Json> = serde_json::from_str(&std::fs::read_to_string(data).unwrap()).unwrap();
-    let mut code = String::from(
-        "/// A set's compiled templates, or why the set did not compile.\npub type Set = Result<&'static [::twig::loader::CompiledEntry], &'static [u8]>;\n\n/// The compiled template sets, by name.\npub static SANDBOX_SETS: &[(&str, Set)] = &[\n",
+    let mut code = format!(
+        "/// A set's compiled templates, or why the set did not compile.\npub type Set = Result<&'static [::twig::loader::CompiledEntry], &'static [u8]>;\n\n/// The compiled template sets, by name.\npub static {name}: &[(&str, Set)] = &[\n",
     );
     let mut modules = String::new();
     for (i, set) in sets.iter().enumerate() {
         let name = set["name"].as_str().unwrap();
-        let mut extensions: Vec<Rc<dyn twig::extension::Extension>> =
-            vec![Rc::new(sandbox_extension::SandboxTestExtension)];
-        if set["sandbox"].as_bool().unwrap() {
+        let mut extensions: Vec<Rc<dyn twig::extension::Extension>> = if legacy {
+            vec![
+                Rc::new(legacy_sandbox_extension::LegacySandboxTestExtension {
+                    variant: set["variant"].as_str().unwrap_or_default().to_owned(),
+                }),
+                Rc::new(twig::extension::string_loader::StringLoaderExtension),
+            ]
+        } else {
+            vec![Rc::new(sandbox_extension::SandboxTestExtension)]
+        };
+        if set["sandbox"].as_bool().unwrap_or(true) {
             extensions.push(Rc::new(twig::extension::sandbox::SandboxExtension::new(
                 Rc::new(twig::sandbox::SecurityPolicy::default()),
                 false,
@@ -197,7 +229,21 @@ fn sandbox_sets() {
                 )
             })
             .collect();
-        match twig::compiler::compile_set(&env, &templates) {
+        let strings: Vec<(Option<Vec<u8>>, Vec<u8>)> = set["strings"]
+            .as_array()
+            .map(|strings| {
+                strings
+                    .iter()
+                    .map(|pair| {
+                        (
+                            pair[0].as_str().map(|n| n.as_bytes().to_vec()),
+                            pair[1].as_str().unwrap().as_bytes().to_vec(),
+                        )
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+        match twig::compiler::compile_set_with(&env, &templates, &strings, legacy) {
             Ok(module) => {
                 let _ = writeln!(
                     modules,
@@ -212,7 +258,7 @@ fn sandbox_sets() {
     }
     code.push_str("];\n");
     code.push_str(&modules);
-    let out = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("sandbox_sets.rs");
+    let out = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join(format!("{out}.rs"));
     std::fs::write(out, code).unwrap();
 }
 

@@ -1,0 +1,485 @@
+[
+ {
+  "name": "templates",
+  "templates": {
+   "1_basic1": "{{ obj.foo }}",
+   "1_basic2": "{{ name|upper }}",
+   "1_basic3": "{% if name %}foo{% endif %}",
+   "1_basic4": "{{ obj.bar }}",
+   "1_basic5": "{{ obj }}",
+   "1_basic7": "{{ cycle([\"foo\",\"bar\"], 1) }}",
+   "1_basic8": "{{ obj.getfoobar }}{{ obj.getFooBar }}",
+   "1_basic9": "{{ obj.foobar }}{{ obj.fooBar }}",
+   "1_basic": "{% if obj.foo %}{{ obj.foo|upper }}{% endif %}",
+   "1_layout": "{% block content %}{% endblock %}",
+   "1_child": "{% extends \"1_layout\" %}\n{% block content %}\n{{ \"a\"|json_encode }}\n{% endblock %}",
+   "1_include": "{{ include(\"1_basic1\", sandboxed=true) }}",
+   "1_basic2_include_template_from_string_sandboxed": "{{ include(template_from_string(\"{{ name|upper }}\"), sandboxed=true) }}",
+   "1_basic2_include_template_from_string": "{{ include(template_from_string(\"{{ name|upper }}\")) }}",
+   "1_range_operator": "{{ (1..2)[0] }}",
+   "1_syntax_error_wrapper_legacy": "{% sandbox %}{% include \"1_syntax_error\" %}{% endsandbox %}",
+   "1_syntax_error_wrapper": "{{ include(\"1_syntax_error\", sandboxed: true) }}",
+   "1_syntax_error": "{% syntax error }}",
+   "1_childobj_parentmethod": "{{ child_obj.ParentMethod() }}",
+   "1_childobj_childmethod": "{{ child_obj.ChildMethod() }}",
+   "1_empty": "",
+   "1_array_like": "{{ array_like[\"foo\"] }}"
+  },
+  "strings": [
+   [
+    "index",
+    "{% apply upper %}foo{% endapply %}"
+   ],
+   [
+    "index",
+    "{% autoescape %}foo{% endautoescape %}"
+   ],
+   [
+    "index",
+    "{% block foo %}foo{% endblock %}"
+   ],
+   [
+    "index",
+    "{% deprecated \"message\" %}"
+   ],
+   [
+    "index",
+    "{% do 1 + 2 %}"
+   ],
+   [
+    "index",
+    "{% embed \"base.twig\" %}{% endembed %}"
+   ],
+   [
+    "index",
+    "{% flush %}"
+   ],
+   [
+    "index",
+    "{% for i in 1..2 %}{% endfor %}"
+   ],
+   [
+    "index",
+    "{% from \"macros\" import foo %}"
+   ],
+   [
+    "index",
+    "{% if false %}{% endif %}"
+   ],
+   [
+    "index",
+    "{% import \"macros\" as macros %}"
+   ],
+   [
+    "index",
+    "{% include \"macros\" %}"
+   ],
+   [
+    "index",
+    "{% macro foo() %}{% endmacro %}"
+   ],
+   [
+    "index",
+    "{% set foo = 1 %}"
+   ],
+   [
+    "index",
+    "{% with foo %}{% endwith %}"
+   ],
+   [
+    "index",
+    "{% extends \"1_empty\" %}"
+   ],
+   [
+    "index",
+    "{% use \"1_empty\" %}"
+   ],
+   [
+    "index",
+    "{% use \"does_not_exist\" %}"
+   ],
+   [
+    "index",
+    "{% use \"1_layout\" with does_not_exist as alias %}"
+   ],
+   [
+    "index",
+    "{% use \"1_child\" %}"
+   ],
+   [
+    "index",
+    "{{ \"\" is empty ? \"y\" }}"
+   ],
+   [
+    "index",
+    "{{ [] is iterable ? \"y\" }}"
+   ],
+   [
+    "index",
+    "{{ null is null ? \"y\" }}"
+   ],
+   [
+    "index",
+    "{{ null is none ? \"y\" }}"
+   ],
+   [
+    "index",
+    "{{ 1 is defined ? \"y\" }}"
+   ],
+   [
+    "index",
+    "{{ 2 is even ? \"y\" }}"
+   ],
+   [
+    "index",
+    "{{ 3 is odd ? \"y\" }}"
+   ],
+   [
+    "index",
+    "{{ true is true ? \"y\" }}"
+   ],
+   [
+    "index",
+    "{{ 1 is same as(1) ? \"y\" }}"
+   ],
+   [
+    "index",
+    "{{ 4 is divisible by(2) ? \"y\" }}"
+   ],
+   [
+    "index",
+    "{{ [] is sequence ? \"y\" }}"
+   ],
+   [
+    "index",
+    "{{ {\"a\": 1} is mapping ? \"y\" }}"
+   ]
+  ]
+ },
+ {
+  "name": "parser_callables",
+  "templates": {
+   "attr_secret": "{{ attribute(data, \"secret\") }}",
+   "attr_bar": "{{ attribute(obj, \"bar\") }}",
+   "attr_foo": "{{ attribute(obj, \"foo\") }}",
+   "attr_x": "{{ attribute(data, \"x\") }}",
+   "block": "{% block content %}B{% endblock %}{{ block(\"content\") }}",
+   "base": "{% block content %}PARENT{% endblock %}",
+   "child": "{% extends \"base\" %}{% block content %}{{ parent() }} CHILD{% endblock %}",
+   "child_attr": "{% extends \"base\" %}{% block content %}{{ parent() }} CHILD - {{ attribute(data, \"x\") }}{% endblock %}"
+  }
+ },
+ {
+  "name": "tests",
+  "templates": {
+   "constant": "{{ 1 is constant(\"PHP_INT_MAX\") ? \"y\" }}",
+   "constant_n": "{{ 1 is constant(\"PHP_INT_MAX\") ? \"y\" : \"n\" }}",
+   "unsafe": "{{ \"x\" is unsafe ? \"y\" }}",
+   "implicit": "{% if x %}a{% endif %}{{ y ? 'b' : 'c' }}{{ z ?: 'd' }}{{ w ?? 'e' }}{{ v|default('f') }}"
+  }
+ },
+ {
+  "name": "test_line",
+  "templates": {
+   "index": "{{ 1 }}\n{{ 1 is constant('PHP_INT_MAX') ? 'y' }}"
+  }
+ },
+ {
+  "name": "magic_call",
+  "templates": {
+   "property": "{{ o.hello }}",
+   "method": "{{ o.hello() }}",
+   "secret": "{{ o.secret }}"
+  }
+ },
+ {
+  "name": "non_string_keys",
+  "autoescape": "html",
+  "templates": {
+   "float": "{{ obj[3.14] }}",
+   "true": "{{ obj[true] }}",
+   "false": "{{ obj[false] }}"
+  }
+ },
+ {
+  "name": "unallowed_to_string",
+  "templates": {
+   "simple": "{{ obj }}",
+   "object_from_array": "{{ arr.obj }}",
+   "object_chain": "{{ obj.anotherFooObject }}",
+   "filter": "{{ obj|upper }}",
+   "filter_from_array": "{{ arr.obj|upper }}",
+   "function": "{{ random(obj) }}",
+   "function_from_array": "{{ random(arr.obj) }}",
+   "function_and_filter": "{{ random(obj|upper) }}",
+   "function_and_filter_from_array": "{{ random(arr.obj|upper) }}",
+   "object_chain_and_filter": "{{ obj.anotherFooObject|upper }}",
+   "object_chain_and_function": "{{ random(obj.anotherFooObject) }}",
+   "concat": "{{ obj ~ \"\" }}",
+   "concat_again": "{{ \"\" ~ obj }}",
+   "object_in_arguments": "{{ \"__toString\"|replace({\"__toString\": obj}) }}",
+   "object_in_array": "{{ [12, \"foo\", obj]|join(\", \") }}",
+   "object_in_array_var": "{{ some_array|join(\", \") }}",
+   "object_in_array_nested": "{{ [12, \"foo\", [12, \"foo\", obj]]|join(\", \") }}",
+   "object_in_array_var_nested": "{{ [12, \"foo\", some_array]|join(\", \") }}",
+   "object_in_array_dynamic_key": "{{ {(obj): \"foo\"}|join(\", \") }}",
+   "object_in_array_dynamic_key_nested": "{{ {\"foo\": { (obj): \"foo\" }}|join(\", \") }}",
+   "context": "{{ _context|join(\", \") }}",
+   "spread_array_operator": "{{ [1, 2, ...[5, 6, 7, obj]]|join(\",\") }}",
+   "spread_array_operator_var": "{{ [1, 2, ...some_array]|join(\",\") }}",
+   "spread_iterator_in_function_args": "{{ [\"x\", ...iterator]|join(\",\") }}",
+   "iterator_in_join": "{{ iterator|join(\", \") }}",
+   "iterator_nested_in_join": "{{ iterator_nested|join(\", \") }}",
+   "iterator_in_replace": "{{ \"__toString\"|replace(iterator_map) }}",
+   "recursion": "{{ recursion|join(\", \") }}",
+   "ternary_print": "{{ true ? obj : \"\" }}",
+   "ternary_filter_input": "{{ (true ? obj : \"\")|upper }}",
+   "elvis_filter_input": "{{ (obj ?: \"\")|upper }}",
+   "nullcoalesce_filter_input": "{{ (obj ?? \"\")|upper }}",
+   "function_arg_with_ternary": "{{ random(true ? obj : \"\") }}",
+   "filter_arg_with_ternary": "{{ \"%s\"|format(true ? obj : \"\") }}",
+   "matches_in_print": "{{ obj matches \"/foo/\" ? \"1\" : \"0\" }}",
+   "equal_in_print": "{{ obj == \"x\" ? \"1\" : \"0\" }}",
+   "equal_in_if": "{% if obj == \"x\" %}LEAK{% endif %}",
+   "notequal_in_if": "{% if obj != \"x\" %}LEAK{% endif %}",
+   "spaceship_in_if": "{% if (obj <=> \"x\") == 0 %}LEAK{% endif %}",
+   "less_in_if": "{% if obj < \"B\" %}LEAK{% endif %}",
+   "greater_in_if": "{% if obj > \"A\" %}LEAK{% endif %}",
+   "lessequal_in_if": "{% if obj <= \"z\" %}LEAK{% endif %}",
+   "greaterequal_in_if": "{% if obj >= \"a\" %}LEAK{% endif %}",
+   "concat_left_in_if": "{% if obj ~ \"\" %}LEAK{% endif %}",
+   "concat_right_in_if": "{% if \"\" ~ obj %}LEAK{% endif %}",
+   "range_left": "{% for x in obj..1 %}LEAK{% endfor %}",
+   "range_right": "{% for x in 1..obj %}LEAK{% endfor %}",
+   "in_array_right": "{% if \"needle\" in [obj] %}LEAK{% endif %}",
+   "in_array_left": "{% if obj in [\"needle\"] %}LEAK{% endif %}",
+   "notin_array_right": "{% if \"needle\" not in [obj] %}LEAK{% endif %}",
+   "notin_array_left": "{% if obj not in [\"needle\"] %}LEAK{% endif %}",
+   "in_iterator_right": "{% if \"needle\" in iterator %}LEAK{% endif %}",
+   "notin_iterator_right": "{% if \"needle\" not in iterator %}LEAK{% endif %}",
+   "do_tag_function_arg": "{% do my_func(obj) %}",
+   "do_tag_filter_input": "{% do obj|upper %}",
+   "do_tag_concat": "{% do obj ~ \"\" %}",
+   "set_tag_filter_input": "{% set _ = obj|upper %}",
+   "set_tag_concat": "{% set _ = obj ~ \"\" %}",
+   "set_tag_array_dynamic_key": "{% set _ = {(obj): \"v\"} %}",
+   "set_tag_array_dynamic_key_nested": "{% set _ = {\"foo\": {(obj): \"v\"}} %}",
+   "set_tag_array_dynamic_key_object_chain": "{% set _ = {(obj.anotherFooObject): \"v\"} %}",
+   "set_capture_print": "{% set _ %}{{ obj }}{% endset %}",
+   "is_empty_in_if": "{% if obj is empty %}LEAK{% endif %}",
+   "is_empty_in_print": "{{ obj is empty ? \"1\" : \"0\" }}",
+   "method_argument": "{{ obj.foo(obj.anotherFooObject) }}",
+   "filter_input_in_if": "{% if obj|upper == \"X\" %}LEAK{% endif %}",
+   "filter_arg_in_if": "{% if \"x\"|replace({\"x\": obj}) == \"y\" %}LEAK{% endif %}",
+   "function_arg_in_if": "{% if not random(obj) %}LEAK{% endif %}",
+   "filter_input_in_for": "{% for x in (obj|split(\",\")) %}LEAK{% endfor %}",
+   "function_arg_in_for": "{% for x in [random(obj)] %}LEAK{% endfor %}"
+  }
+ },
+ {
+  "name": "allowed_to_string",
+  "templates": {
+   "constant_test": "{{ obj is constant(\"PHP_INT_MAX\") }}",
+   "set_object": "{% set a = obj.anotherFooObject %}{{ a.foo }}",
+   "do_object_discarded": "{% do obj %}",
+   "set_object_assigned": "{% set a = obj %}{{ a is defined ? \"1\" : \"0\" }}",
+   "is_defined1": "{{ obj.anotherFooObject is defined }}",
+   "is_defined2": "{{ magic.foo is defined }}",
+   "is_null": "{{ obj is null }}",
+   "is_sameas": "{{ obj is same as(obj) }}",
+   "is_sameas_no_brackets": "{{ obj is same as obj }}",
+   "is_sameas_from_array": "{{ arr.obj is same as(arr.obj) }}",
+   "is_sameas_from_array_no_brackets": "{{ arr.obj is same as arr.obj }}",
+   "is_sameas_from_another_method": "{{ obj.anotherFooObject is same as(obj.anotherFooObject) }}",
+   "is_sameas_from_another_method_no_brackets": "{{ obj.anotherFooObject is same as obj.anotherFooObject }}"
+  }
+ },
+ {
+  "name": "to_string_blocks",
+  "templates": {
+   "make_obj": "{{ make_obj() }}",
+   "to_obj": "{{ \"x\"|to_obj }}",
+   "dynamic_attribute": "{{ arr[obj] }}",
+   "dynamic_macro": "{% import _self as macros %}\n{% macro foo() %}foo{% endmacro %}\n{{ macros.(obj)() }}",
+   "include": "{% include obj %}",
+   "extends": "{% extends obj %}",
+   "block_function": "{{ block(\"content\", obj) }}",
+   "embed": "{% embed obj %}{% endembed %}",
+   "constant_argument": "{% if \"x\" is constant(obj) %}LEAK{% endif %}",
+   "deprecated": "{% deprecated obj %}",
+   "self_import": "{% macro local_lower(s) %}{{ s|lower }}{% endmacro %}{% from _self import local_lower %}{{ local_lower('A') }}",
+   "dynamic_key_allowed": "{% set arr = {(obj): \"v\", (obj.anotherFooObject): \"v2\"} %}{{ arr|keys|join(\",\") }}"
+  }
+ },
+ {
+  "name": "destructuring",
+  "templates": {
+   "both": "{% do {bar: x, foo: y} = obj %}{{ x }}-{{ y }}",
+   "property": "{% do {bar: x} = obj %}{{ x }}",
+   "method": "{% do {foo: y} = obj %}{{ y }}"
+  }
+ },
+ {
+  "name": "include_locally",
+  "templates": {
+   "2_basic": "{{ obj.foo }}{% include \"2_included\" %}{{ obj.foo }}",
+   "2_included": "{% if obj.foo %}{{ obj.foo|upper }}{% endif %}",
+   "3_basic": "{{ include(\"3_included\", sandboxed: true) }}",
+   "3_included": "{% if true %}{{ \"foo\"|upper }}{% endif %}"
+  }
+ },
+ {
+  "name": "macros_html",
+  "autoescape": "html",
+  "templates": {
+   "import": "{%- import _self as macros %}\n\n{%- macro test(text) %}<p>{{ text }}</p>{% endmacro %}\n\n{{- macros.test('username') }}",
+   "greet": "{%- macro greet(n) %}Hi {{ n }}{% endmacro %}\n{{- _self.('greet')('World') }}"
+  }
+ },
+ {
+  "name": "macro_injection",
+  "templates": {
+   "self": "{{ _self.('foo + 1; trigger_error(\"BAD-MACRO-REF\") //')() }}",
+   "imported": "{% import \"m\" as m %}{{ m.('foo + 1; trigger_error(\"BAD-IMPORT-REF\") //')() }}",
+   "m": "{% macro greet() %}hi{% endmacro %}"
+  }
+ },
+ {
+  "name": "sandbox_tag",
+  "templates": {
+   "index": "{% sandbox %}{% include \"included\" %}{% endsandbox %}",
+   "ignore_missing": "{% sandbox %}{% include \"included\" ignore missing %}{% endsandbox %}",
+   "included": "{{ \"hello\"|upper }}"
+  }
+ },
+ {
+  "name": "filter_html",
+  "autoescape": "html",
+  "templates": {
+   "index": "{{ [\"foo\", \"bar\", \"\"]|filter(\"trim\")|join(\", \") }}",
+   "closure": "{{ [\"foo\", \"bar\", \"\"]|filter(v => v != \"\")|join(\", \") }}"
+  }
+ },
+ {
+  "name": "column",
+  "templates": {
+   "bar": "{{ [obj]|column('bar')|first }}",
+   "index": "{{ [obj]|column('bar', 'foo')|keys|first }}",
+   "magic": "{{ [magic]|column('anything')|first }}"
+  }
+ },
+ {
+  "name": "traversable",
+  "templates": {
+   "join": "{{ stringable_iterator|join(\", \") }}",
+   "replace": "{{ \"__toString\"|replace(stringable_iterator_map) }}",
+   "iterator_join": "{{ iterator|join(\", \") }}",
+   "iterator_replace": "{{ \"__toString\"|replace(iterator_map) }}",
+   "cyclic_join": "{{ obj|join(\",\") }}",
+   "cyclic_replace": "{{ \"x\"|replace(obj) }}",
+   "cyclic_spread": "{{ [\"a\", ...obj]|join(\",\") }}",
+   "render_obj": "{{ render_traversable(obj) }}",
+   "render_iterator": "{{ render_traversable(stringable_iterator) }}"
+  }
+ },
+ {
+  "name": "traversable_html",
+  "autoescape": "html",
+  "templates": {
+   "index": "{{ obj }}"
+  }
+ },
+ {
+  "name": "param_types",
+  "templates": {
+   "safe_n": "{{ safe_fn(n) }}",
+   "safe_b": "{{ safe_fn(b) }}",
+   "safe_obj": "{{ safe_fn(obj) }}",
+   "unsafe_obj": "{{ unsafe_fn(obj) }}",
+   "my_test": "{{ 5 is my_test(obj) }}",
+   "unsafe_filter": "{{ 1|unsafe_filter(foo_bar: obj) }}",
+   "unsafe_test": "{{ 1 is unsafe_test(foo_bar: obj) ? \"yes\" : \"no\" }}",
+   "safe_filter": "{{ n|safe_filter }}"
+  }
+ },
+ {
+  "name": "safe_variadic",
+  "variant": "safe_variadic",
+  "templates": {
+   "index": "{{ safe_fn(1, 2, 3) }}"
+  }
+ },
+ {
+  "name": "unsafe_variadic",
+  "variant": "unsafe_variadic",
+  "templates": {
+   "index": "{{ unsafe_fn(...args) }}"
+  }
+ },
+ {
+  "name": "named_variadic",
+  "variant": "named_variadic",
+  "templates": {
+   "index": "{{ unsafe_fn(foo_bar: obj) }}"
+  }
+ },
+ {
+  "name": "arrow",
+  "templates": {
+   "sort": "{{ [\"a\",\"b\"]|sort(\"strnatcasecmp\")|join }}",
+   "filter": "{{ [\"a\",\"b\"]|filter(\"is_string\")|join }}",
+   "map": "{{ [\"a\",\"b\"]|map(\"strtoupper\")|join }}",
+   "reduce": "{{ [1,2]|reduce(\"intval\") }}",
+   "find": "{{ [\"a\",\"b\"]|find(\"is_string\") }}",
+   "has_some": "{{ [1,2] has some \"is_string\" ? \"yes\" : \"no\" }}",
+   "has_every": "{{ [1,2] has every \"is_int\" ? \"yes\" : \"no\" }}",
+   "closure": "{{ [\"b\",\"a\"]|sort((a, b) => a < b ? -1 : 1)|join(\",\") }}",
+   "natcase": "{{ [\"b\",\"a\"]|sort(\"strnatcasecmp\")|join(\",\") }}"
+  }
+ },
+ {
+  "name": "sandbox_aware",
+  "templates": {
+   "index": "{{ \"foo\"|sandbox_aware }}",
+   "in": "{{ \"foo\"|sandbox_aware }}",
+   "out": "{{ \"foo\"|sandbox_aware }}",
+   "test": "{{ \"foo\" is sandbox_aware ? \"on\" : \"off\" }}"
+  }
+ },
+ {
+  "name": "not_sandboxed_test",
+  "variant": "not_sandboxed_test",
+  "templates": {
+   "index": "{{ \"foo\" is sandbox_aware ? \"on\" : \"off\" }}"
+  }
+ },
+ {
+  "name": "no_sandbox",
+  "sandbox": false,
+  "templates": {
+   "index": "{{ sandbox_aware(\"foo\") }}"
+  }
+ },
+ {
+  "name": "always_allowed",
+  "templates": {
+   "safe_upper": "{{ \"fabien\"|safe_upper }}",
+   "gated_upper": "{{ \"fabien\"|gated_upper }}",
+   "safe_greet": "{{ safe_greet(\"fabien\") }}",
+   "gated_greet": "{{ gated_greet(\"fabien\") }}",
+   "safe_even": "{{ 4 is safe_even ? \"yes\" : \"no\" }}",
+   "gated_even": "{{ 4 is gated_even ? \"yes\" : \"no\" }}",
+   "always_allowed_tag": "{% always_allowed_tag %}",
+   "gated_tag": "{% gated_tag %}",
+   "safe_upper_obj": "{{ obj|safe_upper }}",
+   "safe_greet_obj": "{{ safe_greet(obj) }}"
+  }
+ },
+ {
+  "name": "range",
+  "variant": "range",
+  "templates": {
+   "index": "{{ (1..2)[0] }}"
+  }
+ }
+]
