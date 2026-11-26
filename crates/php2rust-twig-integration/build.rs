@@ -98,6 +98,7 @@ fn main() {
                     continue;
                 }
             };
+        extension::register_enums(&env);
         let templates: Vec<(Vec<u8>, Vec<u8>)> = record["templates"]
             .as_array()
             .unwrap()

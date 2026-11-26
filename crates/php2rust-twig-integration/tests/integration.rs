@@ -6,8 +6,8 @@
 //! exception ("Class: message"), and the deprecations.
 //!
 //! A case is skipped when its `--CONDITION--` is false in PHP, when the
-//! Rust compiler does not support a part of it yet (the sandbox, `date`,
-//! enums, `dump`, `template_from_string`), or when its `--DATA--` holds an
+//! Rust compiler does not support a part of it yet (`dump`,
+//! `template_from_string`), or when its `--DATA--` holds an
 //! object of a class the port does not have (`src/classes.rs` has the
 //! test classes). The cases listed in
 //! `data/integration_pending.txt` must still fail: the list stays exact.
@@ -108,9 +108,82 @@ fn object(json: &Json) -> Option<Value> {
         }),
         "Twig\\Tests\\SimpleIteratorForTesting" => Arc::new(c::SimpleIteratorForTesting),
         "Twig\\Tests\\MagicCallStub" => Arc::new(c::MagicCallStub),
+        "DateTime" | "DateTimeImmutable" => {
+            let zone = php_date::DateTimeZone::new(&text(&string("timezone"))).ok()?;
+            let date =
+                php_date::DateTimeImmutable::new(&text(&string("date")), Some(&zone)).ok()?;
+            if class == "DateTime" {
+                return Some(php_date::object::DateTime::object(date));
+            }
+            Arc::new(date)
+        }
+        "DateTimeZone" => Arc::new(php_date::DateTimeZone::new(&text(&string("timezone"))).ok()?),
+        "DateInterval" if get("days") == Some(Value::Bool(false)) => {
+            let int = |name: &str| match get(name) {
+                Some(Value::Int(i)) => i,
+                _ => 0,
+            };
+            let f = match get("f") {
+                Some(Value::Float(f)) => f,
+                _ => 0.0,
+            };
+            #[allow(clippy::cast_possible_truncation)]
+            Arc::new(php_value::date_interval::DateInterval {
+                y: int("y"),
+                m: int("m"),
+                d: int("d"),
+                h: int("h"),
+                i: int("i"),
+                s: int("s"),
+                microsecond: (f * 1_000_000.0).round() as i64,
+                invert: int("invert") == 1,
+            })
+        }
         _ => return None,
     };
     Some(Value::Object(object))
+}
+
+fn text(s: &PhpString) -> String {
+    String::from_utf8_lossy(s.as_bytes()).into_owned()
+}
+
+/// What the case's `--DATA--` set: PHP's default zone and the core
+/// extension's date formats, zone and number format.
+fn apply_env(record: &Json, env: &Environment) {
+    let Some(Value::Array(state)) = record.get("env").and_then(value) else {
+        return;
+    };
+    let get = |name: &str| state.get(&Key::from_bytes(name.as_bytes())).cloned();
+    let string = |v: Option<Value>| match v {
+        Some(Value::String(s)) => s.as_bytes().to_vec(),
+        _ => Vec::new(),
+    };
+    if let Some(Value::String(zone)) = get("default_timezone") {
+        php_date::date_default_timezone_set(&text(&zone));
+    }
+    let mut core = env.core_options_mut();
+    if let Some(Value::Array(formats)) = get("date_format") {
+        let mut formats = formats.values().map(|v| string(Some(v.clone())));
+        core.date_formats = [
+            formats.next().unwrap_or_default(),
+            formats.next().unwrap_or_default(),
+        ];
+    }
+    if let Some(Value::String(zone)) = get("timezone") {
+        core.timezone = Some(text(&zone));
+    }
+    if let Some(Value::Array(number)) = get("number_format") {
+        let values: Vec<Value> = number.values().cloned().collect();
+        core.number_format = (
+            match values.first() {
+                Some(Value::Int(i)) => *i,
+                _ => 0,
+            },
+            string(values.get(1).cloned()),
+            string(values.get(2).cloned()),
+        );
+    }
 }
 
 fn options(config: &serde_json::Map<String, Json>) -> EnvironmentOptions {
@@ -191,6 +264,7 @@ fn run(record: &Json, compiled: &generated::Compiled) -> Outcome {
         options(record["config"].as_object().unwrap()),
     )
     .unwrap();
+    twig_integration::extension::register_enums(&env);
     env.add_global("global", Value::String(PhpString::from(b"global".to_vec())));
     // TwigTestFoo::BAR_NAME
     env.core_options_mut().constants.push((
@@ -246,6 +320,7 @@ fn render(record: &Json, env: &Environment) -> Outcome {
     let Some(data) = value(&record["data"]) else {
         return Outcome::Skip;
     };
+    apply_env(record, env);
     let context = match data {
         Value::Array(a) => a,
         _ => PhpArray::new(),

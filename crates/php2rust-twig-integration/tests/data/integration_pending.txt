@@ -1,3 +1,2 @@
 # Integration cases that do not pass yet: "<file> #<case> # reason".
 expressions/matches_error_execution.test #0 # php-pcre does not support (*LIMIT_MATCH=n)
-filters/number_format_default.test #0 # the --DATA-- section calls setNumberFormat() on the environment

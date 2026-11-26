@@ -154,3 +154,28 @@ impl Extension for FixtureExtension {
         ]
     }
 }
+
+/// `Twig\Tests\DummyBackedEnum` and `Twig\Tests\DummyUnitEnum`, the enums
+/// the fixtures name, registered for `enum()` and `enum_cases()`.
+///
+/// Upstream: twig/twig tests/DummyBackedEnum.php tests/DummyUnitEnum.php
+pub fn register_enums(env: &twig::Environment) {
+    use php_value::object::EnumCase;
+    let backed = "Twig\\Tests\\DummyBackedEnum";
+    let unit = "Twig\\Tests\\DummyUnitEnum";
+    let mut options = env.core_options_mut();
+    options.enums.define_enum(
+        backed,
+        vec![
+            EnumCase::new(backed, "FOO", Some("foo".into())),
+            EnumCase::new(backed, "BAR", Some("bar".into())),
+        ],
+    );
+    options.enums.define_enum(
+        unit,
+        vec![
+            EnumCase::new(unit, "BAR", None),
+            EnumCase::new(unit, "BAZ", None),
+        ],
+    );
+}

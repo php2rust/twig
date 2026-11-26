@@ -134,8 +134,8 @@ src/Node/Expression/Filter/EscapeFilter.php	EscapeFilter	26	ported	crates/twig/s
 src/Node/Expression/Filter/RawFilter.php	RawFilter	24	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/FilterExpression.php	FilterExpression	58	ported	crates/twig/src/node/expression.rs
 src/Node/Expression/FunctionExpression.php	FunctionExpression	61	ported	crates/twig/src/node/expression.rs
-src/Node/Expression/FunctionNode/EnumCasesFunction.php	EnumCasesFunction	31	pending	
-src/Node/Expression/FunctionNode/EnumFunction.php	EnumFunction	34	pending	
+src/Node/Expression/FunctionNode/EnumCasesFunction.php	EnumCasesFunction	31	ported	crates/twig/src/compiler.rs
+src/Node/Expression/FunctionNode/EnumFunction.php	EnumFunction	34	ported	crates/twig/src/compiler.rs
 src/Node/Expression/FunctionNode/RenderSandboxedFunction.php	RenderSandboxedFunction	55	pending	
 src/Node/Expression/GetAttrExpression.php	GetAttrExpression	170	ported	crates/twig/src/compiler.rs crates/twig/src/node/expression.rs
 src/Node/Expression/InlinePrint.php	InlinePrint	18	ported	crates/twig/src/compiler.rs
