@@ -404,8 +404,9 @@ use Twig\TwigTest;
 
 // A value as a typed tree: ["n"], ["b", bool], ["i", int], ["f", repr],
 // ["s", base64], ["a", [[key, value], ...]] with int keys or ["s", base64]
-// keys, ["o", class] for an object (not read by the Rust tests yet).
-function typed($value)
+// keys, ["o", class, state] for an object (state: see below), ["o", type]
+// for an object too deep or a resource.
+function typed($value, int $depth = 0)
 {
     if (null === $value) {
         return ['n'];
@@ -425,13 +426,37 @@ function typed($value)
     if (is_array($value)) {
         $pairs = [];
         foreach ($value as $k => $v) {
-            $pairs[] = [is_int($k) ? $k : ['s', base64_encode($k)], typed($v)];
+            $pairs[] = [is_int($k) ? $k : ['s', base64_encode($k)], typed($v, $depth)];
         }
 
         return ['a', $pairs];
     }
 
-    return ['o', is_object($value) ? get_class($value) : get_debug_type($value)];
+    if (!is_object($value)) {
+        return ['o', get_debug_type($value)];
+    }
+    // the state the Rust ports of the classes read: an ArrayObject's or
+    // ArrayIterator's storage, else every instance property (private ones
+    // too), not deeper than 4 objects
+    if ($depth >= 4) {
+        return ['o', get_class($value)];
+    }
+    if ($value instanceof \ArrayObject || $value instanceof \ArrayIterator) {
+        return ['o', get_class($value), typed($value->getArrayCopy(), $depth + 1)];
+    }
+    $properties = [];
+    for ($class = new ReflectionObject($value); $class; $class = $class->getParentClass()) {
+        foreach ($class->getProperties() as $property) {
+            if (!$property->isStatic() && $property->isInitialized($value) && !array_key_exists($property->getName(), $properties)) {
+                $properties[$property->getName()] = $property->getValue($value);
+            }
+        }
+    }
+    foreach (get_object_vars($value) as $name => $v) {
+        $properties[$name] ??= $v;
+    }
+
+    return ['o', get_class($value), typed($properties, $depth + 1)];
 }
 
 function make_env(array $templates, array $config): Environment

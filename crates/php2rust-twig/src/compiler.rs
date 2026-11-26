@@ -1662,7 +1662,7 @@ impl<'a> Compiler<'a> {
                     None => "rt::Value::Null".to_owned(),
                 };
                 format!(
-                    "{{ let __c = {inner}; let __o = {object}; rt::same(&__c, &rt::core::constant_value(&{name}, &__o, false)?) }}"
+                    "{{ let __c = {inner}; let __o = {object}; rt::same(&__c, &rt::core::constant_value(env, &{name}, &__o, false)?) }}"
                 )
             }
             C::DefinedTest | C::DefaultFilter | C::RawFilter => {

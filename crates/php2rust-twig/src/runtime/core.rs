@@ -41,6 +41,10 @@ pub struct CoreOptions {
     /// Decimals, decimal point, thousands separator.
     pub number_format: (i64, Vec<u8>, Vec<u8>),
     pub timezone: Option<String>,
+    /// The constants of the application's own classes (`Foo::BAR`), which
+    /// `constant()` and `getAttribute()` read after PHP's built-in ones:
+    /// Rust has no PHP class constants to look up.
+    pub constants: Vec<(Vec<u8>, Value)>,
 }
 
 impl Default for CoreOptions {
@@ -49,6 +53,7 @@ impl Default for CoreOptions {
             date_formats: [b"F j, Y H:i".to_vec(), b"%d days".to_vec()],
             number_format: (0, b".".to_vec(), b",".to_vec()),
             timezone: None,
+            constants: Vec::new(),
         }
     }
 }
@@ -426,13 +431,18 @@ pub fn test_sequence(_: &Call<'_>, args: Vec<Value>) -> R {
 
 /// The `mapping` test.
 pub fn test_mapping(_: &Call<'_>, args: Vec<Value>) -> R {
-    let value = arg(&args, 0);
-    let is_object = matches!(value, Value::Object(_));
-    Ok(Value::Bool(match sequence_value(&value)? {
-        Some(a) if !matches!(value, Value::Object(ref o) if o.class() != "ArrayObject" && !o.instance_of("Traversable")) => {
-            !a.is_list() || is_object
+    let mut value = arg(&args, 0);
+    if let Value::Object(o) = &value {
+        if let Some(a) = o.downcast_ref::<php_value::object::ArrayObject>() {
+            value = Value::Array(a.storage().clone());
+        } else if o.instance_of("Traversable") {
+            value = to_array(&value, true)?;
         }
-        _ => is_object,
+    }
+    Ok(Value::Bool(match &value {
+        Value::Array(a) => !a.is_list(),
+        Value::Object(_) => true,
+        _ => false,
     }))
 }
 
@@ -2018,7 +2028,21 @@ pub fn random(_: &Call<'_>, args: Vec<Value>) -> R {
 /// The constants the `constant` function and test can read: PHP's
 /// predefined constants that templates use.
 #[must_use]
-pub fn php_constant(name: &[u8]) -> Option<Value> {
+pub fn php_constant(env: &Environment, name: &[u8]) -> Option<Value> {
+    if let Some(value) = builtin_constant(name) {
+        return Some(value);
+    }
+    let name = name.strip_prefix(b"\\").unwrap_or(name);
+    env.core_options()
+        .constants
+        .iter()
+        .find(|(n, _)| n.as_slice() == name)
+        .map(|(_, v)| v.clone())
+}
+
+/// The PHP constants the port knows.
+#[allow(clippy::match_same_arms)] // a table of names
+fn builtin_constant(name: &[u8]) -> Option<Value> {
     Some(match name {
         b"PHP_EOL" => Value::from("\n"),
         b"PHP_INT_MAX" => Value::Int(i64::MAX),
@@ -2027,6 +2051,11 @@ pub fn php_constant(name: &[u8]) -> Option<Value> {
         b"PHP_VERSION_ID" => Value::Int(80427),
         b"M_PI" => Value::Float(std::f64::consts::PI),
         b"E_ALL" => Value::Int(32767),
+        b"E_ERROR" => Value::Int(1),
+        b"E_WARNING" => Value::Int(2),
+        b"E_NOTICE" => Value::Int(8),
+        b"E_DEPRECATED" => Value::Int(8192),
+        b"E_USER_DEPRECATED" => Value::Int(16384),
         b"DATE_W3C" | b"DATE_ATOM" | b"DATE_RFC3339" => Value::from("Y-m-d\\TH:i:sP"),
         b"ENT_QUOTES" => Value::Int(3),
         b"JSON_PRETTY_PRINT" => Value::Int(128),
@@ -2040,7 +2069,12 @@ pub fn php_constant(name: &[u8]) -> Option<Value> {
 }
 
 /// `constant($constant, $object, $checkDefined)`.
-pub fn constant_value(constant: &Value, object: &Value, check_defined: bool) -> R {
+pub fn constant_value(
+    env: &Environment,
+    constant: &Value,
+    object: &Value,
+    check_defined: bool,
+) -> R {
     let mut name = string_of(constant)?;
     if let Value::Object(o) = object {
         if name == b"class" {
@@ -2055,7 +2089,7 @@ pub fn constant_value(constant: &Value, object: &Value, check_defined: bool) -> 
         full.extend_from_slice(&name);
         name = full;
     }
-    match php_constant(&name) {
+    match php_constant(env, &name) {
         Some(v) => Ok(if check_defined { Value::Bool(true) } else { v }),
         None if check_defined => Ok(Value::Bool(false)),
         None => {
@@ -2074,8 +2108,13 @@ pub fn constant_value(constant: &Value, object: &Value, check_defined: bool) -> 
 }
 
 /// The `constant` function.
-pub fn constant(_: &Call<'_>, args: Vec<Value>) -> R {
-    constant_value(&arg(&args, 0), &arg(&args, 1), arg(&args, 2).is_truthy())
+pub fn constant(call: &Call<'_>, args: Vec<Value>) -> R {
+    constant_value(
+        call.env,
+        &arg(&args, 0),
+        &arg(&args, 1),
+        arg(&args, 2).is_truthy(),
+    )
 }
 
 /// `include($env, $context, $template, $variables, $withContext,
@@ -2400,7 +2439,7 @@ pub fn get_attribute(
         let mut constant = o.class().as_bytes().to_vec();
         constant.extend_from_slice(b"::");
         constant.extend_from_slice(&item);
-        if let Some(value) = php_constant(&constant) {
+        if let Some(value) = php_constant(env, &constant) {
             if is_defined_test {
                 return Ok(Value::Bool(true));
             }

@@ -40,17 +40,18 @@ on, except the sandbox visitor.
 
 Integration fixtures: `crates/twig-integration` compiles every case of
 upstream's `tests/Fixtures/**/*.test` to Rust in its build script and runs
-it against what real Twig did (`IntegrationTest::testIntegration`): 361 of
-457 cases pass, 2 are pending (listed with the reason in
-`tests/data/integration_pending.txt`), 94 are skipped (data with objects,
-which need the test classes; the sandbox, `date`, enums, `dump`,
-`template_from_string`; a false `--CONDITION--`).
+it against what real Twig did (`IntegrationTest::testIntegration`): 397 of
+457 cases pass, 4 are pending (listed with the reason in
+`tests/data/integration_pending.txt`), 56 are skipped (data with objects of
+classes the port does not have, such as dates, `TemplateWrapper` and
+closures; the sandbox, `date`, enums, `dump`, `template_from_string`; a
+false `--CONDITION--`).
 
 Not yet ported: the sandbox, the date filters, `enum`/`enum_cases`, the
 debug and string loader extensions, the filesystem loader and the cache,
 the undefined-callable callbacks (GuardTokenParserTest pending), the
-`path()`/`app.request` hooks (after the HTTP path merges), the PHP test
-classes of the integration fixtures, and the legacy fixtures.
+`path()`/`app.request` hooks (after the HTTP path merges), named arguments
+in method calls, and the legacy fixtures.
 
 Vectors: `scripts/record.sh twig-lexer` runs
 `oracle/recorders/twig_lexer.php` and writes `tests/data/lexer.json`;
