@@ -12,7 +12,7 @@ the Twig Team or Symfony.
 Part of the php2rust project. The crates came from
 [symfony-rs](https://github.com/php2rust/symfony-rs), with their git
 history. PHP's own behaviour (values, arrays, dates, regex, iconv) comes
-from [php2rust/compatibility-tools-rs](https://github.com/php2rust/compatibility-tools-rs).
+from [php2rust/compatibility-tools](https://github.com/php2rust/compatibility-tools).
 
 | Crate | What it is |
 |---|---|
@@ -38,11 +38,11 @@ workspace that uses Twig takes that crate from the same git source, so
 that one deprecation handler sees all deprecations. Twig does not depend
 on symfony-rs.
 
-To change php2rust/compatibility-tools-rs and see the result here at once,
+To change php2rust/compatibility-tools and see the result here at once,
 add an uncommitted `.cargo/config.toml`:
 
 ```toml
-[patch."https://github.com/php2rust/compatibility-tools-rs"]
+[patch."https://github.com/php2rust/compatibility-tools"]
 php2rust-value = { path = "../compatibility-tools/crates/php2rust-value" }
 ```
 
