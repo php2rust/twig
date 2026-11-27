@@ -20,6 +20,9 @@ if [[ ! -d upstream/twig/twig || ! -d upstream/symfony/deprecation-contracts ]];
     exit 1
 fi
 
+# Build the oracle image first, with its log on stderr, so that the
+# build log does not go into a recorder's JSON output.
+docker compose -f oracle/compose.yaml build php >&2
 oracle() { docker compose -f oracle/compose.yaml run --rm -T php "$@"; }
 
 # record OUT RECORDER [ARG...]: run RECORDER, check that it wrote JSON, move it to OUT.
