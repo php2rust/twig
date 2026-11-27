@@ -48,6 +48,14 @@ php2rust-value = { path = "../compatibility-tools/crates/php2rust-value" }
 
 When the change is merged there, update `rev` in the root `Cargo.toml`.
 
+## Twig extras
+
+The small Twig extra packages (`twig/intl-extra`, `twig/string-extra`,
+`twig/markdown-extra`, `twig/html-extra`, `twig/cssinliner-extra` and the
+others) go into this repository as crates of their own, named from the PHP
+package (`php2rust-twig-intl-extra` and so on). A large extra can get a
+repository of its own. None is ported yet; `parity/packages.tsv` lists them.
+
 ## Checks
 
 There is no hosted CI. Run the checks locally:
