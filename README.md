@@ -10,7 +10,7 @@ twig/twig pin what the tests leave open. Not affiliated with or endorsed by
 the Twig Team or Symfony.
 
 Part of the php2rust project. The crates came from
-[symfony-rs](https://github.com/D-Nations/symfony-rs), with their git
+[symfony-rs](https://github.com/php2rust/symfony-rs), with their git
 history. PHP's own behaviour (values, arrays, dates, regex, iconv) comes
 from [php2rust/compatibility-tools](https://github.com/php2rust/compatibility-tools).
 
@@ -36,7 +36,7 @@ symfony-rs; a workspace with its own copy of that crate patches the git
 source to it, so that one deprecation handler sees all deprecations:
 
 ```toml
-[patch."https://github.com/D-Nations/symfony-rs"]
+[patch."https://github.com/php2rust/symfony-rs"]
 symfony-deprecation-contracts = { path = "crates/deprecation-contracts" }
 ```
 

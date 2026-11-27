@@ -14,7 +14,7 @@ php-iconv = { package = "php2rust-iconv", git = "https://github.com/php2rust/com
 # symfony/deprecation-contracts (`trigger_deprecation()`), from symfony-rs.
 # symfony-rs patches this source to its own crate, so that both use one
 # deprecation handler.
-symfony-deprecation-contracts = { git = "https://github.com/D-Nations/symfony-rs", rev = "a43c0ba8511cbeaacd7631b2e69a80832d00ef5b" }
+symfony-deprecation-contracts = { git = "https://github.com/php2rust/symfony-rs", rev = "a43c0ba8511cbeaacd7631b2e69a80832d00ef5b" }
 
 # Lints for every member (`[lints] workspace = true`), the same rule set as
 # symfony-rs and php2rust/compatibility-tools.
