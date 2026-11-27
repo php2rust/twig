@@ -31,14 +31,11 @@ php2rust-twig = { git = "https://github.com/php2rust/twig", rev = "<commit>" }
 ```
 
 The library is named `twig`, as the compiled templates call it
-(`::twig::runtime::...`). It uses `symfony-deprecation-contracts` from
-symfony-rs; a workspace with its own copy of that crate patches the git
-source to it, so that one deprecation handler sees all deprecations:
-
-```toml
-[patch."https://github.com/php2rust/symfony-rs"]
-symfony-deprecation-contracts = { path = "crates/deprecation-contracts" }
-```
+(`::twig::runtime::...`). Its `trigger_deprecation()` comes from
+`php2rust-deprecation-contracts` in php2rust/compatibility-tools. A
+workspace that uses Twig takes that crate from the same git source, so
+that one deprecation handler sees all deprecations. Twig does not depend
+on symfony-rs.
 
 To change php2rust/compatibility-tools and see the result here at once,
 add an uncommitted `.cargo/config.toml`:

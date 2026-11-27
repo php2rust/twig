@@ -11,10 +11,9 @@ php-value = { package = "php2rust-value", git = "https://github.com/php2rust/com
 php-pcre = { package = "php2rust-regex", git = "https://github.com/php2rust/compatibility-tools", rev = "4585a15ed0263257317cdf818ebcad7ed7542db8" }
 php-date = { package = "php2rust-date", git = "https://github.com/php2rust/compatibility-tools", rev = "4585a15ed0263257317cdf818ebcad7ed7542db8" }
 php-iconv = { package = "php2rust-iconv", git = "https://github.com/php2rust/compatibility-tools", rev = "4585a15ed0263257317cdf818ebcad7ed7542db8" }
-# symfony/deprecation-contracts (`trigger_deprecation()`), from symfony-rs.
-# symfony-rs patches this source to its own crate, so that both use one
-# deprecation handler.
-symfony-deprecation-contracts = { git = "https://github.com/php2rust/symfony-rs", rev = "a43c0ba8511cbeaacd7631b2e69a80832d00ef5b" }
+# symfony/deprecation-contracts (`trigger_deprecation()`). One git source
+# for every port, so that one deprecation handler sees all of them.
+symfony-deprecation-contracts = { package = "php2rust-deprecation-contracts", git = "https://github.com/php2rust/compatibility-tools", rev = "c807d86d34225172402bf8015a8ed01913f9e52a" }
 
 # Lints for every member (`[lints] workspace = true`), the same rule set as
 # symfony-rs and php2rust/compatibility-tools.

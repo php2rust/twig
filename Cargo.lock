@@ -139,6 +139,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "php2rust-deprecation-contracts"
+version = "0.1.0"
+source = "git+https://github.com/php2rust/compatibility-tools?rev=c807d86d34225172402bf8015a8ed01913f9e52a#c807d86d34225172402bf8015a8ed01913f9e52a"
+
+[[package]]
 name = "php2rust-iconv"
 version = "0.1.0"
 source = "git+https://github.com/php2rust/compatibility-tools?rev=4585a15ed0263257317cdf818ebcad7ed7542db8#4585a15ed0263257317cdf818ebcad7ed7542db8"
@@ -159,11 +164,11 @@ name = "php2rust-twig"
 version = "0.1.0"
 dependencies = [
  "php2rust-date",
+ "php2rust-deprecation-contracts",
  "php2rust-iconv",
  "php2rust-regex",
  "php2rust-value",
  "serde_json",
- "symfony-deprecation-contracts",
  "twox-hash",
 ]
 
@@ -172,10 +177,10 @@ name = "php2rust-twig-integration"
 version = "0.1.0"
 dependencies = [
  "php2rust-date",
+ "php2rust-deprecation-contracts",
  "php2rust-twig",
  "php2rust-value",
  "serde_json",
- "symfony-deprecation-contracts",
 ]
 
 [[package]]
@@ -292,11 +297,6 @@ name = "simdutf8"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
-
-[[package]]
-name = "symfony-deprecation-contracts"
-version = "0.1.0"
-source = "git+https://github.com/php2rust/symfony-rs?rev=a43c0ba8511cbeaacd7631b2e69a80832d00ef5b#a43c0ba8511cbeaacd7631b2e69a80832d00ef5b"
 
 [[package]]
 name = "syn"
