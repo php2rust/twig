@@ -1,0 +1,6 @@
+# Non-Composer upstream sources (Composer packages: parity/packages.tsv):
+# symfony/deprecation-contracts v3.7.1, which the recorders load with twig/twig.
+# checkout	repository	tag or commit
+# php-src is not fetched: PHP behaviour comes only from the oracle and
+# PHP's documentation.
+symfony/deprecation-contracts	https://github.com/symfony/deprecation-contracts.git	f3202fa1b5097b0af062dc978b32ecf63404e31d

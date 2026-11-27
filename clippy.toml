@@ -1,0 +1,8 @@
+# Clippy configuration for the workspace lints in Cargo.toml.
+# Test code may unwrap, expect and print; library code may not.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-print-in-tests = true
+allow-dbg-in-tests = false
+# Product and standard names used as prose in doc comments.
+doc-valid-idents = ["PHPUnit", "XPath", ".."]

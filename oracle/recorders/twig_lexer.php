@@ -1,12 +1,12 @@
 <?php
-// Twig lexer vectors (crates/twig/tests/lexer_vectors.rs): every template
+// Twig lexer vectors (crates/php2rust-twig/tests/lexer_vectors.rs): every template
 // of twig/twig's tests/Fixtures/**/*.test (split as IntegrationTestCase
-// does), plus the cases in crates/twig/tests/data/lexer_extra.json, each
+// does), plus the cases in crates/php2rust-twig/tests/data/lexer_extra.json, each
 // tokenized by the real Twig\Lexer with the core extension's operators.
 // For each template: the tokens (type, value, line, offset,
 // documentation) or the SyntaxError (message, line, column), and the
 // deprecations the lexer triggered. Bytes are base64 (templates need not
-// be UTF-8). Output: crates/twig/tests/data/lexer.json
+// be UTF-8). Output: crates/php2rust-twig/tests/data/lexer.json
 // (scripts/record.sh twig-lexer).
 
 if (is_file('/demo/vendor/autoload.php')) {
@@ -66,7 +66,7 @@ foreach ($files as $path) {
         $cases[] = ['name' => $relative.' '.$name, 'template' => $code];
     }
 }
-foreach (json_decode(file_get_contents('/work/crates/twig/tests/data/lexer_extra.json'), true) as $name => $code) {
+foreach (json_decode(file_get_contents('/work/crates/php2rust-twig/tests/data/lexer_extra.json'), true) as $name => $code) {
     $cases[] = ['name' => 'extra '.$name, 'template' => $code];
 }
 

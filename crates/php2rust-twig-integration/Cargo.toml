@@ -1,25 +1,29 @@
 [package]
-name = "twig-integration"
+name = "php2rust-twig-integration"
 version = "0.1.0"
 edition = "2024"
 license = "BSD-3-Clause"
 publish = false
 description = "Twig's integration fixtures, compiled to Rust at build time and run against recorded PHP results"
 
+[lib]
+# Compiled templates name the test callables `::twig_integration::`.
+name = "twig_integration"
+
 [dependencies]
 php-value = { workspace = true }
-twig = { path = "../twig" }
+twig = { package = "php2rust-twig", path = "../php2rust-twig" }
 
 [build-dependencies]
 php-value = { workspace = true }
 serde_json = "1.0.154"
-symfony-deprecation-contracts = { path = "../deprecation-contracts" }
-twig = { path = "../twig" }
+symfony-deprecation-contracts = { workspace = true }
+twig = { package = "php2rust-twig", path = "../php2rust-twig" }
 
 [dev-dependencies]
 php-date = { workspace = true }
 serde_json = "1.0.154"
-symfony-deprecation-contracts = { path = "../deprecation-contracts" }
+symfony-deprecation-contracts = { workspace = true }
 
 [lints]
 workspace = true

@@ -1,0 +1,43 @@
+[workspace]
+members = ["crates/php2rust-twig", "crates/php2rust-twig-integration"]
+resolver = "3"
+
+# PHP behaviour crates from php2rust/compatibility-tools, pinned to a
+# commit. The aliases keep `php_value::` and the other names in code. To
+# work on both repositories, override the git source with a local path in
+# an uncommitted .cargo/config.toml (see README.md).
+[workspace.dependencies]
+php-value = { package = "php2rust-value", git = "https://github.com/php2rust/compatibility-tools", rev = "4585a15ed0263257317cdf818ebcad7ed7542db8" }
+php-pcre = { package = "php2rust-regex", git = "https://github.com/php2rust/compatibility-tools", rev = "4585a15ed0263257317cdf818ebcad7ed7542db8" }
+php-date = { package = "php2rust-date", git = "https://github.com/php2rust/compatibility-tools", rev = "4585a15ed0263257317cdf818ebcad7ed7542db8" }
+php-iconv = { package = "php2rust-iconv", git = "https://github.com/php2rust/compatibility-tools", rev = "4585a15ed0263257317cdf818ebcad7ed7542db8" }
+# symfony/deprecation-contracts (`trigger_deprecation()`), from symfony-rs.
+# symfony-rs patches this source to its own crate, so that both use one
+# deprecation handler.
+symfony-deprecation-contracts = { git = "https://github.com/D-Nations/symfony-rs", rev = "a43c0ba8511cbeaacd7631b2e69a80832d00ef5b" }
+
+# Lints for every member (`[lints] workspace = true`), the same rule set as
+# symfony-rs and php2rust/compatibility-tools.
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+# Pedantic lints that only add noise to a port.
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+# AGENTS.md rules: no panics on external input, no stubs or debug
+# output left behind. Tests may unwrap (clippy.toml).
+unwrap_used = "warn"
+expect_used = "warn"
+todo = "warn"
+unimplemented = "warn"
+dbg_macro = "deny"
+print_stdout = "warn"
+
+# Keep source locations for normal development without full debug symbols.
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.test]
+debug = "line-tables-only"

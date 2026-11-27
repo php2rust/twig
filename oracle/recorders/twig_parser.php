@@ -1,14 +1,14 @@
 <?php
-// Twig parser vectors (crates/twig/tests/parser_vectors.rs): every template
+// Twig parser vectors (crates/php2rust-twig/tests/parser_vectors.rs): every template
 // of twig/twig's tests/Fixtures/**/*.test (split as IntegrationTestCase
-// does), plus the cases in crates/twig/tests/data/parser_extra.json, each
+// does), plus the cases in crates/php2rust-twig/tests/data/parser_extra.json, each
 // parsed by the real Twig\Parser with the node visitors turned off. With
-// the argument "visitors" (crates/twig/tests/data/parser_visitors.json):
+// the argument "visitors" (crates/php2rust-twig/tests/data/parser_visitors.json):
 // the same templates with the environment's node visitors except
 // SandboxNodeVisitor, plus the cases in
-// crates/twig/tests/data/parser_visitors_extra.json, each with its own
+// crates/php2rust-twig/tests/data/parser_visitors_extra.json, each with its own
 // "autoescape" and "optimizations" options. With the argument "sandbox"
-// (crates/twig/tests/data/parser_sandbox.json): the same cases with all
+// (crates/php2rust-twig/tests/data/parser_sandbox.json): the same cases with all
 // the node visitors, SandboxNodeVisitor too. The
 // environment has the extensions of Twig\Tests\IntegrationTest (debug,
 // sandbox, string loader and the test extension, rebuilt below without its
@@ -16,7 +16,7 @@
 // ModuleNode as a compact dump (dump_node() below), or the error (class,
 // message, line), and the deprecations parsing triggered. Templates,
 // messages and deprecations are base64; a tree is text, or base64 when it
-// is not UTF-8. Output: crates/twig/tests/data/parser.json or
+// is not UTF-8. Output: crates/php2rust-twig/tests/data/parser.json or
 // parser_visitors.json or parser_sandbox.json (scripts/record.sh
 // twig-parser).
 
@@ -233,11 +233,11 @@ foreach ($files as $path) {
 }
 $mode = $argv[1] ?? 'plain';
 $visitors = 'visitors' === $mode || 'sandbox' === $mode;
-foreach (json_decode(file_get_contents('/work/crates/twig/tests/data/parser_extra.json'), true) as $name => $code) {
+foreach (json_decode(file_get_contents('/work/crates/php2rust-twig/tests/data/parser_extra.json'), true) as $name => $code) {
     $cases[] = ['name' => 'extra '.$name, 'source' => 'index.twig', 'template' => $code];
 }
 if ($visitors) {
-    foreach (json_decode(file_get_contents('/work/crates/twig/tests/data/parser_visitors_extra.json'), true) as $name => $case) {
+    foreach (json_decode(file_get_contents('/work/crates/php2rust-twig/tests/data/parser_visitors_extra.json'), true) as $name => $case) {
         $cases[] = [
             'name' => 'visitors '.$name,
             'source' => $case['source'] ?? 'index.twig',
