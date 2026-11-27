@@ -22,7 +22,7 @@ Templates are compiled to Rust ahead of time; the runtime runs them.
 
 - No PHP source code (php-src) in this repository. twig/twig's source and
   tests (BSD-3-Clause) are the specification. PHP's own behaviour belongs
-  in php2rust/compatibility-tools-rs (php2rust-value and the other crates),
+  in php2rust/compatibility-tools (php2rust-value and the other crates),
   learned from the oracle.
 - Copy behaviour, not style. Use upstream's message texts; never reword
   one. If PHP's behaviour cannot be kept, stop and ask the owner.
