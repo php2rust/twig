@@ -1,10 +1,14 @@
 [package]
-name = "twig"
+name = "php2rust-twig"
 version = "0.1.0"
 edition = "2024"
 license = "BSD-3-Clause"
 publish = false
 description = "Port of twig/twig: lexer, parser and runtime for a build-time Twig compiler"
+
+[lib]
+# Compiled templates name the runtime `::twig::`.
+name = "twig"
 
 [dependencies]
 php-pcre = { workspace = true }
@@ -12,7 +16,7 @@ php-date = { workspace = true }
 php-iconv = { workspace = true }
 twox-hash = { version = "2.1.5", default-features = false, features = ["xxhash3_128"] }
 php-value = { workspace = true }
-symfony-deprecation-contracts = { path = "../deprecation-contracts" }
+symfony-deprecation-contracts = { workspace = true }
 
 [lints]
 workspace = true

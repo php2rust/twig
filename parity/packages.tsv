@@ -1,0 +1,9 @@
+# Upstream packages: the twig/twig release and the Twig extra packages
+# symfony/demo f42980c installs (its composer.lock), as symfony-rs pinned
+# them. Checked out at upstream/<package> by scripts/fetch-upstream.sh.
+# package	version	reference	repository
+twig/extra-bundle	v3.29.0	aaa2993e19293a99240c4c61aa461d743b0dd569	https://github.com/twigphp/twig-extra-bundle.git
+twig/html-extra	v3.29.0	7147611979df81edb78baf7d003860b72e335c3f	https://github.com/twigphp/html-extra.git
+twig/intl-extra	v3.30.0	211c603b3f7d5a8f6c6543a02fe9f82c09b18025	https://github.com/twigphp/intl-extra.git
+twig/markdown-extra	v3.29.0	8a8e3c28ed17b03ed4965b2e265a018d61f00ba5	https://github.com/twigphp/markdown-extra.git
+twig/twig	v3.30.0	8c737079b726af72ff8ef3c595be9f6a810ea1ef	https://github.com/twigphp/Twig.git

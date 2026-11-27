@@ -1,0 +1,9 @@
+# The PHP oracle (scripts/record.sh runs it).
+#
+#   docker compose -f oracle/compose.yaml run --rm php oracle/recorders/twig_lexer.php
+services:
+  php:
+    build: .
+    image: php2rust-twig-oracle:8.4.27
+    volumes:
+      - ..:/work:ro

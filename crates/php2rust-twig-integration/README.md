@@ -1,12 +1,12 @@
 # Twig integration fixtures
 
-Private workspace test crate for `crates/twig`: a port of twig/twig's
+Private workspace test crate for `crates/php2rust-twig`: a port of twig/twig's
 `tests/IntegrationTest.php` (v3.30.0). Its build script compiles every case
 of upstream's `tests/Fixtures/**/*.test` to Rust with `twig::compiler`, and
 `tests/integration.rs` runs each one against the result real Twig gave
 (`tests/data/integration.json`). Twig source and tests copyright (c)
 2009-present by the Twig Team, BSD-3-Clause
-([LICENSE-Twig](../twig/LICENSE-Twig)). Unofficial, not affiliated with or
+([LICENSE-Twig](../php2rust-twig/LICENSE-Twig)). Unofficial, not affiliated with or
 endorsed by Twig or Symfony.
 
 `src/extension.rs` and `src/callables.rs` port `TwigTestExtension`: its

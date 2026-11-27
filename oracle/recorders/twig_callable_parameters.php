@@ -2,7 +2,7 @@
 // The PHP parameters of every filter, function and test of an environment
 // with the core, escaper, debug, string loader and sandbox extensions, as
 // Twig\Util\CallableParameters sees them for the sandbox
-// (crates/twig/tests/data/callable_parameters.json, scripts/record.sh
+// (crates/php2rust-twig/tests/data/callable_parameters.json, scripts/record.sh
 // twig-callable-parameters): for each callable its type, name and PHP
 // callable, and its template-level parameters
 // (ReflectionCallable::getTwigParameters()) with the name, whether it is

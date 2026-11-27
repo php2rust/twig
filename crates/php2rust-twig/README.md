@@ -1,14 +1,12 @@
-# Twig
+# php2rust-twig
 
-Private workspace crate: a port of `twig/twig` v3.30.0 (`8c737079`), as
-installed by symfony/demo, for the build-time Twig compiler of PLAN.md
-("M4: Twig"). Twig source and tests copyright (c) 2009-present by the
-Twig Team, BSD-3-Clause ([LICENSE-Twig](LICENSE-Twig)). Unofficial, not
-affiliated with or endorsed by Twig or Symfony.
+A port of `twig/twig` v3.30.0 (`8c737079`), as installed by symfony/demo:
+a build-time Twig compiler and its runtime (library name `twig`). Twig
+source and tests copyright (c) 2009-present by the Twig Team, BSD-3-Clause
+([LICENSE-Twig](LICENSE-Twig)). Unofficial, not affiliated with or
+endorsed by Twig or Symfony.
 
-The crate starts from the November 24 trial (`spikes/twig-trial`), which
-stays as it is until this crate replaces it. Templates are bytes, as in
-PHP.
+Templates are bytes, as in PHP.
 
 | Contract | Source | Evidence |
 |---|---|---|
@@ -42,7 +40,7 @@ more cases (`tests/data/parser_visitors_extra.json`, each with its
 `autoescape` and `optimizations` options) parsed with the node visitors
 on, except the sandbox visitor.
 
-Integration fixtures: `crates/twig-integration` compiles every case of
+Integration fixtures: `crates/php2rust-twig-integration` compiles every case of
 upstream's `tests/Fixtures/**/*.test` (with the `.legacy.test` cases) to
 Rust in its build script and runs it against what real Twig did
 (`IntegrationTest::testIntegration` and `testLegacyIntegration`, with
@@ -92,9 +90,9 @@ writes `tests/data/parser.json` (visitors off) and
 `tests/data/callable_parameters.json` (the parameters of the core
 callables, for the sandbox's to-string checks).
 
-Dependencies: `php-pcre` (workspace) checks the `matches` regex as PHP's
+Dependencies: `php-pcre` (php2rust-regex) checks the `matches` regex as PHP's
 `preg_match()` does; `php-value`, `php-date` and `php-iconv` (workspace,
 from php2rust-compatibility-tools) for PHP's values, dates and `iconv()`;
 `twox-hash` for `createTemplate()`'s `xxh128` names (as symfony-config and
 symfony-http-foundation use it); `symfony-deprecation-contracts`
-(workspace) for `trigger_deprecation()`.
+(from symfony-rs) for `trigger_deprecation()`.
